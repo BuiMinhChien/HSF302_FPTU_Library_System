@@ -20,15 +20,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // public pages
                         .requestMatchers(
-                                "/",
-                                "/home",
                                 "/login",
                                 "/forgot-password",
-                                "/register",
-                                "/test-s3/**",  // <--- thêm doòng này để test chức năng s3
                                 "/css/**",
                                 "/js/**",
-                                "/image/**"
+                                "/images/**"
                         ).permitAll()
                         // ADMIN
                         .requestMatchers("/admin/**")
