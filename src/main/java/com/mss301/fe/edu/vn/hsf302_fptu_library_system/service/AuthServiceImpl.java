@@ -1,0 +1,46 @@
+package com.mss301.fe.edu.vn.hsf302_fptu_library_system.service;
+
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.User;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.security.SecureRandom;
+
+@Service
+@RequiredArgsConstructor
+public class AuthServiceImpl implements AuthService {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+
+    @Transactional
+    public void resetPassword(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+        // Tạo mật khẩu mới
+        String newPassword = generateRandomPassword();
+        // Gửi email trước
+        emailService.sendNewPasswordEmail(
+                user.getEmail(),
+                user.getFullName(),
+                newPassword
+        );
+        // Hash password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        // Lưu DB
+        userRepository.save(user);
+    }
+
+    private String generateRandomPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            password.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return password.toString();
+    }
+}
