@@ -47,4 +47,8 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user")
     private List<Fine> fines;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "avatar_file_id")
+    AppFile avatar;
 }
