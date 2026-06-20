@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<div th:fragment="navbar" class="w-100">
+    <button class="navbar-toggler" type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNavbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNavbar">
+        <ul class="navbar-nav mx-auto">
+            <li class="nav-item"
+                sec:authorize="hasAnyRole('ADMIN','LIBRARIAN','READER')">
+                <a class="nav-link fw-bold" th:href="@{/books}">
+                    <i class="bi bi-house-door me-1"></i>Trang chủ
+                </a>
+            </li>
+            <li class="nav-item"
+                sec:authorize="hasAnyRole('READER')">
+                <a class="nav-link fw-bold" th:href="@{/borrow-requests}">
+                    <i class="bi bi-book me-1"></i>Yêu cầu mượn sách
+                </a>
+            </li>
+            <li class="nav-item"
+                sec:authorize="hasAnyRole('LIBRARIAN')">
+                <a class="nav-link fw-bold" th:href="@{/librarian/borrow-requests}">
+                    <i class="bi bi-book me-1"></i>Yêu cầu mượn sách
+                </a>
+            </li>
+            <li class="nav-item"
+                sec:authorize="hasAnyRole('READER')">
+                <a class="nav-link fw-bold" th:href="@{/books}">
+                    <i class="bi bi-calendar2-week me-1"></i>Lịch sử mượn sách
+                </a>
+            </li>
+            <li class="nav-item"
+                sec:authorize="hasAnyRole('READER')">
+                <a class="nav-link fw-bold" th:href="@{/books}">
+                    <i class="bi bi-journal-plus me-1"></i>Yêu cầu bổ sung sách mới
+                </a>
+            </li>
+            <li class="nav-item"
+                sec:authorize="hasAnyRole('READER')">
+                <a class="nav-link fw-bold" th:href="@{/books}">
+                    <i class="bi bi-cash me-1"></i>Phiếu phạt
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

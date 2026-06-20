@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Yêu cầu mượn sách</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    Danh sách yêu cầu mượn sách
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="get"
+                      th:action="@{/borrow-requests}"
+                      class="row g-3 mb-3">
+                    <div class="col-md-5">
+                        <input type="text"
+                               name="keyword"
+                               class="form-control"
+                               placeholder="Nhập tên sách..."
+                               th:value="${keyword}">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="status" class="form-select">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="PENDING"
+                                    th:selected="${status == 'PENDING'}">
+                                Chờ duyệt
+                            </option>
+                            <option value="APPROVED"
+                                    th:selected="${status == 'APPROVED'}">
+                                Đã duyệt
+                            </option>
+                            <option value="REJECTED"
+                                    th:selected="${status == 'REJECTED'}">
+                                Từ chối
+                            </option>
+                            <option value="CANCELLED"
+                                    th:selected="${status == 'CANCELLED'}">
+                                Đã huỷ
+                            </option>
+                            <option value="EXPIRED"
+                                    th:selected="${status == 'EXPIRED'}">
+                                Hết hạn
+                            </option>
+                            <option value="ISSUED"
+                                    th:selected="${status == 'ISSUED'}">
+                                Đã mượn
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            Tìm kiếm
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <a th:href="@{/borrow-requests}"
+                           class="btn btn-outline-secondary w-100">
+                            Đặt lại
+                        </a>
+                    </div>
+                </form>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>STT</th>
+                            <th>Sách</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Người duyệt</th>
+                            <th>Ngày duyệt</th>
+                            <th>Lý do từ chối</th>
+                            <th>Tùy chọn</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(requests)}">
+                            <td colspan="8"
+                                class="text-center text-muted">
+                                Chưa có yêu cầu nào
+                            </td>
+                        </tr>
+                        <tr th:each="request, stat : ${requests}">
+                            <td th:text="${requestPage.number * requestPage.size + stat.count}"></td>
+                            <td>
+                                <a th:href="@{/books/{id}(id=${request.bookId})}" th:text="${request.bookTitle}">
+                                    Xem sách
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="
+                                            ${request.status.name() == 'PENDING'} ? ' bg-warning text-dark' :
+                                            (${request.status.name() == 'APPROVED'} ? ' bg-success' :
+                                            (${request.status.name() == 'REJECTED'} ? ' bg-danger' :
+                                            (${request.status.name() == 'ISSUED'} ? ' bg-primary' :
+                                            ' bg-secondary')))">
+                                    <span th:text="${request.status}">
+                                    </span>
+                                </span>
+                            </td>
+                            <td>
+                                <div th:if="${request.createdDate != null}">
+                                    <div class="fw-semibold"
+                                         th:text="${#temporals.format(request.createdDate, 'dd/MM/yyyy')}">
+                                    </div>
+                                    <small class="text-muted"
+                                           th:text="${#temporals.format(request.createdDate, 'HH:mm:ss')}">
+                                    </small>
+                                </div>
+                            </td>
+                            <td th:text="${request.approvedByName ?: '-'}"></td>
+                            <td>
+                                <div th:if="${request.approvedDate != null}">
+                                    <div class="fw-semibold"
+                                         th:text="${#temporals.format(request.approvedDate, 'dd/MM/yyyy')}">
+                                    </div>
+                                    <small class="text-muted"
+                                           th:text="${#temporals.format(request.approvedDate, 'HH:mm:ss')}">
+                                    </small>
+                                </div>
+                                <span th:if="${request.approvedDate == null}">-</span>
+                            </td>
+                            <td th:text="${request.rejectionReason ?: '-'}"></td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <form
+                                            th:if="${request.status.name() == 'PENDING'}"
+                                            th:action="@{/borrow-requests/{id}/delete(id=${request.requestId})}"
+                                            method="post">
+                                        <button
+                                                type="submit"
+                                                class="btn btn-sm btn-outline-danger">
+                                            Huỷ
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+<!--                    PHÂN TRANG-->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted">
+                            Hiển thị
+                            <span th:text="${requestPage.number * requestPage.size + 1}"></span>
+                            -
+                            <span th:text="${requestPage.number * requestPage.size + requests.size()}"></span>
+                            trên tổng
+                            <span th:text="${requestPage.totalElements}"></span>
+                            yêu cầu
+                        </div>
+                        <nav th:if="${requestPage.totalPages > 1}">
+                            <ul class="pagination mb-0">
+                                <!-- Previous -->
+                                <li class="page-item"
+                                    th:classappend="${requestPage.first} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/borrow-requests(
+                                            page=${requestPage.number - 1},
+                                            keyword=${keyword},
+                                            status=${status}
+                                        )}"
+                                    >
+                                        Trước
+                                    </a>
+                                </li>
+                                <!-- Page numbers -->
+                                <li class="page-item"
+                                    th:each="i : ${#numbers.sequence(0, requestPage.totalPages - 1)}"
+                                    th:classappend="${i == requestPage.number} ? 'active'">
+                                    <a class="page-link"
+                                       th:text="${i + 1}"
+                                       th:href="@{/borrow-requests(
+                                            page=${i},
+                                            keyword=${keyword},
+                                            status=${status}
+                                        )}"
+                                    >
+                                    </a>
+                                </li>
+                                <!-- Next -->
+                                <li class="page-item"
+                                    th:classappend="${requestPage.last} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/borrow-requests(
+                                            page=${requestPage.number + 1},
+                                            keyword=${keyword},
+                                            status=${status}
+                                        )}"
+                                    >
+                                        Sau
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <!-- Success Toast -->
+        <div th:if="${success}"
+             id="successToast"
+             class="toast text-bg-success border-0"
+             role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+                <button type="button"
+                        class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast">
+                </button>
+            </div>
+        </div>
+        <!-- Error Toast -->
+        <div th:if="${error}"
+             id="errorToast"
+             class="toast text-bg-danger border-0"
+             role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                <button type="button"
+                        class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const successToast = document.getElementById('successToast');
+            if (successToast) {
+                new bootstrap.Toast(successToast, {
+                    delay: 5000
+                }).show();
+            }
+            const errorToast = document.getElementById('errorToast');
+            if (errorToast) {
+                new bootstrap.Toast(errorToast, {
+                    delay: 5000
+                }).show();
+            }
+        });
+    </script>
+</div>
+
+</body>
+</html>

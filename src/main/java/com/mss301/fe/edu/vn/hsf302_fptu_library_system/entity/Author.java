@@ -3,7 +3,7 @@ package com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "authors")
@@ -24,5 +24,9 @@ public class Author extends BaseEntity {
     private String biography;
 
     @ManyToMany(mappedBy = "authors")
-    private Set<Book> books;
+    private List<Book> books;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "avatar_file_id")
+    AppFile avatar;
 }

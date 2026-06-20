@@ -26,8 +26,6 @@ public class BorrowRequest extends BaseEntity {
     @JoinColumn(name = "book_id")
     private Book book;
 
-    private LocalDateTime requestDate;
-
     @Enumerated(EnumType.STRING)
     private EBorrowRequestStatus status;
 
