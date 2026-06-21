@@ -57,15 +57,9 @@ public class BorrowRequestController {
     ) {
         try {
             borrowRequestService.cancelPendingRequest(id);
-            redirectAttributes.addFlashAttribute(
-                    "success",
-                    "Đã huỷ yêu cầu mượn sách"
-            );
+            redirectAttributes.addFlashAttribute("success", "Đã huỷ yêu cầu mượn sách");
         } catch (Exception ex) {
-            redirectAttributes.addFlashAttribute(
-                    "error",
-                    ex.getMessage()
-            );
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/borrow-requests";
     }

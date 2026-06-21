@@ -23,11 +23,15 @@ public class AuthServiceImpl implements AuthService {
         // Tạo mật khẩu mới
         String newPassword = generateRandomPassword();
         // Gửi email trước
-        emailService.sendNewPasswordEmail(
-                user.getEmail(),
-                user.getFullName(),
-                newPassword
-        );
+        try {
+            emailService.sendNewPasswordEmail(
+                    user.getEmail(),
+                    user.getFullName(),
+                    newPassword
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Send mail failed");
+        }
         // Hash password
         user.setPassword(passwordEncoder.encode(newPassword));
         // Lưu DB

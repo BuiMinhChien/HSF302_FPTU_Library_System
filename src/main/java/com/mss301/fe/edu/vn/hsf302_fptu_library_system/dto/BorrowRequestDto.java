@@ -22,4 +22,6 @@ public class BorrowRequestDto {
     private String approvedByName;
     private LocalDateTime approvedDate;
     private LocalDateTime createdDate;
+    private BookDetailDto bookDetail;
+    private String reservedBookCopyBarcode;
 }

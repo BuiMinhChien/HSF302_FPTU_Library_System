@@ -98,8 +98,8 @@
                         <tr>
                             <th>STT</th>
                             <th>Người mượn</th>
-                            <th>Mã sinh viên</th>
                             <th>Sách</th>
+                            <th>Tình trạng sách</th>
                             <th>Trạng thái</th>
                             <th>Ngày tạo</th>
                             <th>Người duyệt</th>
@@ -117,12 +117,36 @@
                         </tr>
                         <tr th:each="request, stat : ${requests}">
                             <td th:text="${requestPage.number * requestPage.size + stat.count}"></td>
-                            <td th:text="${request.username}"></td>
-                            <td th:text="${request.studentCode}"></td>
+                            <td>
+                                <div>
+                                    <div class="fw-semibold"
+                                         th:text="${request.username}">
+                                    </div>
+                                    <small class="text-muted"
+                                           th:text="${request.studentCode}">
+                                    </small>
+                                </div>
+                            </td>
                             <td>
                                 <a th:href="@{/books/{id}(id=${request.bookId})}" th:text="${request.bookTitle}">
                                     Xem sách
                                 </a>
+                            </td>
+                            <td>
+                                <div class="small">
+                                    <div>
+                                        <span class="fw-semibold">Tổng:</span>
+                                        <span th:text="${request.bookDetail.totalCopies}"></span>
+                                    </div>
+                                    <div class="text-success">
+                                        <span class="fw-semibold">Có sẵn:</span>
+                                        <span th:text="${request.bookDetail.availableCopies}"></span>
+                                    </div>
+                                    <div class="text-danger">
+                                        <span class="fw-semibold">Đang mượn:</span>
+                                        <span th:text="${request.bookDetail.borrowedCopies}"></span>
+                                    </div>
+                                </div>
                             </td>
                             <td>
                                 <span class="badge"
@@ -170,23 +194,15 @@
                                                 Phê duyệt
                                             </button>
                                         </form>
-                                        <form th:action="@{/librarian/borrow-requests/{id}/reject(id=${request.requestId})}"
-                                              method="post">
-                                            <button type="submit"
-                                                    class="btn btn-sm btn-outline-danger">
-                                                Từ chối
-                                            </button>
-                                        </form>
-                                    </th:block>
-                                    <!-- APPROVED -->
-                                    <th:block th:if="${request.status.name() == 'APPROVED'}">
-                                        <form th:action="@{/librarian/borrow-requests/{id}/issue(id=${request.requestId})}"
-                                              method="post">
-                                            <button type="submit"
-                                                    class="btn btn-sm btn-outline-primary">
-                                                Đã mượn
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#rejectModal"
+                                                th:data-request-id="${request.requestId}"
+                                                th:data-book-title="${request.bookTitle}"
+                                                th:data-user-name="${request.username}">
+                                            Từ chối
+                                        </button>
                                     </th:block>
                                 </div>
                             </td>
@@ -257,6 +273,51 @@
         </div>
     </div>
 
+<!--    Modal-->
+    <div class="modal fade"
+         id="rejectModal"
+         tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="rejectForm" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            Từ chối yêu cầu mượn sách
+                        </h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="rejectMessage"></p>
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Lý do từ chối <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="rejectionReason"
+                                      class="form-control"
+                                      rows="3"
+                                      required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+                            Hủy
+                        </button>
+                        <button type="submit"
+                                class="btn btn-danger">
+                            Xác nhận
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div class="toast-container position-fixed bottom-0 start-0 p-3">
         <!-- Success Toast -->
@@ -293,6 +354,18 @@
         </div>
     </div>
 
+    <script>
+        const rejectModal = document.getElementById('rejectModal');
+        rejectModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const requestId = button.getAttribute('data-request-id');
+            const bookTitle = button.getAttribute('data-book-title');
+            const userName = button.getAttribute('data-user-name');
+            document.getElementById('rejectForm').action = '/librarian/borrow-requests/' + requestId + '/reject';
+            document.getElementById('rejectMessage').innerHTML =
+                'Bạn có chắc chắn muốn từ chối yêu cầu mượn sách <strong>' + bookTitle + '</strong> của <strong>' + userName + '</strong> không?';
+        });
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const successToast = document.getElementById('successToast');

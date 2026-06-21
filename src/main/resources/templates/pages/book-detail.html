@@ -2,6 +2,7 @@
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/main-layout}">
 <head>
     <meta charset="UTF-8">
@@ -141,20 +142,14 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-4">
+                        <div class="mt-4"
+                             sec:authorize="hasRole('READER')">
                             <button class="btn btn-primary btn-lg w-100"
-                                    th:disabled="${book.availableCopies == 0}"
                                     data-bs-toggle="modal"
                                     data-bs-target="#borrowModal">
                                 <i class="bi bi-journal-check"></i>
                                 Đăng ký mượn sách
                             </button>
-                        </div>
-                        <div class="mt-3"
-                             th:if="${book.availableCopies == 0}">
-                            <span class="badge bg-warning text-dark">
-                                Hiện không còn bản sách khả dụng
-                            </span>
                         </div>
                     </div>
                 </div>

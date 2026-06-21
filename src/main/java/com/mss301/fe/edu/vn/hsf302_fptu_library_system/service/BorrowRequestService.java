@@ -21,4 +21,6 @@ public interface BorrowRequestService {
             int size
     );
     void cancelPendingRequest(Integer requestId);
+    void rejectRequest(Integer requestId, String rejectionReason);
+    void approveRequest(Integer requestId);
 }

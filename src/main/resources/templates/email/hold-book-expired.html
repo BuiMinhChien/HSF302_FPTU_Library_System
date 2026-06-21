@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông báo hết hạn giữ sách</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+<h2>Thông báo từ FPTU Library</h2>
+<p>
+    Xin chào <strong th:text="${fullName}"></strong>,
+</p>
+<p>
+    Thời hạn giữ cuốn sách
+    <strong th:text="${bookTitle}"></strong>
+    dành cho yêu cầu mượn của bạn đã hết.
+</p>
+<p>
+    Do bạn chưa đến nhận sách trong thời gian quy định, yêu cầu mượn đã bị hủy và bản sao sách sẽ được chuyển cho người dùng khác trong hàng chờ (nếu có).
+</p>
+<p>
+    Nếu bạn vẫn có nhu cầu mượn cuốn sách này,
+    vui lòng tạo một yêu cầu mượn mới trên hệ thống FPTU Library.
+</p>
+<br>
+<p>
+    Trân trọng,<br>
+    <strong>FPTU Library</strong>
+</p>
+</body>
+</html>

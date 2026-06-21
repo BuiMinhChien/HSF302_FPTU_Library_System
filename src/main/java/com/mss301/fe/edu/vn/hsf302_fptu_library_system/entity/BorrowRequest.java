@@ -37,4 +37,8 @@ public class BorrowRequest extends BaseEntity {
     private User approvedBy;
 
     private LocalDateTime approvedDate;
+
+    @ManyToOne
+    @JoinColumn(name = "reserved_copy_id")
+    private BookCopy reservedCopy;
 }
