@@ -1,6 +1,5 @@
 package com.mss301.fe.edu.vn.hsf302_fptu_library_system.service;
 
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.util.List;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @Transactional
@@ -42,6 +43,65 @@ public class EmailServiceImpl implements EmailService {
             helper.setFrom(fromEmailAddress);
             helper.setTo(to);
             helper.setSubject("FPTU Library - Mật khẩu mới");
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Không gửi được email", e);
+        }
+    }
+
+    @Async
+    public void sendWaitingBookNotification(
+            String to,
+            String fullName,
+            String bookTitle
+    ) {
+        try {
+            LocalDate deadline = calculatePickupDeadline(LocalDate.now());
+            Context context = new Context();
+            context.setVariable("fullName", fullName);
+            context.setVariable("bookTitle", bookTitle);
+            context.setVariable("deadline", deadline.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            String html = templateEngine.process("email/book-ready-notification", context);
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmailAddress);
+            helper.setTo(to);
+            helper.setSubject("FPTU Library - Sách đã sẵn sàng để nhận");
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Không gửi được email", e);
+        }
+    }
+
+    private LocalDate calculatePickupDeadline(LocalDate startDate) {
+        int workingDays = 0;
+        LocalDate deadline = startDate;
+        while (workingDays < 3) {
+            deadline = deadline.plusDays(1);
+            if (deadline.getDayOfWeek() != DayOfWeek.SATURDAY
+                    && deadline.getDayOfWeek() != DayOfWeek.SUNDAY) {
+                workingDays++;
+            }
+        }
+        return deadline;
+    }
+
+    @Async
+    public void sendHoldExpiredEmail(String to,
+                                     String fullName,
+                                     String bookTitle) {
+        try {
+            Context context = new Context();
+            context.setVariable("fullName", fullName);
+            context.setVariable("bookTitle", bookTitle);
+            String html = templateEngine.process("email/hold-book-expired", context);
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmailAddress);
+            helper.setTo(to);
+            helper.setSubject("FPTU Library - Thông báo hết hạn giữ sách");
             helper.setText(html, true);
             mailSender.send(message);
         } catch (Exception e) {

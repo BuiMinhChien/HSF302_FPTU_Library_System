@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông báo sách đã sẵn sàng</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+<h2>Thông báo từ FPTU Library</h2>
+<p>
+    Xin chào <strong th:text="${fullName}"></strong>,
+</p>
+<p>
+    Yêu cầu mượn sách
+    <strong th:text="${bookTitle}"></strong>
+    của bạn đã được duyệt.
+</p>
+<p>
+    Hiện tại sách đã có sẵn tại thư viện và đang được giữ cho bạn.
+</p>
+<p>
+    Vui lòng đến thư viện để nhận sách trước ngày
+    <strong th:text="${deadline}"></strong>.
+</p>
+<p>
+    Thời hạn giữ sách là <strong>03 ngày làm việc</strong>
+    kể từ ngày nhận được email này
+    (không tính Thứ Bảy và Chủ Nhật).
+</p>
+<p>
+    Nếu quá thời hạn trên mà bạn chưa đến nhận sách,
+    yêu cầu mượn có thể bị hủy và sách sẽ được chuyển cho người dùng khác.
+</p>
+<br>
+<p>
+    Trân trọng,<br>
+    <strong>FPTU Library</strong>
+</p>
+</body>
+</html>

@@ -2,10 +2,14 @@ package com.mss301.fe.edu.vn.hsf302_fptu_library_system.mapper;
 
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BorrowRequestDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BorrowRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class BorrowRequestMapper {
+    private final BookMapper bookMapper;
+
     public BorrowRequestDto toDTO(BorrowRequest request) {
         return BorrowRequestDto.builder()
                 .requestId(request.getRequestId())
@@ -28,6 +32,10 @@ public class BorrowRequestMapper {
                 )
                 .approvedDate(request.getApprovedDate())
                 .createdDate(request.getCreatedAt())
+                .bookDetail(bookMapper.toDTO(request.getBook()))
+                .reservedBookCopyBarcode(request.getReservedCopy() != null
+                        ? request.getReservedCopy().getBarcode()
+                        : null)
                 .build();
     }
 }

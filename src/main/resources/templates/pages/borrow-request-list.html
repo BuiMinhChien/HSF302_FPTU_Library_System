@@ -137,7 +137,7 @@
                                 <div class="d-flex gap-2">
                                     <form
                                             th:if="${request.status.name() == 'PENDING'}"
-                                            th:action="@{/borrow-requests/{id}/delete(id=${request.requestId})}"
+                                            th:action="@{/borrow-requests/{id}/cancel(id=${request.requestId})}"
                                             method="post">
                                         <button
                                                 type="submit"

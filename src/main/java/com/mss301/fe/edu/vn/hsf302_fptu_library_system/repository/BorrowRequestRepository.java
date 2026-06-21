@@ -11,12 +11,28 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Repository
 public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, Integer> {
     boolean existsByUserAndBookAndStatus(
             User user,
             Book book,
             EBorrowRequestStatus status
+    );
+
+    List<BorrowRequest> findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus status);
+
+    List<BorrowRequest> findByStatusAndUpdatedAtBefore(
+            EBorrowRequestStatus status,
+            LocalDateTime expiredTime
+    );
+
+    boolean existsByUserAndBookAndStatusNotIn(
+            User user,
+            Book book,
+            List<EBorrowRequestStatus> statuses
     );
 
     Page<BorrowRequest> findByUser_UserId(

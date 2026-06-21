@@ -5,6 +5,7 @@ public enum EBorrowRequestStatus {
     APPROVED,
     REJECTED,
     CANCELLED,
+    WAITING,
     EXPIRED,
     ISSUED
 }
