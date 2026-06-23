@@ -1,0 +1,38 @@
+package com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BorrowHistory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+@Repository
+public interface BorrowHistoryRepository extends JpaRepository<BorrowHistory, Integer> {
+    // JpaRepository<BorrowHistory, Integer>:
+    //BorrowHistory: Entity tương ứng với bảng borrow_histories
+    // Integer: kiểu dữ liệu của primary key
+    // Spring sẽ tự lòi ra các method crud cơ bản save(), findById(), findAll()...
+    // Tìm kiếm lịch sử mượn sách theo userId và từ khóa (tên sách)
+    // Kết quả trả về dạng Page (có phân trang)
+    //cái phaanf query naày chỉ viết do phan truong hop nguoi dung nhap null thi nó ko có hàm sẵn hỗ trợ
+    @Query("""
+        SELECT bh
+        FROM BorrowHistory bh
+        WHERE bh.user.userId = :userId
+        AND (
+            :keyword IS NULL
+            OR :keyword = ''
+            OR LOWER(bh.copy.book.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        )
+    """)
+    // Giải thích query:
+    //   bh.user.userId        → đi qua quan hệ BorrowHistory → User → userId
+    //   bh.copy.book.title    → đi qua BorrowHistory → BookCopy → Book → title
+    //   :keyword IS NULL      → nếu không truyền keyword thì lấy tất cả
+    Page<BorrowHistory> search(
+            @Param("userId") Integer userId,   // ID của user đang đăng nhập
+            @Param("keyword") String keyword,  // từ khóa tìm kiếm (tên sách)
+            Pageable pageable                  // thông tin phân trang (page, size, sort)
+    );
+}
+//param là gán giá trị vô câu query

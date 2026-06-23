@@ -1,0 +1,50 @@
+{
+  "project": {
+    "name": "HSF302_FPTU_Library_System",
+    "type": "Spring Boot MVC - Thư viện FPTU",
+    "tech_stack": ["Java 17", "Spring Boot 4.1.0", "Spring Data JPA", "Spring Security", "Thymeleaf", "SQL Server", "Lombok", "AWS S3", "Spring Mail"]
+  },
+  "session": {
+    "date": "2026-06-23",
+    "role": "Mentor - Hướng dẫn, KHÔNG tự ý code vào project",
+    "student": "Bùi Minh Chiến (chien181004@gmail.com)"
+  },
+  "my_features": [
+    "View Borrowing History (Reader)",
+    "Manage New Book Request (Reader)",
+    "Manage Account (Admin)",
+    "Approve New Book Request (Admin/Librarian)"
+  ],
+  "current_task": {
+    "feature": "View Borrowing History",
+    "status": "in_progress",
+    "progress": "Đã tạo xong 4 class Java (Repository, Service Interface, ServiceImpl, Controller). Chưa làm HTML Thymeleaf.",
+    "files_created": [
+      "repository/BorrowHistoryRepository.java",
+      "service/BorrowHistoryService.java",
+      "service/BorrowHistoryServiceImpl.java",
+      "controller/BorrowHistoryController.java"
+    ],
+    "next_step": "Tạo file Thymeleaf template: templates/pages/borrow-history.html"
+  },
+  "context_learned": {
+    "pattern": "Service Interface + ServiceImpl + Controller + Thymeleaf",
+    "pagination": "Page/Pageable với PageRequest.of(page, size, Sort...)",
+    "current_user": "Dùng CommonFunction.getCurrentUser() để lấy user đang login",
+    "query": "@Query JPQL với @Param cho filter tùy chọn (nullable keyword)",
+    "url": "GET /borrow-history?keyword=...&page=0&size=10"
+  },
+  "team_notes": {
+    "already_done_by_team": [
+      "BorrowRequestController (Manage Borrow Request)",
+      "ApprovalBorrowRequestController (Approve Book Borrowing Request)",
+      "AuthController (Login, Forgot Password, Change Password)",
+      "CronJob: BorrowAssignmentJob, BorrowExpirationJob",
+      "CommonFunction.getCurrentUser()"
+    ],
+    "db_password_local": "123 (tài khoản sa)",
+    "s3_keys": "dummy - cần xin teammate key thật nếu cần upload ảnh"
+  },
+  "saved_at": "2026-06-23T13:01:00+07:00",
+  "trigger": "user_manual (/save-brain)"
+}
