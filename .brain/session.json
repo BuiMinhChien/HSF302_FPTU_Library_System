@@ -2,37 +2,46 @@
   "project": {
     "name": "HSF302_FPTU_Library_System",
     "type": "Spring Boot MVC - Thư viện FPTU",
-    "tech_stack": ["Java 17", "Spring Boot 4.1.0", "Spring Data JPA", "Spring Security", "Thymeleaf", "SQL Server", "Lombok", "AWS S3", "Spring Mail"]
+    "tech_stack": [
+      "Java 17",
+      "Spring Boot 4.1.0",
+      "Spring Data JPA",
+      "Spring Security",
+      "Thymeleaf",
+      "SQL Server",
+      "Lombok",
+      "AWS S3",
+      "Spring Mail"
+    ]
   },
   "session": {
-    "date": "2026-06-23",
+    "date": "2026-06-28",
     "role": "Mentor - Hướng dẫn, KHÔNG tự ý code vào project",
     "student": "Bùi Minh Chiến (chien181004@gmail.com)"
   },
   "my_features": [
-    "View Borrowing History (Reader)",
-    "Manage New Book Request (Reader)",
-    "Manage Account (Admin)",
-    "Approve New Book Request (Admin/Librarian)"
+    "View Borrowing History (Reader) - DONE",
+    "Manage New Book Request (Reader) - IN PROGRESS",
+    "Manage Account (Admin) - PENDING",
+    "Approve New Book Request (Admin/Librarian) - PENDING"
   ],
   "current_task": {
-    "feature": "View Borrowing History",
+    "feature": "Manage New Book Request",
     "status": "in_progress",
-    "progress": "Đã tạo xong 4 class Java (Repository, Service Interface, ServiceImpl, Controller). Chưa làm HTML Thymeleaf.",
+    "progress": "Đã hoàn thành View Borrowing History. Đang làm Manage New Book Request (Bước 1: Repository và Bước 2: Service đã được hướng dẫn chi tiết). Bỏ qua tính năng Hủy yêu cầu.",
     "files_created": [
-      "repository/BorrowHistoryRepository.java",
-      "service/BorrowHistoryService.java",
-      "service/BorrowHistoryServiceImpl.java",
-      "controller/BorrowHistoryController.java"
+      "repository/NewBookRequestRepository.java (pending code)",
+      "service/NewBookRequestService.java (pending code)",
+      "service/NewBookRequestServiceImpl.java (pending code)"
     ],
-    "next_step": "Tạo file Thymeleaf template: templates/pages/borrow-history.html"
+    "next_step": "User cần code xong Bước 1 & 2 rồi chuyển sang Bước 3: Controller"
   },
   "context_learned": {
     "pattern": "Service Interface + ServiceImpl + Controller + Thymeleaf",
-    "pagination": "Page/Pageable với PageRequest.of(page, size, Sort...)",
-    "current_user": "Dùng CommonFunction.getCurrentUser() để lấy user đang login",
-    "query": "@Query JPQL với @Param cho filter tùy chọn (nullable keyword)",
-    "url": "GET /borrow-history?keyword=...&page=0&size=10"
+    "pagination": "Page/Pageable giúp tối ưu hiệu năng DB và UX (giảm lag, chia nhỏ data)",
+    "current_user": "Dùng CommonFunction.getCurrentUser() thay vì gửi userId từ frontend để bảo mật",
+    "query": "@Query JPQL dùng :status IS NULL OR r.status = :status để lọc tuỳ chọn (tất cả hoặc theo trạng thái cụ thể)",
+    "transactional": "@Transactional đảm bảo tính ACID khi can thiệp vào Database (rollback nếu lỗi giữa chừng)"
   },
   "team_notes": {
     "already_done_by_team": [
@@ -45,6 +54,6 @@
     "db_password_local": "123 (tài khoản sa)",
     "s3_keys": "dummy - cần xin teammate key thật nếu cần upload ảnh"
   },
-  "saved_at": "2026-06-23T13:01:00+07:00",
+  "saved_at": "2026-06-28T16:28:00+07:00",
   "trigger": "user_manual (/save-brain)"
 }
