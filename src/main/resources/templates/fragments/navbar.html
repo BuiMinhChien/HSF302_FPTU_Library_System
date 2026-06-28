@@ -26,13 +26,13 @@
             </li>
             <li class="nav-item"
                 sec:authorize="hasAnyRole('READER')">
-                <a class="nav-link fw-bold" th:href="@{/books}">
+                <a class="nav-link fw-bold" th:href="@{/borrow-history}">
                     <i class="bi bi-calendar2-week me-1"></i>Lịch sử mượn sách
                 </a>
             </li>
             <li class="nav-item"
                 sec:authorize="hasAnyRole('READER')">
-                <a class="nav-link fw-bold" th:href="@{/books}">
+                <a class="nav-link fw-bold" th:href="@{/new-book-requests}">
                     <i class="bi bi-journal-plus me-1"></i>Yêu cầu bổ sung sách mới
                 </a>
             </li>
