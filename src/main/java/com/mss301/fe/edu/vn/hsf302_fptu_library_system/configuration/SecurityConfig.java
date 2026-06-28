@@ -29,6 +29,15 @@ public class SecurityConfig {
                         // ADMIN
                         .requestMatchers("/admin/**")
                         .hasRole("ADMIN")
+                        // LIBRARIAN
+                        .requestMatchers("/librarian/**")
+                        .hasRole("LIBRARIAN")
+                        // READER
+                        .requestMatchers("/reader/**")
+                        .hasRole("READER")
+                        // PayOS callback
+                        .requestMatchers("/payment/payos/**")
+                        .permitAll()
                         // USER
                         .requestMatchers("/user/**")
                         .hasRole("USER")
