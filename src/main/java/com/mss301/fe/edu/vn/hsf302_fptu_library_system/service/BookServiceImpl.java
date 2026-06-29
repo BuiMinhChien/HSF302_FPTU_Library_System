@@ -3,16 +3,18 @@ package com.mss301.fe.edu.vn.hsf302_fptu_library_system.service;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBookCopyStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.AuthorInfoDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BookDetailDto;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BookListDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.Book;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.Category;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.BookRepository;
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -71,5 +73,48 @@ public class BookServiceImpl implements BookService {
                 .canBorrow(availableCopies > 0)
                 .authors(authors)
                 .build();
+    }
+
+    // ===== METHOD MỚI =====
+    @Override
+    public Page<BookListDto> searchBooks(String keyword, String searchType, int page, int size) {
+        // Tạo đối tượng phân trang: lấy `size` sách, trang thứ `page`
+        Pageable pageable = PageRequest.of(page, size);
+        // Chọn query theo loại tìm kiếm
+        Page<Book> bookPage;
+        if (keyword == null || keyword.isBlank()) {
+            // Không có keyword -> lấy tất cả
+            bookPage = bookRepository.findAll(pageable);
+        } else {
+            switch (searchType != null ? searchType : "title") {
+                case "author":
+                    bookPage = bookRepository.findByAuthorContaining(keyword, pageable);
+                    break;
+                case "publisher":
+                    bookPage = bookRepository.findByPublisherContaining(keyword, pageable);
+                    break;
+                case "isbn":
+                    bookPage = bookRepository.findByIsbnContaining(keyword, pageable);
+                    break;
+                default: // "title" hoặc mặc định
+                    bookPage = bookRepository.findByTitleContaining(keyword, pageable);
+                    break;
+            }
+        }
+        // Chuyển từng Book entity sang BookListDto (chỉ lấy những trường cần thiết)
+        return bookPage.map(book -> {
+            long availableCopies = book.getBookCopies()
+                    .stream()
+                    .filter(copy -> copy.getStatus() == EBookCopyStatus.AVAILABLE)
+                    .count();
+            return BookListDto.builder()
+                    .bookId(book.getBookId())
+                    .title(book.getTitle())
+                    .publisher(book.getPublisher())
+                    .publishYear(book.getPublishYear())
+                    .bookCoverUrl(book.getBookCover() != null ? book.getBookCover().getFileUrl() : null)
+                    .availableCopies(availableCopies)
+                    .build();
+        });
     }
 }
