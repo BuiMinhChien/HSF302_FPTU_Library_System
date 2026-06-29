@@ -16,32 +16,36 @@
   },
   "session": {
     "date": "2026-06-28",
-    "role": "Mentor - Hướng dẫn, KHÔNG tự ý code vào project",
+    "role": "Mentor - Hướng dẫn, KHÔNG tự ý code vào project (Được phép can thiệp file HTML)",
     "student": "Bùi Minh Chiến (chien181004@gmail.com)"
   },
   "my_features": [
     "View Borrowing History (Reader) - DONE",
-    "Manage New Book Request (Reader) - IN PROGRESS",
+    "Manage New Book Request (Reader) - DONE",
     "Manage Account (Admin) - PENDING",
     "Approve New Book Request (Admin/Librarian) - PENDING"
   ],
   "current_task": {
-    "feature": "Manage New Book Request",
-    "status": "in_progress",
-    "progress": "Đã hoàn thành View Borrowing History. Đang làm Manage New Book Request (Bước 1: Repository và Bước 2: Service đã được hướng dẫn chi tiết). Bỏ qua tính năng Hủy yêu cầu.",
+    "feature": "Approve New Book Request",
+    "status": "not_started",
+    "progress": "Đã hoàn thành 100% chức năng Manage New Book Request (đã test thành công trên web, đã fix lỗi link Navbar).",
     "files_created": [
-      "repository/NewBookRequestRepository.java (pending code)",
-      "service/NewBookRequestService.java (pending code)",
-      "service/NewBookRequestServiceImpl.java (pending code)"
+      "repository/NewBookRequestRepository.java",
+      "service/NewBookRequestService.java",
+      "service/NewBookRequestServiceImpl.java",
+      "controller/NewBookRequestController.java",
+      "templates/pages/new-book-request-list.html",
+      "Cập nhật templates/fragments/navbar.html"
     ],
-    "next_step": "User cần code xong Bước 1 & 2 rồi chuyển sang Bước 3: Controller"
+    "next_step": "Bắt đầu tính năng Approve New Book Request hoặc Manage Account"
   },
   "context_learned": {
     "pattern": "Service Interface + ServiceImpl + Controller + Thymeleaf",
     "pagination": "Page/Pageable giúp tối ưu hiệu năng DB và UX (giảm lag, chia nhỏ data)",
     "current_user": "Dùng CommonFunction.getCurrentUser() thay vì gửi userId từ frontend để bảo mật",
     "query": "@Query JPQL dùng :status IS NULL OR r.status = :status để lọc tuỳ chọn (tất cả hoặc theo trạng thái cụ thể)",
-    "transactional": "@Transactional đảm bảo tính ACID khi can thiệp vào Database (rollback nếu lỗi giữa chừng)"
+    "transactional": "@Transactional đảm bảo tính ACID khi can thiệp vào Database (rollback nếu lỗi giữa chừng)",
+    "git": "Biết cách viết commit message chuẩn Conventional Commits (ví dụ: feat(reader): implement...)"
   },
   "team_notes": {
     "already_done_by_team": [
@@ -54,6 +58,6 @@
     "db_password_local": "123 (tài khoản sa)",
     "s3_keys": "dummy - cần xin teammate key thật nếu cần upload ảnh"
   },
-  "saved_at": "2026-06-28T16:28:00+07:00",
+  "saved_at": "2026-06-28T17:44:00+07:00",
   "trigger": "user_manual (/save-brain)"
 }

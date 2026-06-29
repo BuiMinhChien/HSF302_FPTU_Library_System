@@ -21,5 +21,14 @@ public interface NewBookRequestRepository extends JpaRepository<NewBookRequest, 
             @Param("status") ENewBookRequestStatus status,
             Pageable pageable
     );
+    // thủ thư sẽ lấy tất cả yêu cầu của hệ thống , có lọc traạng thái
+    @Query("""
+        SELECT r FROM NewBookRequest r 
+        WHERE (:status IS NULL OR r.status = :status)
+    """)
+    Page<NewBookRequest> searchAllRequests(
+            @Param("status") ENewBookRequestStatus status,
+            Pageable pageable
+    );
 
 }

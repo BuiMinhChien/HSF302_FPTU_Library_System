@@ -10,4 +10,12 @@ public interface NewBookRequestService {
 
     //tạo mới yêu caauf
     void createRequest(NewBookRequest request);
+    // dành cho admin lấy tất cả danh sách
+    Page<NewBookRequest> searchAllRequests(ENewBookRequestStatus status, int page, int size);
+
+    // hàm duyệt yêu cầu
+    void approveRequest(Integer requestId);
+
+    // hàm từ chối
+    void rejectRequest(Integer requestId);
 }

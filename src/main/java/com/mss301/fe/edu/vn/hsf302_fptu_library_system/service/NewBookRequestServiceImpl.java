@@ -35,9 +35,43 @@ public class NewBookRequestServiceImpl implements NewBookRequestService {
         //tìm xem ông nào đang đăng nhập để gán vào làm chủ nhân yêu cầu
         User currentUser = commonFunction.getCurrentUser();
         request.setUser(currentUser);
-        //Ép trạng thái ban đầu luôn luôn là chờ duyệt
+        //ép trạng thái ban đầu luôn luôn là chờ duyệt
         request.setStatus(ENewBookRequestStatus.PENDING);
         request.setRequestDate(LocalDateTime.now());
+        newBookRequestRepository.save(request);
+    }
+    @Override
+    public Page<NewBookRequest> searchAllRequests(ENewBookRequestStatus status, int page, int size) {
+        // Sắp xếp ngày tạo từ mới nhất xuống cũ nhất
+        Pageable pageable = PageRequest.of(page, size, Sort.by("requestDate").descending());
+        // Gọi thẳng hàm mới viết ở Repository
+        return newBookRequestRepository.searchAllRequests(status, pageable);
+    }
+    @Override
+    @Transactional
+    public void approveRequest(Integer requestId) {
+        //tìm cái yêu cầu đó, nếu không có thì quăng ra lỗi
+        NewBookRequest request = newBookRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu này!"));
+        //chuyển sang trạng thái status
+        request.setStatus(ENewBookRequestStatus.APPROVED);
+        //đánh dấu người duyệt và ngày duyệt
+        request.setApprovedBy(commonFunction.getCurrentUser());
+        request.setApprovedDate(LocalDateTime.now());
+        // lưu
+        newBookRequestRepository.save(request);
+    }
+    @Override
+    @Transactional
+    public void rejectRequest(Integer requestId) {
+        //tìm ra yêu cầu đó
+        NewBookRequest request = newBookRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu này!"));
+        request.setStatus(ENewBookRequestStatus.REJECTED);
+        request.setApprovedBy(commonFunction.getCurrentUser());
+        request.setApprovedDate(LocalDateTime.now());
+
+        // 4. Lưu lại
         newBookRequestRepository.save(request);
     }
 }
