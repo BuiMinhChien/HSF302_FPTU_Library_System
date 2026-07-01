@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 @Repository
 public interface BorrowHistoryRepository extends JpaRepository<BorrowHistory, Integer> {
-    // JpaRepository<BorrowHistory, Integer>:
     //BorrowHistory: Entity tương ứng với bảng borrow_histories
     // Integer: kiểu dữ liệu của primary key
     // Spring sẽ tự lòi ra các method crud cơ bản save(), findById(), findAll()...
@@ -48,5 +47,9 @@ public interface BorrowHistoryRepository extends JpaRepository<BorrowHistory, In
             ORDER BY bh.returnDate DESC
             """)
     java.util.List<BorrowHistory> findReturnedWithoutFine();
+
+    // Lấy danh sách sách đang mượn chưa trả (returnDate còn trống)
+    java.util.List<BorrowHistory> findByReturnDateIsNull();
 }
+
 //param là gán giá trị vô câu query
