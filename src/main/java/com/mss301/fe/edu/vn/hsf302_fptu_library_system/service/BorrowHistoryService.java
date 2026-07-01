@@ -5,8 +5,7 @@ import org.springframework.data.domain.Page;
 
 public interface BorrowHistoryService {
     // Lấy danh sách lịch sử mượn sách của user đang đăng nhập
-    // keyword từ khóa tìm kiếm theo tên sách (có thể null)
-    // page trang hiện tại (bắt đầu từ 0)
-    // size số bản ghi mỗi trang
     Page<BorrowHistory> getCurrentUserHistory(String keyword, int page, int size);
+    //phần dành cho thủ thư lấy lịch sử người muon sach trong tuan
+    Page<BorrowHistory> getBorrowersThisWeek(String keyword, Boolean isReturned, int page, int size);
 }

@@ -45,14 +45,8 @@
 <!--            DÀNH CHO LIBRARIAN-->
             <li class="nav-item"
                 sec:authorize="hasAnyRole('LIBRARIAN')">
-                <a class="nav-link fw-bold" th:href="@{/books}">
+                <a class="nav-link fw-bold" th:href="@{/librarian/borrowers-this-week}">
                     <i class="bi bi-card-checklist me-1"></i>Người mượn sách tuần này
-                </a>
-            </li>
-            <li class="nav-item"
-                sec:authorize="hasAnyRole('LIBRARIAN')">
-                <a class="nav-link fw-bold" th:href="@{/books}">
-                    <i class="bi bi-check-circle me-1"></i>Xác nhận mượn/trả sách
                 </a>
             </li>
             <li class="nav-item"

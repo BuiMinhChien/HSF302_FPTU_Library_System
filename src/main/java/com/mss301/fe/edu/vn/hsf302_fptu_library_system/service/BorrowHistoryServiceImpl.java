@@ -22,17 +22,23 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
 
     @Override
     public Page<BorrowHistory> getCurrentUserHistory(String keyword, int page, int size) {
-
-        // step 1: Lấy thông tin user đang đăng nhập từ Security Context
-        // CommonFunction.getCurrentUser() có sẵn ròi
         User user = commonFunction.getCurrentUser();
-
-        // step 2: Tạo đối tượng phân trang
-        // - page, size: số trang và số bản ghi mỗi trang
-        // - Sort.by("borrowDate").descending(): sắp xếp theo ngày mượn, mới nhất lên đầu
         Pageable pageable = PageRequest.of(page, size, Sort.by("borrowDate").descending());
-
-        // step 3: Gọi rep để query data rồi trả về kết quả
         return borrowHistoryRepository.search(user.getUserId(), keyword, pageable);
+
+    }
+    @Override
+    public Page<BorrowHistory> getBorrowersThisWeek(String keyword, Boolean isReturned, int page, int size) {
+        //Tính toán ngày bắt đầu và kết thúc của tuần này
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        //thuws 2 lúc 00:00
+        java.time.LocalDateTime startOfWeek = now.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+                .withHour(0).withMinute(0).withSecond(0);
+        // Chủ nhật lúc 23:59:59
+        java.time.LocalDateTime endOfWeek = now.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY))
+                .withHour(23).withMinute(59).withSecond(59);
+        // Tạo đối tượng phân trang sắp xếp ngaày mượn gần nhất lên đầu
+        Pageable pageable = PageRequest.of(page, size, Sort.by("borrowDate").descending());
+        return borrowHistoryRepository.findBorrowersThisWeek(startOfWeek, endOfWeek, keyword, isReturned, pageable);
     }
 }

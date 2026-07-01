@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Người mượn sách tuần này (Thủ thư)</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-calendar2-check-fill fs-5 text-dark"></i>
+                    <h4 class="mb-0 text-dark fw-bold">Danh sách mượn sách tuần này</h4>
+                </div>
+                <div class="text-dark fw-bold small bg-white px-3 py-1 rounded-pill">
+                    <i class="bi bi-calendar-range me-1"></i>
+                    Từ <span th:text="${#temporals.format(startOfWeek, 'dd/MM/yyyy')}"></span>
+                    đến <span th:text="${#temporals.format(endOfWeek, 'dd/MM/yyyy')}"></span>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <!-- Form Tìm kiếm & Lọc -->
+                <form method="get" th:action="@{/librarian/borrowers-this-week}" class="row g-3 mb-4 bg-light p-3 rounded border">
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold text-muted small">Từ khóa</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                            <input type="text" name="keyword" class="form-control"
+                                   th:value="${keyword}" placeholder="Tên SV, Mã SV, Tên sách...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold text-muted small">Trạng thái sách</label>
+                        <select name="isReturned" class="form-select">
+                            <option value="">-- Tất cả --</option>
+                            <option value="true" th:selected="${isReturned == true}">Đã trả sách</option>
+                            <option value="false" th:selected="${isReturned == false}">Chưa trả sách</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-funnel-fill me-1"></i> Lọc
+                        </button>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <a th:href="@{/librarian/borrowers-this-week}" class="btn btn-outline-secondary w-100">Xóa lọc</a>
+                    </div>
+                </form>
+
+                <!-- Bảng danh sách -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle border">
+                        <thead class="table-light">
+                        <tr>
+                            <th>STT</th>
+                            <th>Sinh viên mượn</th>
+                            <th>Thông tin sách</th>
+                            <th>Ngày mượn</th>
+                            <th>Hạn trả</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(histories)}">
+                            <td colspan="6" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                Tuần này chưa có ai mượn sách hoặc không tìm thấy dữ liệu phù hợp.
+                            </td>
+                        </tr>
+                        <tr th:each="h, stat : ${histories}">
+                            <td class="fw-bold text-muted" th:text="${historyPage.number * historyPage.size + stat.count}"></td>
+
+                            <!-- Thông tin người mượn -->
+                            <td>
+                                <div class="fw-bold text-primary" th:text="${h.user.fullName}"></div>
+                                <div class="small text-muted"><i class="bi bi-person-badge me-1"></i><span th:text="${h.user.code}"></span></div>
+                            </td>
+
+                            <!-- Thông tin sách -->
+                            <td>
+                                <div class="fw-bold" th:text="${h.copy.book.title}"></div>
+                                <div class="small text-muted">Mã bản sao: <span class="badge bg-secondary" th:text="${h.copy.barcode}"></span></div>
+                            </td>
+
+                            <!-- Ngày mượn -->
+                            <td>
+                                <div th:text="${#temporals.format(h.borrowDate, 'dd/MM/yyyy')}"></div>
+                                <div class="small text-muted" th:text="${#temporals.format(h.borrowDate, 'HH:mm')}"></div>
+                            </td>
+
+                            <!-- Hạn trả -->
+                            <td>
+                                <span th:class="${h.returnDate == null and h.dueDate.isBefore(#temporals.createNow())} ? 'text-danger fw-bold' : ''"
+                                      th:text="${#temporals.format(h.dueDate, 'dd/MM/yyyy')}"></span>
+                            </td>
+
+                            <!-- Trạng thái -->
+                            <td>
+                                <span th:if="${h.returnDate != null}" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                    <i class="bi bi-check2-circle me-1"></i> Đã trả
+                                    <span class="d-block mt-1" style="font-size: 0.75rem;" th:text="${#temporals.format(h.returnDate, 'dd/MM/yyyy HH:mm')}"></span>
+                                </span>
+                                <span th:unless="${h.returnDate != null}" class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">
+                                    <i class="bi bi-clock-history me-1"></i> Đang mượn
+                                </span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Phân trang -->
+                <div class="d-flex justify-content-between align-items-center mt-3" th:if="${historyPage.totalElements > 0}">
+                    <div class="text-muted small">
+                        Hiển thị <span th:text="${historyPage.number * historyPage.size + 1}"></span> -
+                        <span th:text="${historyPage.number * historyPage.size + histories.size()}"></span>
+                        / <span th:text="${historyPage.totalElements}"></span> dòng
+                    </div>
+                    <nav th:if="${historyPage.totalPages > 1}">
+                        <ul class="pagination mb-0">
+                            <li class="page-item" th:classappend="${historyPage.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{/librarian/borrowers-this-week(page=${historyPage.number - 1}, keyword=${keyword}, isReturned=${isReturned})}">Trước</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, historyPage.totalPages - 1)}" th:classappend="${i == historyPage.number} ? 'active'">
+                                <a class="page-link" th:text="${i + 1}" th:href="@{/librarian/borrowers-this-week(page=${i}, keyword=${keyword}, isReturned=${isReturned})}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${historyPage.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{/librarian/borrowers-this-week(page=${historyPage.number + 1}, keyword=${keyword}, isReturned=${isReturned})}">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

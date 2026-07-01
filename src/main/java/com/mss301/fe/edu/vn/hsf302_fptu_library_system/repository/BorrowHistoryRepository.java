@@ -8,12 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 @Repository
 public interface BorrowHistoryRepository extends JpaRepository<BorrowHistory, Integer> {
-    // JpaRepository<BorrowHistory, Integer>:
-    //BorrowHistory: Entity tương ứng với bảng borrow_histories
-    // Integer: kiểu dữ liệu của primary key
-    // Spring sẽ tự lòi ra các method crud cơ bản save(), findById(), findAll()...
-    // Tìm kiếm lịch sử mượn sách theo userId và từ khóa (tên sách)
-    // Kết quả trả về dạng Page (có phân trang)
     //cái phaanf query naày chỉ viết do phan truong hop nguoi dung nhap null thi nó ko có hàm sẵn hỗ trợ
     @Query("""
         SELECT bh
@@ -25,14 +19,30 @@ public interface BorrowHistoryRepository extends JpaRepository<BorrowHistory, In
             OR LOWER(bh.copy.book.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
         )
     """)
-    // Giải thích query:
-    //   bh.user.userId        → đi qua quan hệ BorrowHistory → User → userId
-    //   bh.copy.book.title    → đi qua BorrowHistory → BookCopy → Book → title
-    //   :keyword IS NULL      → nếu không truyền keyword thì lấy tất cả
+
     Page<BorrowHistory> search(
             @Param("userId") Integer userId,   // ID của user đang đăng nhập
             @Param("keyword") String keyword,  // từ khóa tìm kiếm (tên sách)
             Pageable pageable                  // thông tin phân trang (page, size, sort)
+    );
+    // Dành cho thủ thư có thể xem, kiếm người mượn sách tuần này
+    @Query("""
+        SELECT bh FROM BorrowHistory bh
+        WHERE bh.borrowDate >= :startDate AND bh.borrowDate <= :endDate
+        AND (:keyword IS NULL OR :keyword = ''
+             OR LOWER(bh.user.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+             OR LOWER(bh.user.code) LIKE LOWER(CONCAT('%', :keyword, '%'))
+             OR LOWER(bh.copy.book.title) LIKE LOWER(CONCAT('%', :keyword, '%')))
+        AND (:isReturned IS NULL 
+             OR (:isReturned = true AND bh.returnDate IS NOT NULL) 
+             OR (:isReturned = false AND bh.returnDate IS NULL))
+    """)
+    Page<BorrowHistory> findBorrowersThisWeek(
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate,
+            @Param("keyword") String keyword,
+            @Param("isReturned") Boolean isReturned,
+            Pageable pageable
     );
 }
 //param là gán giá trị vô câu query
