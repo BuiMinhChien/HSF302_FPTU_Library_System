@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Thống kê thư viện</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-bar-chart-fill fs-5 text-primary"></i>
+                <h4 class="mb-0">Thống kê thư viện</h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card text-white bg-primary h-100">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-people-fill fs-1"></i>
+                                <h2 class="mt-2" th:text="${stats['totalUsers']}">0</h2>
+                                <p class="mb-0">Tổng tài khoản</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-white bg-warning h-100">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-book-fill fs-1"></i>
+                                <h2 class="mt-2" th:text="${stats['totalBorrowed']}">0</h2>
+                                <p class="mb-0">Đang được mượn</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-white bg-success h-100">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-bookmark-check-fill fs-1"></i>
+                                <h2 class="mt-2" th:text="${stats['totalAvailable']}">0</h2>
+                                <p class="mb-0">Sách có sẵn trong kho</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-white bg-secondary h-100">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-hourglass-split fs-1"></i>
+                                <h2 class="mt-2" th:text="${stats['totalPending']}">0</h2>
+                                <p class="mb-0">Yêu cầu chờ duyệt</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-white bg-danger h-100">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-clock-history fs-1"></i>
+                                <h2 class="mt-2" th:text="${stats['totalWaiting']}">0</h2>
+                                <p class="mb-0">Đang xếp hàng đợi</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
