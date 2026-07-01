@@ -70,7 +70,7 @@
             <!--            DÀNH CHO ADMIN-->
             <li class="nav-item"
                 sec:authorize="hasAnyRole('ADMIN')">
-                <a class="nav-link fw-bold" th:href="@{/books}">
+                <a class="nav-link fw-bold" th:href="@{/admin/accounts}">
                     <i class="bi bi-person-circle me-1"></i>Quản lý tài khoản
                 </a>
             </li>

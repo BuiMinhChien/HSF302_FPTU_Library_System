@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 @Controller
 @RequestMapping("/admin/new-book-requests")
 @RequiredArgsConstructor
@@ -17,7 +19,7 @@ public class ApprovalNewBookRequestController {
 
     private final NewBookRequestService newBookRequestService;
 
-    // 1. Màn hình danh sách (CHỈ ADMIN MỚI ĐƯỢC VÀO)
+    //màn hình danh sách
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public String showAllRequests(
@@ -26,38 +28,40 @@ public class ApprovalNewBookRequestController {
             @RequestParam(defaultValue = "10") int size,
             Model model
     ) {
-        // Gọi Service lấy danh sách của TOÀN TRƯỜNG
+        // gọi sv laayasy danh sách của toàn trường
         Page<NewBookRequest> requestPage = newBookRequestService.searchAllRequests(status, page, size);
 
         model.addAttribute("requests", requestPage.getContent());
         model.addAttribute("requestPage", requestPage);
         model.addAttribute("status", status);
 
-        // Trả về file HTML giao diện dành cho Admin mà tôi vừa ném vào project
+        //trả về giao diện
         return "pages/admin-new-book-request";
     }
 
-    // 2. Xử lý nút Duyệt
+    // xử lý nút duyệt
     @PostMapping("/approve")
     @PreAuthorize("hasRole('ADMIN')")
-    public String approveRequest(@RequestParam("requestId") Integer requestId) {
+    public String approveRequest(@RequestParam("requestId") Integer requestId, RedirectAttributes redirectAttributes) {
         try {
             newBookRequestService.approveRequest(requestId);
-            return "redirect:/admin/new-book-requests?success=Duyệt yêu cầu thành công!";
+            redirectAttributes.addAttribute("success", "Duyệt yêu cầu thành công!");
         } catch (Exception e) {
-            return "redirect:/admin/new-book-requests?error=" + e.getMessage();
+            redirectAttributes.addAttribute("error", e.getMessage());
         }
+        return "redirect:/admin/new-book-requests";
     }
 
-    // 3. Xử lý nút Từ chối
+    //Xử lý nút Từ chối
     @PostMapping("/reject")
     @PreAuthorize("hasRole('ADMIN')")
-    public String rejectRequest(@RequestParam("requestId") Integer requestId) {
+    public String rejectRequest(@RequestParam("requestId") Integer requestId, RedirectAttributes redirectAttributes) {
         try {
             newBookRequestService.rejectRequest(requestId);
-            return "redirect:/admin/new-book-requests?success=Đã từ chối yêu cầu!";
+            redirectAttributes.addAttribute("success", "Đã từ chối yêu cầu!");
         } catch (Exception e) {
-            return "redirect:/admin/new-book-requests?error=" + e.getMessage();
+            redirectAttributes.addAttribute("error", e.getMessage());
         }
+        return "redirect:/admin/new-book-requests";
     }
 }
