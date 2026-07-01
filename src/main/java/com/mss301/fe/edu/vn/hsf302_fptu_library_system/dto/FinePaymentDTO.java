@@ -19,6 +19,10 @@ public class FinePaymentDTO {
     private EPaymentMethod paymentMethod;
     private EPaymentStatus paymentStatus;
     private String checkoutUrl;
+    private String qrCode;
+    private String qrPayload;
+    private String qrImageUrl;
+    private boolean mockEnabled;
     private String transactionCode;
     private LocalDateTime createdAt;
     private LocalDateTime paidAt;

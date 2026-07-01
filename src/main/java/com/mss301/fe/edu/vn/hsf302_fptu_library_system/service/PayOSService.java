@@ -18,25 +18,43 @@ public class PayOSService {
     private final PayOS payOS;
     private final String returnUrl;
     private final String cancelUrl;
+    private final boolean mockEnabled;
 
     public PayOSService(
             @Value("${payos.client-id}") String clientId,
             @Value("${payos.api-key}") String apiKey,
             @Value("${payos.checksum-key}") String checksumKey,
             @Value("${payos.return-url}") String returnUrl,
-            @Value("${payos.cancel-url}") String cancelUrl
+            @Value("${payos.cancel-url}") String cancelUrl,
+            @Value("${payos.mock-enabled:true}") boolean mockEnabled
     ) {
         this.payOS = new PayOS(clientId, apiKey, checksumKey);
         this.returnUrl = returnUrl;
         this.cancelUrl = cancelUrl;
+        this.mockEnabled = mockEnabled || isPlaceholderCredential(clientId);
+    }
+
+    public boolean isMockEnabled() {
+        return mockEnabled;
     }
 
     public PayOSCreatePaymentResponse createPaymentLink(long orderCode, long amount, String description) {
+        if (mockEnabled) {
+            return PayOSCreatePaymentResponse.builder()
+                    .orderCode(orderCode)
+                    .checkoutUrl("/reader/fines/pay/checkout?orderCode=" + orderCode)
+                    .qrCode("FPTU-Library|orderCode=" + orderCode + "|amount=" + amount + "|" + description)
+                    .build();
+        }
+
         try {
+            String safeDescription = description == null ? "Phat thu vien"
+                    : description.length() <= 25 ? description : description.substring(0, 25);
+
             CreatePaymentLinkRequest request = CreatePaymentLinkRequest.builder()
                     .orderCode(orderCode)
                     .amount(amount)
-                    .description(description)
+                    .description(safeDescription)
                     .returnUrl(returnUrl + "?orderCode=" + orderCode)
                     .cancelUrl(cancelUrl + "?orderCode=" + orderCode)
                     .build();
@@ -55,6 +73,10 @@ public class PayOSService {
     }
 
     public boolean isPaymentPaid(long orderCode) {
+        if (mockEnabled) {
+            return true;
+        }
+
         try {
             PaymentLink info = payOS.paymentRequests().get(orderCode);
             return info != null && PaymentLinkStatus.PAID.equals(info.getStatus());
@@ -66,5 +88,11 @@ public class PayOSService {
 
     public String getTransactionCode(long orderCode) {
         return String.valueOf(orderCode);
+    }
+
+    private boolean isPlaceholderCredential(String clientId) {
+        return clientId == null
+                || clientId.isBlank()
+                || clientId.startsWith("YOUR_");
     }
 }

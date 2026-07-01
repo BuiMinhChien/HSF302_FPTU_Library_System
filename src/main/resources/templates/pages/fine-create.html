@@ -63,7 +63,7 @@
                                     Số tiền phạt (VNĐ) <span class="text-danger">*</span>
                                 </label>
                                 <input type="number" class="form-control" th:field="*{amount}"
-                                       min="1" step="1000" placeholder="VD: 50000">
+                                       min="1" step="1" placeholder="VD: 50000">
                                 <div th:if="${#fields.hasErrors('amount')}"
                                      th:errors="*{amount}"
                                      class="text-danger small mt-1"></div>
