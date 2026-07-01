@@ -34,5 +34,19 @@ public interface BorrowHistoryRepository extends JpaRepository<BorrowHistory, In
             @Param("keyword") String keyword,  // từ khóa tìm kiếm (tên sách)
             Pageable pageable                  // thông tin phân trang (page, size, sort)
     );
+
+    @Query("""
+            SELECT bh FROM BorrowHistory bh
+            LEFT JOIN FETCH bh.user u
+            LEFT JOIN FETCH bh.copy c
+            LEFT JOIN FETCH c.book
+            WHERE bh.returnDate IS NOT NULL
+            AND NOT EXISTS (
+                SELECT 1 FROM Fine f
+                WHERE f.borrowHistory.borrowId = bh.borrowId AND f.deleteFlag = false
+            )
+            ORDER BY bh.returnDate DESC
+            """)
+    java.util.List<BorrowHistory> findReturnedWithoutFine();
 }
 //param là gán giá trị vô câu query

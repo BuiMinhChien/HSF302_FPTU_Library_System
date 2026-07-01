@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán thành công</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                <h3 class="mt-3">Thanh toán thành công!</h3>
+                <p class="text-muted">Cảm ơn bạn đã thanh toán khoản phạt thư viện.</p>
+                <div class="card mt-4 text-start" th:if="${payment != null}">
+                    <div class="card-body">
+                        <p class="mb-1">Mã đơn hàng: <strong th:text="${payment.orderCode}"></strong></p>
+                        <p class="mb-0">Số tiền:
+                            <strong th:text="${#numbers.formatDecimal(payment.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                        </p>
+                    </div>
+                </div>
+                <a th:href="@{/reader/fines}" class="btn btn-primary mt-4">
+                    <i class="bi bi-arrow-left me-1"></i> Về danh sách phiếu phạt
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
