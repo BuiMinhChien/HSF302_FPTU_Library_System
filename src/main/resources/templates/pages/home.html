@@ -7,227 +7,41 @@
 <head>
     <meta charset="UTF-8">
     <title>Trang chủ</title>
-    <style>
-        /* ===== HERO BANNER ===== */
-        /* Banner cao hơn (500px), ảnh được "kéo xuống" bằng background-position: center bottom */
-        .hero-banner {
-            background: linear-gradient(rgba(0,0,0,0.28), rgba(0,0,0,0.28)),
-                        url('/images/fpt-home.jpg')
-                        center bottom / cover no-repeat;
-            min-height: 500px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* ===== SEARCH BOX – NHỎ VÀ MẢNH HƠN ===== */
-        .search-box-wrapper {
-            background: rgba(243, 112, 33, 0.88);
-            border-radius: 8px;
-            /* padding thu nhỏ lại so với trước (32px 40px -> 20px 28px) */
-            padding: 20px 28px;
-            width: 100%;
-            max-width: 680px;
-        }
-        .search-box-wrapper h2 {
-            color: white;
-            font-weight: 700;
-            /* chữ nhỏ hơn một chút */
-            font-size: 1.5rem;
-            margin-bottom: 14px;
-            text-align: center;
-        }
-        /* Input group – dùng form-control-sm để thanh mảnh hơn */
-        .search-input-group .form-select {
-            max-width: 140px;
-            border-radius: 6px 0 0 6px;
-            border-right: none;
-            /* chiều cao mảnh */
-            height: 38px;
-            font-size: 0.875rem;
-        }
-        .search-input-group .form-control {
-            border-radius: 0;
-            height: 38px;
-            font-size: 0.875rem;
-        }
-        .search-input-group .btn-search {
-            background-color: #c44f00;
-            color: white;
-            border-radius: 0 6px 6px 0;
-            padding: 0 20px;
-            font-weight: 600;
-            font-size: 0.875rem;
-            border: none;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .search-input-group .btn-search:hover {
-            background-color: #a84300;
-        }
-        .search-links a {
-            color: rgba(255,255,255,0.88);
-            font-size: 0.82rem;
-            text-decoration: none;
-        }
-        .search-links a:hover {
-            color: white;
-            text-decoration: underline;
-        }
-        .search-divider {
-            color: rgba(255,255,255,0.35);
-            margin: 0 8px;
-        }
-
-        /* ===== BOOK CARD ===== */
-        .book-card {
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            background: #fff;
-        }
-        .book-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-        }
-        .book-cover-wrapper {
-            height: 210px;
-            background: #f1f3f5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        .book-cover-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .book-cover-placeholder {
-            color: #ced4da;
-            font-size: 3.5rem;
-        }
-        .book-card-body {
-            padding: 10px 12px 12px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .book-title {
-            font-size: 0.88rem;
-            font-weight: 600;
-            color: #212529;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            margin-bottom: 4px;
-            line-height: 1.35;
-        }
-        .book-publisher {
-            font-size: 0.76rem;
-            color: #6c757d;
-            margin-bottom: auto;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .book-available {
-            font-size: 0.75rem;
-            margin-top: 8px;
-        }
-        .btn-detail {
-            font-size: 0.78rem;
-            margin-top: 8px;
-            background-color: #f37021;
-            border-color: #f37021;
-            color: white;
-            padding: 4px 0;
-        }
-        .btn-detail:hover {
-            background-color: #d4601a;
-            border-color: #d4601a;
-            color: white;
-        }
-
-        /* ===== SECTION TITLE ===== */
-        .section-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #212529;
-            padding-bottom: 8px;
-            border-bottom: 3px solid #f37021;
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-
-        /* ===== PAGINATION ===== */
-        .page-link {
-            color: #f37021;
-        }
-        .page-item.active .page-link {
-            background-color: #f37021;
-            border-color: #f37021;
-            color: white;
-        }
-        .page-link:hover {
-            color: #c44f00;
-        }
-    </style>
 </head>
 
 <body>
 <div layout:fragment="content">
 
     <!-- ===== PHẦN 1: HERO BANNER + SEARCH ===== -->
-    <!-- Phần này KHÔNG nằm trong container để chiếm full width -->
-    <div class="hero-banner">
-        <div class="search-box-wrapper">
-            <!-- Tiêu đề trong banner -->
-            <h2><i class="bi bi-book me-2"></i>Tìm kiếm sách</h2>
+    <div class="d-flex align-items-center justify-content-center w-100"
+         style="background: linear-gradient(rgba(0,0,0,0.28), rgba(0,0,0,0.28)), url('/images/fpt-home.jpg') center bottom / cover no-repeat; min-height: 500px;">
+        <div class="rounded-3 p-4 w-100" style="background: rgba(243, 112, 33, 0.88); max-width: 680px;">
+            <h2 class="text-white fw-bold fs-4 mb-3 text-center">
+                <i class="bi bi-book me-2"></i>Tìm kiếm sách
+            </h2>
 
-            <!-- TH2: SEARCH BAR với dropdown loại tìm kiếm -->
-            <!-- Khi submit -> GET /books?keyword=...&searchType=... -->
             <form method="get" th:action="@{/books}">
-                <div class="input-group search-input-group mb-3">
-                    <!-- Dropdown chọn loại tìm kiếm (giống hình mẫu) -->
-                    <select name="searchType" class="form-select">
-                        <option value="title"
-                                th:selected="${searchType == 'title' or searchType == null}">Tiêu đề</option>
-                        <option value="author"
-                                th:selected="${searchType == 'author'}">Tác giả</option>
-                        <option value="publisher"
-                                th:selected="${searchType == 'publisher'}">Nhà xuất bản</option>
-                        <option value="isbn"
-                                th:selected="${searchType == 'isbn'}">ISBN</option>
+                <div class="input-group mb-3 shadow-sm">
+                    <select name="searchType" class="form-select border-0" style="max-width: 140px;">
+                        <option value="title" th:selected="${searchType == 'title' or searchType == null}">Tiêu đề</option>
+                        <option value="author" th:selected="${searchType == 'author'}">Tác giả</option>
+                        <option value="publisher" th:selected="${searchType == 'publisher'}">Nhà xuất bản</option>
+                        <option value="isbn" th:selected="${searchType == 'isbn'}">ISBN</option>
                     </select>
 
-                    <!-- Ô nhập từ khoá -->
-                    <input type="text"
-                           name="keyword"
-                           class="form-control"
-                           placeholder="Nhập từ khoá tìm kiếm..."
-                           th:value="${keyword}"/>
+                    <input type="text" name="keyword" class="form-control border-0" placeholder="Nhập từ khoá tìm kiếm..." th:value="${keyword}"/>
 
-                    <!-- Nút Search -->
-                    <button type="submit" class="btn btn-search">
+                    <button type="submit" class="btn text-white fw-bold px-4" style="background-color: #c44f00;">
                         <i class="bi bi-search me-1"></i> Tìm kiếm
                     </button>
                 </div>
 
-                <!-- Link phụ bên dưới search (giống hình mẫu) -->
-                <div class="search-links text-center">
-                    <a th:href="@{/borrow-requests}">Yêu cầu mượn</a>
-                    <span class="search-divider">|</span>
-                    <a th:href="@{/new-book-requests}">Đề xuất sách mới</a>
-                    <span class="search-divider">|</span>
-                    <a th:href="@{/borrow-history}">Lịch sử mượn</a>
+                <div class="text-center small">
+                    <a th:href="@{/borrow-requests}" class="text-white text-decoration-none">Yêu cầu mượn</a>
+                    <span class="text-white-50 mx-2">|</span>
+                    <a th:href="@{/new-book-requests}" class="text-white text-decoration-none">Đề xuất sách mới</a>
+                    <span class="text-white-50 mx-2">|</span>
+                    <a th:href="@{/borrow-history}" class="text-white text-decoration-none">Lịch sử mượn</a>
                 </div>
             </form>
         </div>
@@ -235,11 +49,9 @@
 
     <!-- ===== PHẦN 2: DANH SÁCH SÁCH CÓ PHÂN TRANG ===== -->
     <div class="container py-5">
-
-        <!-- Tiêu đề section -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <span class="section-title">
+                <span class="fs-4 fw-bold text-dark pb-2 border-bottom border-3 d-inline-block mb-4" style="border-color: #f37021 !important;">
                     <i class="bi bi-grid me-2" style="color:#f37021"></i>
                     <span th:if="${keyword != null and keyword != ''}">
                         Kết quả tìm kiếm cho: "<span th:text="${keyword}" class="text-warning"></span>"
@@ -247,71 +59,45 @@
                     <span th:if="${keyword == null or keyword == ''}">Danh sách sách</span>
                 </span>
             </div>
-            <!-- Thông tin số lượng -->
             <div class="text-muted small" th:if="${bookPage.totalElements > 0}">
                 Tổng cộng <strong th:text="${bookPage.totalElements}"></strong> cuốn sách
             </div>
         </div>
 
-        <!-- Nút xoá filter nếu đang search -->
         <div th:if="${keyword != null and keyword != ''}" class="mb-3">
             <a th:href="@{/books}" class="btn btn-sm btn-outline-secondary">
                 <i class="bi bi-x-circle me-1"></i> Xoá tìm kiếm, xem tất cả
             </a>
         </div>
 
-        <!-- Khi không có sách nào -->
         <div th:if="${#lists.isEmpty(books)}" class="text-center py-5">
-            <i class="bi bi-search fs-1 text-muted d-block mb-3"></i>
+            <i class="bi bi-search display-4 text-muted d-block mb-3"></i>
             <p class="text-muted fs-5">Không tìm thấy sách phù hợp.</p>
             <a th:href="@{/books}" class="btn btn-outline-primary mt-2">Xem tất cả sách</a>
         </div>
 
-        <!-- TH3: LƯỚI SÁCH – 5 CỘT MỖI HÀNG (Bootstrap: col-md-2 = 12/5 ≈ dùng col-lg-2 col-md-4 col-6) -->
-        <!-- Dùng row-cols-* để tự động chia đều cột -->
-        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3"
-             th:if="${!#lists.isEmpty(books)}">
-
-            <!-- Lặp qua từng sách -->
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3" th:if="${!#lists.isEmpty(books)}">
             <div class="col" th:each="book : ${books}">
-                <div class="book-card">
-                    <!-- Ảnh bìa sách -->
-                    <div class="book-cover-wrapper">
-                        <!-- Nếu có URL ảnh -> hiện ảnh -->
-                        <img th:if="${book.bookCoverUrl != null}"
-                             th:src="${book.bookCoverUrl}"
-                             th:alt="${book.title}"/>
-                        <!-- Nếu không có ảnh -> hiện icon thay thế -->
-                        <i class="bi bi-book book-cover-placeholder"
-                           th:if="${book.bookCoverUrl == null}"></i>
+                <div class="card h-100 shadow-sm border-light">
+                    <div class="bg-light d-flex align-items-center justify-content-center overflow-hidden" style="height: 210px;">
+                        <img th:if="${book.bookCoverUrl != null}" th:src="${book.bookCoverUrl}" th:alt="${book.title}" class="w-100 h-100 object-fit-cover"/>
+                        <i class="bi bi-book text-muted display-4" th:if="${book.bookCoverUrl == null}"></i>
                     </div>
 
-                    <!-- Thông tin sách -->
-                    <div class="book-card-body">
-                        <!-- Tên sách -->
-                        <div class="book-title" th:text="${book.title}">Tên sách</div>
+                    <div class="card-body d-flex flex-column p-3">
+                        <div class="fw-bold text-dark mb-1" style="font-size: 0.88rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35;" th:text="${book.title}">Tên sách</div>
+                        <div class="text-muted small mb-auto text-truncate" style="font-size: 0.76rem;" th:text="${book.publisher != null ? book.publisher : 'Chưa có thông tin'}"></div>
 
-                        <!-- Nhà xuất bản -->
-                        <div class="book-publisher"
-                             th:text="${book.publisher != null ? book.publisher : 'Chưa có thông tin'}">
-                        </div>
-
-                        <!-- Số bản còn mượn được -->
-                        <div class="book-available">
-                            <span th:if="${book.availableCopies > 0}"
-                                  class="badge bg-success">
-                                <i class="bi bi-check-circle me-1"></i>
-                                Còn <span th:text="${book.availableCopies}"></span> bản
+                        <div class="mt-2 small">
+                            <span th:if="${book.availableCopies > 0}" class="badge bg-success">
+                                <i class="bi bi-check-circle me-1"></i>Còn <span th:text="${book.availableCopies}"></span> bản
                             </span>
-                            <span th:if="${book.availableCopies == 0}"
-                                  class="badge bg-secondary">
+                            <span th:if="${book.availableCopies == 0}" class="badge bg-secondary">
                                 <i class="bi bi-x-circle me-1"></i> Hết bản
                             </span>
                         </div>
 
-                        <!-- Nút xem chi tiết -->
-                        <a th:href="@{/books/{id}(id=${book.bookId})}"
-                           class="btn btn-detail btn-sm w-100">
+                        <a th:href="@{/books/{id}(id=${book.bookId})}" class="btn text-white btn-sm w-100 mt-2" style="background-color: #f37021; border-color: #f37021;">
                             Xem chi tiết
                         </a>
                     </div>
@@ -320,52 +106,30 @@
         </div>
 
         <!-- ===== PHÂN TRANG ===== -->
-        <div class="d-flex justify-content-between align-items-center mt-4"
-             th:if="${!#lists.isEmpty(books)}">
-
-            <!-- Hiển thị "Trang X / Y" -->
+        <div class="d-flex justify-content-between align-items-center mt-4" th:if="${!#lists.isEmpty(books)}">
             <div class="text-muted small">
-                Trang <strong th:text="${bookPage.number + 1}"></strong>
-                / <strong th:text="${bookPage.totalPages}"></strong>
+                Trang <strong th:text="${bookPage.number + 1}"></strong> / <strong th:text="${bookPage.totalPages}"></strong>
             </div>
 
-            <!-- Các nút trang (chỉ hiện khi có > 1 trang) -->
             <nav th:if="${bookPage.totalPages > 1}">
                 <ul class="pagination mb-0">
-
-                    <!-- Nút "Trước": disabled khi đang ở trang đầu -->
-                    <li class="page-item"
-                        th:classappend="${bookPage.first} ? 'disabled'">
-                        <a class="page-link"
-                           th:href="@{/books(page=${bookPage.number - 1}, keyword=${keyword}, searchType=${searchType})}">
+                    <li class="page-item" th:classappend="${bookPage.first} ? 'disabled'">
+                        <a class="page-link text-dark" th:href="@{/books(page=${bookPage.number - 1}, keyword=${keyword}, searchType=${searchType})}">
                             <i class="bi bi-chevron-left"></i> Trước
                         </a>
                     </li>
-
-                    <!-- Số trang: vòng lặp từ 0 đến totalPages - 1 -->
-                    <li class="page-item"
-                        th:each="i : ${#numbers.sequence(0, bookPage.totalPages - 1)}"
-                        th:classappend="${i == bookPage.number} ? 'active'">
-                        <a class="page-link"
-                           th:text="${i + 1}"
-                           th:href="@{/books(page=${i}, keyword=${keyword}, searchType=${searchType})}">
-                        </a>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, bookPage.totalPages - 1)}" th:classappend="${i == bookPage.number} ? 'active'">
+                        <a class="page-link" th:style="${i == bookPage.number ? 'background-color: #f37021; border-color: #f37021; color: white;' : 'color: #f37021;'}" th:text="${i + 1}" th:href="@{/books(page=${i}, keyword=${keyword}, searchType=${searchType})}"></a>
                     </li>
-
-                    <!-- Nút "Sau": disabled khi đang ở trang cuối -->
-                    <li class="page-item"
-                        th:classappend="${bookPage.last} ? 'disabled'">
-                        <a class="page-link"
-                           th:href="@{/books(page=${bookPage.number + 1}, keyword=${keyword}, searchType=${searchType})}">
+                    <li class="page-item" th:classappend="${bookPage.last} ? 'disabled'">
+                        <a class="page-link text-dark" th:href="@{/books(page=${bookPage.number + 1}, keyword=${keyword}, searchType=${searchType})}">
                             Sau <i class="bi bi-chevron-right"></i>
                         </a>
                     </li>
                 </ul>
             </nav>
         </div>
-
-    </div><!-- end container -->
-
-</div><!-- end layout:fragment -->
+    </div>
+</div>
 </body>
 </html>

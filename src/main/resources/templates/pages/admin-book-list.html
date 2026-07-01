@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý sách</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold" style="color: #f37021;"><i class="bi bi-book me-2"></i>Quản lý sách</h2>
+            <!-- Tạm thời chức năng Thêm mới/Sửa sẽ làm sau do khá phức tạp -->
+            <button type="button" class="btn btn-primary disabled">
+                <i class="bi bi-plus-circle me-1"></i> Thêm sách mới
+            </button>
+        </div>
+
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body bg-light">
+                <form th:action="@{/admin/books}" method="get" class="d-flex w-50">
+                    <input type="text" name="keyword" class="form-control me-2" placeholder="Tìm tên sách..." th:value="${keyword}">
+                    <button type="submit" class="btn btn-outline-primary"><i class="bi bi-search"></i></button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0 align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col" style="width: 60px;">Ảnh bìa</th>
+                            <th scope="col">ISBN</th>
+                            <th scope="col">Tên sách</th>
+                            <th scope="col">NXB (Năm)</th>
+                            <th scope="col" class="text-center">Số bản</th>
+                            <th scope="col" class="text-center" style="width: 150px;">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="book : ${bookPage.content}">
+                            <td>
+                                <img th:if="${book.bookCoverUrl != null}" th:src="${book.bookCoverUrl}" style="width: 40px; height: 60px; object-fit: cover;">
+                            </td>
+                            <td class="fw-bold" th:text="${book.isbn}">ISBN</td>
+                            <td class="fw-bold text-primary" th:text="${book.title}">Tên sách</td>
+                            <td th:text="${book.publisher} + ' (' + ${book.publishYear} + ')'">NXB</td>
+                            <td class="text-center">
+                                <span class="badge bg-success" th:text="${book.availableCopies} + '/' + ${book.totalCopies}"></span>
+                            </td>
+                            <td class="text-center">
+                                <form th:action="@{/admin/books/delete/{id}(id=${book.bookId})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa sách này?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
