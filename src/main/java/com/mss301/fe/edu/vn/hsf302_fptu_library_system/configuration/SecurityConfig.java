@@ -26,7 +26,7 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/images/**"
                         ).permitAll()
-                        // ADMIN
+                        // ADMIN only
                         .requestMatchers("/admin/**")
                         .hasRole("ADMIN")
                         // LIBRARIAN
@@ -38,9 +38,12 @@ public class SecurityConfig {
                         // PayOS callback
                         .requestMatchers("/payment/payos/**")
                         .permitAll()
-                        // USER
-                        .requestMatchers("/user/**")
-                        .hasRole("USER")
+                        // LIBRARIAN pages (thống kê, giao sách, xác nhận trả)
+                        .requestMatchers("/librarian/**")
+                        .hasAnyRole("LIBRARIAN", "ADMIN")
+                        // Profile - tất cả đã đăng nhập đều xem được
+                        .requestMatchers("/profile/**")
+                        .authenticated()
                         // tất cả request khác cần login
                         .anyRequest()
                         .authenticated()

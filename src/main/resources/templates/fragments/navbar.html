@@ -51,8 +51,14 @@
             </li>
             <li class="nav-item"
                 sec:authorize="hasAnyRole('LIBRARIAN')">
-                <a class="nav-link fw-bold" th:href="@{/books}">
-                    <i class="bi bi-check-circle me-1"></i>Xác nhận mượn/trả sách
+                <a class="nav-link fw-bold" th:href="@{/librarian/issue}">
+                    <i class="bi bi-box-arrow-up-right me-1"></i>Giao sách
+                </a>
+            </li>
+            <li class="nav-item"
+                sec:authorize="hasAnyRole('LIBRARIAN')">
+                <a class="nav-link fw-bold" th:href="@{/librarian/confirm-return}">
+                    <i class="bi bi-check-circle me-1"></i>Xác nhận trả sách
                 </a>
             </li>
             <li class="nav-item"
@@ -69,7 +75,7 @@
             </li>
             <li class="nav-item"
                 sec:authorize="hasAnyRole('LIBRARIAN')">
-                <a class="nav-link fw-bold" th:href="@{/books}">
+                <a class="nav-link fw-bold" th:href="@{/librarian/statistics}">
                     <i class="bi bi-bar-chart me-1"></i>Thống kê
                 </a>
             </li>
