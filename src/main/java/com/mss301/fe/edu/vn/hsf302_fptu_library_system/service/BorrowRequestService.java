@@ -23,4 +23,6 @@ public interface BorrowRequestService {
     void cancelPendingRequest(Integer requestId);
     void rejectRequest(Integer requestId, String rejectionReason);
     void approveRequest(Integer requestId);
+    Page<BorrowRequestDto> getBorrowersThisWeek(String keyword, int page, int size);
+    void issueBook(Integer requestId);
 }
