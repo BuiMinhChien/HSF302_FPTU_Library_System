@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý tác giả</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold" style="color: #f37021;"><i class="bi bi-people me-2"></i>Quản lý tác giả</h2>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAuthorModal">
+                <i class="bi bi-person-plus me-1"></i> Thêm tác giả mới
+            </button>
+        </div>
+
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Thanh tìm kiếm -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body bg-light">
+                <form th:action="@{/admin/authors}" method="get" class="d-flex w-50">
+                    <input type="text" name="keyword" class="form-control me-2" placeholder="Tìm tên tác giả..." th:value="${keyword}">
+                    <button type="submit" class="btn btn-outline-primary"><i class="bi bi-search"></i></button>
+                    <a th:if="${keyword != null and keyword != ''}" th:href="@{/admin/authors}" class="btn btn-outline-secondary ms-2">Xóa</a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách -->
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0 align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="text-center" style="width: 80px;">Ảnh</th>
+                            <th scope="col">Tên tác giả</th>
+                            <th scope="col" style="width: 40%;">Tiểu sử</th>
+                            <th scope="col" class="text-center">Số sách</th>
+                            <th scope="col" class="text-center" style="width: 150px;">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="author : ${authorPage.content}">
+                            <td class="text-center">
+                                <img th:if="${author.avatarUrl != null}" th:src="${author.avatarUrl}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                <i th:if="${author.avatarUrl == null}" class="bi bi-person-circle text-secondary fs-1"></i>
+                            </td>
+                            <td class="fw-bold text-primary" th:text="${author.authorName}">Tên</td>
+                            <td>
+                                <div class="text-truncate" style="max-width: 300px;" th:text="${author.biography}">Tiểu sử...</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-info text-dark" th:text="${author.bookCount} + ' cuốn'"></span>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" th:data-bs-target="'#editAuthorModal-' + ${author.authorId}">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" th:data-bs-target="'#deleteAuthorModal-' + ${author.authorId}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+
+                                <!-- Modal Sửa -->
+                                <div class="modal fade text-start" th:id="'editAuthorModal-' + ${author.authorId}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form th:action="@{/admin/authors/edit/{id}(id=${author.authorId})}" method="post">
+                                                <div class="modal-header bg-light">
+                                                    <h5 class="modal-title fw-bold text-primary"><i class="bi bi-pencil-square me-2"></i>Sửa tác giả</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Tên tác giả <span class="text-danger">*</span></label>
+                                                        <input type="text" class="form-control" name="authorName" th:value="${author.authorName}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Tiểu sử</label>
+                                                        <textarea class="form-control" name="biography" rows="3" th:text="${author.biography}"></textarea>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">URL Ảnh đại diện</label>
+                                                        <input type="url" class="form-control" name="avatarUrl" th:value="${author.avatarUrl}" placeholder="https://example.com/image.jpg">
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Xóa -->
+                                <div class="modal fade text-start" th:id="'deleteAuthorModal-' + ${author.authorId}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form th:action="@{/admin/authors/delete/{id}(id=${author.authorId})}" method="post">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Xác nhận xóa</h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Bạn có chắc chắn xóa tác giả <strong class="text-danger" th:text="${author.authorName}"></strong>?</p>
+                                                    <p th:if="${author.bookCount > 0}" class="text-danger fw-bold">Tác giả này đang có sách, không thể xóa!</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                    <button type="submit" class="btn btn-danger" th:disabled="${author.bookCount > 0}">Xóa tác giả</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(authorPage.content)}">
+                            <td colspan="5" class="text-center py-4 text-muted">Không tìm thấy tác giả nào.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Phân trang -->
+            <div class="card-footer bg-white" th:if="${authorPage.totalPages > 1}">
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item" th:classappend="${authorPage.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/authors(page=${authorPage.number - 1}, keyword=${keyword})}">Trước</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, authorPage.totalPages - 1)}" th:classappend="${i == authorPage.number} ? 'active'">
+                        <a class="page-link" th:text="${i + 1}" th:href="@{/admin/authors(page=${i}, keyword=${keyword})}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${authorPage.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/authors(page=${authorPage.number + 1}, keyword=${keyword})}">Sau</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Thêm Mới -->
+    <div class="modal fade" id="addAuthorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/admin/authors/add}" method="post">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title fw-bold"><i class="bi bi-person-plus me-2"></i>Thêm tác giả mới</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tên tác giả <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="authorName" required placeholder="Nhập tên tác giả...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tiểu sử</label>
+                            <textarea class="form-control" name="biography" rows="3" placeholder="Nhập tiểu sử..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">URL Ảnh đại diện</label>
+                            <input type="url" class="form-control" name="avatarUrl" placeholder="https://example.com/image.jpg">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Thêm mới</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

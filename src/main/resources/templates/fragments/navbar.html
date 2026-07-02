@@ -38,7 +38,7 @@
             </li>
             <li class="nav-item"
                 sec:authorize="hasAnyRole('READER')">
-                <a class="nav-link fw-bold" th:href="@{/books}">
+                <a class="nav-link fw-bold" th:href="@{/reader/fines}">
                     <i class="bi bi-cash me-1"></i>Phiếu phạt
                 </a>
             </li>
@@ -51,13 +51,31 @@
             </li>
             <li class="nav-item"
                 sec:authorize="hasAnyRole('LIBRARIAN')">
+                <a class="nav-link fw-bold" th:href="@{/librarian/issue}">
+                    <i class="bi bi-box-arrow-up-right me-1"></i>Giao sách
+                </a>
+            </li>
+            <li class="nav-item"
+                sec:authorize="hasAnyRole('LIBRARIAN')">
+                <a class="nav-link fw-bold" th:href="@{/librarian/confirm-return}">
+                    <i class="bi bi-check-circle me-1"></i>Xác nhận trả sách
+                </a>
+            </li>
+            <li class="nav-item"
+                sec:authorize="hasAnyRole('LIBRARIAN')">
                 <a class="nav-link fw-bold" th:href="@{/librarian/borrow-requests}">
                     <i class="bi bi-book me-1"></i>Yêu cầu mượn sách
                 </a>
             </li>
             <li class="nav-item"
                 sec:authorize="hasAnyRole('LIBRARIAN')">
-                <a class="nav-link fw-bold" th:href="@{/books}">
+                <a class="nav-link fw-bold" th:href="@{/librarian/fines/create}">
+                    <i class="bi bi-cash-stack me-1"></i>Tạo phiếu phạt
+                </a>
+            </li>
+            <li class="nav-item"
+                sec:authorize="hasAnyRole('LIBRARIAN')">
+                <a class="nav-link fw-bold" th:href="@{/librarian/statistics}">
                     <i class="bi bi-bar-chart me-1"></i>Thống kê
                 </a>
             </li>
@@ -68,22 +86,19 @@
                     <i class="bi bi-person-circle me-1"></i>Quản lý tài khoản
                 </a>
             </li>
-            <li class="nav-item"
-                sec:authorize="hasAnyRole('ADMIN')">
-                <a class="nav-link fw-bold" th:href="@{/books}">
+            <li class="nav-item" sec:authorize="hasAnyRole('ADMIN')">
+                <a class="nav-link fw-bold" th:href="@{/admin/books}">
                     <i class="bi bi-book me-1"></i>Quản lý sách
                 </a>
             </li>
-            <li class="nav-item"
-                sec:authorize="hasAnyRole('ADMIN')">
-                <a class="nav-link fw-bold" th:href="@{/books}">
-                    <i class="bi bi-list-columns-reverse me-1"></i>Quản lý danh mục
+            <li class="nav-item" sec:authorize="hasAnyRole('ADMIN')">
+                <a class="nav-link fw-bold" th:href="@{/admin/categories}">
+                    <i class="bi bi-tags me-1"></i>Quản lý danh mục
                 </a>
             </li>
-            <li class="nav-item"
-                sec:authorize="hasAnyRole('ADMIN')">
-                <a class="nav-link fw-bold" th:href="@{/books}">
-                    <i class="bi bi-file-person me-1"></i>Quản lý tác giả
+            <li class="nav-item" sec:authorize="hasAnyRole('ADMIN')">
+                <a class="nav-link fw-bold" th:href="@{/admin/authors}">
+                    <i class="bi bi-people me-1"></i>Quản lý tác giả
                 </a>
             </li>
             <li class="nav-item"

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Phiếu phạt của tôi</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-cash-coin fs-5 text-danger"></i>
+                <h4 class="mb-0">Phiếu phạt của tôi</h4>
+            </div>
+            <div class="card-body">
+                <div th:if="${success}" class="alert alert-success">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+                <div th:if="${error}" class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>STT</th>
+                            <th>Sách</th>
+                            <th>Lý do</th>
+                            <th>Số tiền</th>
+                            <th>Ngày tạo</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(fines)}">
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                Bạn chưa có khoản phạt nào.
+                            </td>
+                        </tr>
+                        <tr th:each="fine, stat : ${fines}">
+                            <td th:text="${stat.count}">1</td>
+                            <td th:text="${fine.bookTitle}">Sách</td>
+                            <td th:text="${fine.reason}">Lý do</td>
+                            <td th:text="${#numbers.formatDecimal(fine.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                            <td th:text="${fine.createdAt != null ? #temporals.format(fine.createdAt, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
+                            <td>
+                                <span th:if="${fine.status.name() == 'UNPAID'}"
+                                      class="badge bg-warning text-dark">Chưa thanh toán</span>
+                                <span th:if="${fine.status.name() == 'PAID'}"
+                                      class="badge bg-success">Đã thanh toán</span>
+                            </td>
+                            <td>
+                                <button th:if="${fine.canPay}"
+                                        type="button"
+                                        class="btn btn-sm btn-primary btn-pay-fine"
+                                        th:data-fine-id="${fine.fineId}">
+                                    <i class="bi bi-credit-card me-1"></i> Thanh toán
+                                </button>
+                                <span th:if="${!fine.canPay}" class="text-success">
+                                    <i class="bi bi-check-circle me-1"></i> Đã thanh toán
+                                </span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="payModal" tabindex="-1" aria-labelledby="payModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="payModalLabel">
+                        <i class="bi bi-qr-code me-2"></i>Quét mã QR để thanh toán
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="payModalLoading" class="py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="text-muted mt-2 mb-0">Đang tạo mã QR...</p>
+                    </div>
+                    <div id="payModalError" class="alert alert-danger d-none"></div>
+                    <div id="payModalContent" class="d-none">
+                        <p id="payModalHint" class="text-muted small"></p>
+                        <div class="d-flex justify-content-center my-3">
+                            <img id="payModalQr" alt="Mã QR thanh toán"
+                                 class="border rounded p-2 bg-white"
+                                 style="max-width: 240px; height: auto;">
+                        </div>
+                        <ul class="list-group list-group-flush text-start mb-3">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Mã phiếu phạt</span>
+                                <strong id="payModalFineId">-</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Số tiền</span>
+                                <strong id="payModalAmount" class="text-danger">-</strong>
+                            </li>
+                        </ul>
+                        <p id="payModalWaiting" class="text-muted small d-none">
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                            Đang chờ xác nhận chuyển khoản...
+                        </p>
+                        <button type="button" id="payModalDemoBtn" class="btn btn-primary w-100 d-none">
+                            <i class="bi bi-check-circle me-1"></i> Đã chuyển khoản — Hoàn tất (demo)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script layout:fragment="scripts" th:inline="javascript">
+	(() => {
+		const modalEl = document.getElementById("payModal");
+		const modal = new bootstrap.Modal(modalEl);
+
+		let pollTimer = null;
+		let currentOrderCode = null;
+
+		const formatAmount = (amount) =>
+				new Intl.NumberFormat("vi-VN").format(amount) + " đ";
+
+		const resetModal = () => {
+			clearInterval(pollTimer);
+			pollTimer = null;
+			currentOrderCode = null;
+
+			document.getElementById("payModalLoading").classList.remove("d-none");
+			document.getElementById("payModalError").classList.add("d-none");
+			document.getElementById("payModalContent").classList.add("d-none");
+			document.getElementById("payModalWaiting").classList.add("d-none");
+			document.getElementById("payModalDemoBtn").classList.add("d-none");
+		};
+
+		const showError = (message) => {
+			document.getElementById("payModalLoading").classList.add("d-none");
+			document.getElementById("payModalContent").classList.add("d-none");
+
+			const errorEl = document.getElementById("payModalError");
+			errorEl.textContent = message;
+			errorEl.classList.remove("d-none");
+		};
+
+		const handlePaid = () => {
+			clearInterval(pollTimer);
+			modal.hide();
+			window.location.reload();
+		};
+
+		const startPolling = (orderCode) => {
+			document.getElementById("payModalWaiting").classList.remove("d-none");
+
+			pollTimer = setInterval(async () => {
+				try {
+					const res = await fetch(`/reader/fines/pay/status?orderCode=${orderCode}`);
+					if (!res.ok) return;
+
+					const data = await res.json();
+
+					if (data.paymentStatus === "SUCCESS") {
+						handlePaid();
+					}
+				} catch (e) {
+					// Ignore transient errors while polling
+				}
+			}, 3000);
+		};
+
+		const openPayment = async (fineId) => {
+			resetModal();
+			modal.show();
+
+			try {
+				const res = await fetch(`/reader/fines/${fineId}/pay/init`);
+				const data = await res.json();
+
+				if (!res.ok) {
+					showError(data.message || "Không thể tạo mã QR thanh toán.");
+					return;
+				}
+
+				currentOrderCode = data.orderCode;
+
+				document.getElementById("payModalLoading").classList.add("d-none");
+				document.getElementById("payModalContent").classList.remove("d-none");
+
+				document.getElementById("payModalFineId").textContent = data.fineId;
+				document.getElementById("payModalAmount").textContent = formatAmount(data.amount);
+				document.getElementById("payModalQr").src = data.qrImageUrl || "";
+
+				const hintEl = document.getElementById("payModalHint");
+
+				if (data.mockEnabled) {
+					hintEl.textContent =
+							"Chế độ demo: quét QR không chuyển được. Bấm nút bên dưới để hoàn tất.";
+
+					document.getElementById("payModalDemoBtn")
+							.classList.remove("d-none");
+				} else {
+					hintEl.textContent =
+							"Mở app ngân hàng, chọn Quét QR và quét mã bên dưới. Không cần mở trang PayOS.";
+
+					startPolling(data.orderCode);
+				}
+
+			} catch (e) {
+				showError("Không thể kết nối máy chủ. Vui lòng thử lại.");
+			}
+		};
+
+		document.querySelectorAll(".btn-pay-fine").forEach((btn) => {
+			btn.addEventListener("click", () => openPayment(btn.dataset.fineId));
+		});
+
+		document.getElementById("payModalDemoBtn").addEventListener("click", async () => {
+			if (!currentOrderCode) return;
+
+			try {
+				const res = await fetch(
+						`/reader/fines/pay/complete-json?orderCode=${currentOrderCode}`,
+						{
+							method: "POST"
+						}
+				);
+
+				const data = await res.json();
+
+				if (res.ok && data.paymentStatus === "SUCCESS") {
+					handlePaid();
+				} else {
+					showError("Không thể hoàn tất thanh toán demo.");
+				}
+			} catch (e) {
+				showError("Không thể hoàn tất thanh toán demo.");
+			}
+		});
+
+		modalEl.addEventListener("hidden.bs.modal", resetModal);
+
+	})();
+</script>
+</body>
+</html>
