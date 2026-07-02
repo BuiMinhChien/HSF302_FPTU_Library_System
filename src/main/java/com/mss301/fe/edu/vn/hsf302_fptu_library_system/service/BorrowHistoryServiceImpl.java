@@ -41,24 +41,7 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
         return borrowHistoryRepository.search(user.getUserId(), keyword, pageable);
 
     }
-    @Override
-    public Page<BorrowHistory> getBorrowersThisWeek(String keyword, Boolean isReturned, int page, int size) {
-        //Tính toán ngày bắt đầu và kết thúc của tuần này
-        java.time.LocalDateTime now = java.time.LocalDateTime.now();
-        //thuws 2 lúc 00:00
-        java.time.LocalDateTime startOfWeek = now.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
-                .withHour(0).withMinute(0).withSecond(0);
-        // Chủ nhật lúc 23:59:59
-        java.time.LocalDateTime endOfWeek = now.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY))
-                .withHour(23).withMinute(59).withSecond(59);
-        // Tạo đối tượng phân trang sắp xếp ngaày mượn gần nhất lên đầu
-        Pageable pageable = PageRequest.of(page, size, Sort.by("borrowDate").descending());
-        return borrowHistoryRepository.findBorrowersThisWeek(startOfWeek, endOfWeek, keyword, isReturned, pageable);
-    }
 
-    // ════════════════════════════════════════════════
-    // HÀM MỚI — Giao sách vật lý cho sinh viên
-    // ════════════════════════════════════════════════
     @Override
     public BorrowHistory issueBook(Integer requestId) {
         User librarian = commonFunction.getCurrentUser();
@@ -91,9 +74,6 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
         return borrowHistoryRepository.save(history);
     }
 
-    // ════════════════════════════════════════════════
-    // HÀM MỚI — Xác nhận trả sách + Thuật toán FIFO
-    // ════════════════════════════════════════════════
     @Override
     public BorrowHistory confirmReturn(Integer borrowId) {
         User librarian = commonFunction.getCurrentUser();
@@ -113,7 +93,7 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
         copy.setStatus(EBookCopyStatus.AVAILABLE);
         bookCopyRepository.save(copy);
 
-        // FIFO — Tự động duyệt người xếp hàng tiếp theo
+
         List<BorrowRequest> waitingList = borrowRequestRepository
                 .findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus.WAITING);
 
