@@ -1,13 +1,17 @@
 package com.mss301.fe.edu.vn.hsf302_fptu_library_system.service;
 
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBookCopyStatus;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EFilePurpose;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.AuthorInfoDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BookDetailDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BookFormDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BookListDto;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.AppFile;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.Book;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.Category;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.AuthorRepository;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.BookRepository;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.CategoryRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,8 @@ import java.util.List;
 @Slf4j
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
+    private final CategoryRepository categoryRepository;
+    private final AuthorRepository authorRepository;
 
     @Override
     public BookDetailDto getBookDetail(Integer bookId) {
@@ -170,14 +176,26 @@ public class BookServiceImpl implements BookService {
         book.setPublisher(form.getPublisher());
         book.setPublishYear(form.getPublishYear());
         book.setDescription(form.getDescription());
-
-        // Lấy list categories và authors từ repository
-        // (Trong code thực tế cần inject CategoryRepository và AuthorRepository vào BookServiceImpl)
-        // code lược bỏ cho gọn...
-
+        // Lấy danh sách category và author từ DB dựa theo ID người dùng tick chọn
+        if (form.getCategoryIds() != null) {
+            book.setCategories(categoryRepository.findAllById(form.getCategoryIds()));
+        }
+        if (form.getAuthorIds() != null) {
+            book.setAuthors(authorRepository.findAllById(form.getAuthorIds()));
+        }
+        // Xử lý ảnh bìa
+        if (form.getBookCoverUrl() != null && !form.getBookCoverUrl().isBlank()) {
+            AppFile cover = new AppFile();
+            cover.setFileName("book-cover.jpg");
+            cover.setFileUrl(form.getBookCoverUrl());
+            cover.setExtension("jpg");
+            cover.setPurpose(EFilePurpose.BOOK_COVER);
+            book.setBookCover(cover);
+        }
         bookRepository.save(book);
     }
 
+    // Thay thế hàm updateBook cũ bằng đoạn này:
     @Override
     public void updateBook(Integer id, BookFormDto form) {
         Book book = bookRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sách"));
@@ -186,6 +204,28 @@ public class BookServiceImpl implements BookService {
         book.setPublisher(form.getPublisher());
         book.setPublishYear(form.getPublishYear());
         book.setDescription(form.getDescription());
+        if (form.getCategoryIds() != null) {
+            book.setCategories(categoryRepository.findAllById(form.getCategoryIds()));
+        } else {
+            book.getCategories().clear();
+        }
+        if (form.getAuthorIds() != null) {
+            book.setAuthors(authorRepository.findAllById(form.getAuthorIds()));
+        } else {
+            book.getAuthors().clear();
+        }
+        if (form.getBookCoverUrl() != null && !form.getBookCoverUrl().isBlank()) {
+            if (book.getBookCover() == null) {
+                AppFile cover = new AppFile();
+                cover.setFileName("book-cover.jpg");
+                cover.setExtension("jpg");
+                cover.setPurpose(EFilePurpose.BOOK_COVER);
+                book.setBookCover(cover);
+            }
+            book.getBookCover().setFileUrl(form.getBookCoverUrl());
+        } else {
+            book.setBookCover(null);
+        }
         bookRepository.save(book);
     }
 
