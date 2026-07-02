@@ -49,7 +49,7 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
         BorrowRequest request = borrowRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu #" + requestId));
 
-        if (request.getStatus() != EBorrowRequestStatus.APPROVED) {
+        if (request.getStatus() != EBorrowRequestStatus.WAITING) {
             throw new RuntimeException("Yêu cầu này chưa được duyệt, không thể giao sách!");
         }
 

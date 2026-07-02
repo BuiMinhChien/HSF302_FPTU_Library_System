@@ -24,13 +24,13 @@ public class IssueReturnController {
     private final BorrowHistoryRepository borrowHistoryRepository;
 
     // ─────────────────────────────────────────────
-    // ISSUE BOOK — Hiển thị danh sách yêu cầu đã APPROVED
+    // ISSUE BOOK — Hiển thị danh sách yêu cầu đã duyệt (status = WAITING = chờ lấy sách)
     // URL: GET /librarian/issue
     // ─────────────────────────────────────────────
     @GetMapping("/issue")
     public String listApprovedRequests(Model model) {
         List<BorrowRequest> approvedList = borrowRequestRepository
-                .findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus.APPROVED);
+                .findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus.WAITING);
         model.addAttribute("approvedList", approvedList);
         return "pages/issue-book";
     }
