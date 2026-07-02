@@ -7,5 +7,6 @@ public enum EBorrowRequestStatus {
     CANCELLED,
     WAITING,
     EXPIRED,
-    ISSUED
+    ISSUED,
+    RETURNED,
 }
