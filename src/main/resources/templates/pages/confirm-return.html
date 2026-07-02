@@ -45,9 +45,9 @@
                         <!-- Duyệt từng bản ghi đang mượn -->
                         <tr th:each="borrow, idx : ${activeList}">
                             <td th:text="${idx.count}"></td>
-                            <td th:text="${borrow.user.fullName}"></td>
-                            <td th:text="${borrow.user.code}"></td>
-                            <td th:text="${borrow.copy.book.title}"></td>
+                            <td th:text="${borrow.studentName}"></td>
+                            <td th:text="${borrow.studentCode}"></td>
+                            <td th:text="${borrow.bookTitle}"></td>
                             <td th:text="${#temporals.format(borrow.borrowDate, 'dd/MM/yyyy')}"></td>
                             <!-- Đánh dấu đỏ nếu quá hạn -->
                             <td>
@@ -59,7 +59,7 @@
                                 <!-- Nút xác nhận trả sách -->
                                 <form th:action="@{/librarian/confirm-return/{id}(id=${borrow.borrowId})}"
                                       method="post"
-                                      onsubmit="return confirm('Xác nhận ' + '[[${borrow.user.fullName}]]' + ' đã trả sách?')">
+                                      onsubmit="return confirm('Xác nhận ' + '[[${borrow.studentName}]]' + ' đã trả sách?')">
                                     <button type="submit" class="btn btn-primary btn-sm">
                                         <i class="bi bi-check-circle me-1"></i>Xác nhận trả
                                     </button>

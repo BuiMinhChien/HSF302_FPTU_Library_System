@@ -44,15 +44,15 @@
                         <!-- Duyệt từng yêu cầu -->
                         <tr th:each="req, idx : ${approvedList}">
                             <td th:text="${idx.count}"></td>
-                            <td th:text="${req.user.fullName}"></td>
-                            <td th:text="${req.user.code}"></td>
-                            <td th:text="${req.book.title}"></td>
-                            <td th:text="${#temporals.format(req.createdAt, 'dd/MM/yyyy')}"></td>
+                            <td th:text="${req.username}"></td>
+                            <td th:text="${req.studentCode}"></td>
+                            <td th:text="${req.bookTitle}"></td>
+                            <td th:text="${#temporals.format(req.createdDate, 'dd/MM/yyyy')}"></td>
                             <td>
                                 <!-- Nút bấm giao sách — gửi POST lên server -->
                                 <form th:action="@{/librarian/issue/{id}(id=${req.requestId})}"
                                       method="post"
-                                      onsubmit="return confirm('Xác nhận giao sách cho ' + '[[${req.user.fullName}]]' + '?')">
+                                      onsubmit="return confirm('Xác nhận giao sách cho ' + '[[${req.username}]]' + '?')">
                                     <button type="submit" class="btn btn-success btn-sm">
                                         <i class="bi bi-box-arrow-up-right me-1"></i>Giao sách
                                     </button>
