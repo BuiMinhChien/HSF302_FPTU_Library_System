@@ -1,50 +1,51 @@
 package com.mss301.fe.edu.vn.hsf302_fptu_library_system.controller;
 
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BorrowHistory;
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.service.BorrowHistoryService;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BorrowRequestDto;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.service.BorrowRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjusters;
-import java.time.DayOfWeek;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/librarian/borrowers-this-week")
 @RequiredArgsConstructor
 public class LibrarianBorrowerController {
 
-    private final BorrowHistoryService borrowHistoryService;
+    private final BorrowRequestService borrowRequestService;
 
     @GetMapping
     @PreAuthorize("hasRole('LIBRARIAN')")
     public String viewBorrowersThisWeek(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Boolean isReturned,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model
     ) {
-        // Lấy danh sách từ sv
-        Page<BorrowHistory> historyPage = borrowHistoryService.getBorrowersThisWeek(keyword, isReturned, page, size);
+        Page<BorrowRequestDto> requestPage = borrowRequestService.getBorrowersThisWeek(keyword, page, size);
 
-        //Lấy ngày đầu tuần và cuối tuần để mang ra màn hình
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startOfWeek = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        LocalDateTime endOfWeek = now.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
-        model.addAttribute("histories", historyPage.getContent());
-        model.addAttribute("historyPage", historyPage);
+        model.addAttribute("requests", requestPage.getContent());
+        model.addAttribute("requestPage", requestPage);
         model.addAttribute("keyword", keyword);
-        model.addAttribute("isReturned", isReturned);
-        model.addAttribute("startOfWeek", startOfWeek);
-        model.addAttribute("endOfWeek", endOfWeek);
-        // Chuyển hướng ra file HTML
         return "pages/librarian-borrowers-this-week";
+    }
+
+    @PostMapping("/{id}/issue")
+    @PreAuthorize("hasRole('LIBRARIAN')")
+    public String issueBook(@PathVariable("id") Integer requestId, RedirectAttributes redirectAttributes) {
+        try {
+            borrowRequestService.issueBook(requestId);
+            redirectAttributes.addFlashAttribute("success", "Đã xác nhận giao sách thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/librarian/borrowers-this-week";
     }
 }
