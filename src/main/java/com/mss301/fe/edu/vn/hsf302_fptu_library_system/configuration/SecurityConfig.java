@@ -42,7 +42,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/do-login")
                         .usernameParameter("email")
                         .passwordParameter("password")
-                        .defaultSuccessUrl("/books", true)
+                        .defaultSuccessUrl("/books", true) //TODO: co the dung successHandler
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
