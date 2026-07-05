@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Tạo phiếu phạt</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex align-items-center gap-2">
+                        <i class="bi bi-cash-stack fs-5 text-danger"></i>
+                        <h4 class="mb-0">Tạo phiếu phạt</h4>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${success}" class="alert alert-success">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <span th:text="${success}"></span>
+                        </div>
+                        <div th:if="${error}" class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <span th:text="${error}"></span>
+                        </div>
+
+                        <form th:action="@{/librarian/fines/create}"
+                              th:object="${fineCreateRequest}"
+                              method="post">
+
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    Phiếu mượn <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" th:field="*{borrowRecordId}">
+                                    <option value="">-- Chọn phiếu mượn --</option>
+                                    <option th:each="b : ${borrowOptions}"
+                                            th:value="${b.borrowId}"
+                                            th:text="${b.label}">
+                                    </option>
+                                </select>
+                                <div th:if="${#fields.hasErrors('borrowRecordId')}"
+                                     th:errors="*{borrowRecordId}"
+                                     class="text-danger small mt-1"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    Lý do phạt <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control" rows="3" th:field="*{reason}"
+                                          placeholder="Trả trễ, làm mất sách, làm hỏng sách..."></textarea>
+                                <div th:if="${#fields.hasErrors('reason')}"
+                                     th:errors="*{reason}"
+                                     class="text-danger small mt-1"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    Số tiền phạt (VNĐ) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" th:field="*{amount}"
+                                       min="1" step="1" placeholder="VD: 50000">
+                                <div th:if="${#fields.hasErrors('amount')}"
+                                     th:errors="*{amount}"
+                                     class="text-danger small mt-1"></div>
+                            </div>
+
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-plus-circle me-1"></i> Tạo phiếu phạt
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

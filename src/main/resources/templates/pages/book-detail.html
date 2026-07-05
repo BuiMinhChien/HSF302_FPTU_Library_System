@@ -12,6 +12,13 @@
 <body>
 <div layout:fragment="content">
     <div class="container-fluid py-4">
+        <!-- Back button -->
+        <div class="mb-3">
+            <a th:href="@{/books}" class="text-decoration-none text-muted">
+                <i class="bi bi-arrow-left me-1"></i> Trở về trang chủ
+            </a>
+        </div>
+        
         <!-- Header -->
         <div class="mb-4">
             <h2 class="fw-bold" th:text="${book.title}"></h2>

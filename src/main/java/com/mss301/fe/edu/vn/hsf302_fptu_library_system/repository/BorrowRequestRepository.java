@@ -93,4 +93,21 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, In
             @Param("status") EBorrowRequestStatus status,
             Pageable pageable
     );
+    // lấy danh sách sách mượn ngay từ trạng thái waiting
+    @Query("""
+        SELECT br
+        FROM BorrowRequest br
+        WHERE br.status = 'WAITING'
+        AND (
+            :keyword IS NULL
+            OR :keyword = ''
+            OR LOWER(br.book.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(br.user.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(br.user.code) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        )
+    """)
+    Page<BorrowRequest> findBorrowersThisWeek(
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 }
