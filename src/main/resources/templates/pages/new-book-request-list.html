@@ -12,36 +12,20 @@
 <div layout:fragment="content">
     <div class="container py-4">
         <div class="card shadow-sm">
-
-            <!-- ===== TIÊU ĐỀ TRANG ===== -->
             <div class="card-header d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-journal-plus fs-5 text-primary"></i>
-                    <h4 class="mb-0">Danh sách yêu cầu sách mới</h4>
-                </div>
-                <!-- Nút mở Modal Tạo yêu cầu -->
+                <h4 class="mb-0">
+                    Danh sách yêu cầu sách mới
+                </h4>
                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createRequestModal">
-                    <i class="bi bi-plus-lg me-1"></i> Tạo yêu cầu mới
+                    Tạo yêu cầu mới
                 </button>
             </div>
 
             <div class="card-body">
-
-                <!-- Thông báo thành công/lỗi -->
-                <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${param.success}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${param.error}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-
-                <!-- ===== FORM TÌM KIẾM  ===== -->
                 <form method="get" th:action="@{/new-book-requests}" class="row g-3 mb-3">
-                    <div class="col-md-3">
+                    <div class="col-md-8">
                         <select name="status" class="form-select">
-                            <option value="">-- Tất cả trạng thái --</option>
+                            <option value="">Tất cả trạng thái</option>
                             <option value="PENDING" th:selected="${status != null and status.name() == 'PENDING'}">Đang chờ duyệt</option>
                             <option value="APPROVED" th:selected="${status != null and status.name() == 'APPROVED'}">Đã được duyệt</option>
                             <option value="REJECTED" th:selected="${status != null and status.name() == 'REJECTED'}">Đã bị từ chối</option>
@@ -49,12 +33,16 @@
                     </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-funnel me-1"></i> Lọc
+                            Tìm kiếm
                         </button>
+                    </div>
+                    <div class="col-md-2">
+                        <a th:href="@{/new-book-requests}" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Đặt lại
+                        </a>
                     </div>
                 </form>
 
-                <!-- ===== BẢNG DANH SÁCH ===== -->
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle">
                         <thead class="table-light">
@@ -64,93 +52,87 @@
                             <th>Tác giả / NXB</th>
                             <th>Ngày gửi</th>
                             <th>Trạng thái</th>
-                            <th>Lý do từ chối (nếu có)</th>
+                            <th>Lý do từ chối</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(requests)}">
-                            <td colspan="6" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
-                                Bạn chưa có yêu cầu mua sách nào.
+                            <td colspan="6" class="text-center text-muted">
+                                Chưa có yêu cầu nào
                             </td>
                         </tr>
                         <tr th:each="request, stat : ${requests}">
                             <td th:text="${requestPage.number * requestPage.size + stat.count}"></td>
-                            
-                            <!-- Thông tin sách -->
+
                             <td>
                                 <strong th:text="${request.bookTitle}"></strong><br>
-                                <a th:if="${request.purchaseLink != null and request.purchaseLink != ''}" 
+                                <a th:if="${request.purchaseLink != null and request.purchaseLink != ''}"
                                    th:href="${request.purchaseLink}" target="_blank" class="small">
-                                    <i class="bi bi-link-45deg"></i> Link tham khảo
+                                    Link tham khảo
                                 </a>
                             </td>
-                            
-                            <!-- Tác giả và NXB -->
+
                             <td>
                                 <span th:text="${request.authorName}"></span>
-                                <div class="small text-muted" th:text="${request.publisher}"></div>
+                                <div class="small text-muted" th:text="${request.publisher ?: '-'}"></div>
                             </td>
-                            
-                            <!-- Ngày gửi -->
+
                             <td>
                                 <div th:if="${request.requestDate != null}">
                                     <div class="fw-semibold" th:text="${#temporals.format(request.requestDate, 'dd/MM/yyyy')}"></div>
-                                    <small class="text-muted" th:text="${#temporals.format(request.requestDate, 'HH:mm')}"></small>
+                                    <small class="text-muted" th:text="${#temporals.format(request.requestDate, 'HH:mm:ss')}"></small>
                                 </div>
+                                <span th:if="${request.requestDate == null}">-</span>
                             </td>
-                            
-                            <!-- Trạng thái -->
+
                             <td>
                                 <span class="badge"
                                       th:classappend="
                                           ${request.status.name() == 'PENDING'} ? ' bg-warning text-dark' :
                                           (${request.status.name() == 'APPROVED'} ? ' bg-success' : ' bg-danger')">
-                                    <i class="bi" th:classappend="
-                                          ${request.status.name() == 'PENDING'} ? ' bi-hourglass-split' :
-                                          (${request.status.name() == 'APPROVED'} ? ' bi-check-circle' : ' bi-x-circle')"></i>
                                     <span th:text="${request.status}"></span>
                                 </span>
                             </td>
-                            
-                            <!-- Lý do từ chối -->
-                            <td class="text-danger small" th:text="${request.rejectionReason ?: '-'}"></td>
+
+                            <td th:text="${request.rejectionReason ?: '-'}"></td>
                         </tr>
                         </tbody>
                     </table>
-                </div>
 
-                <!-- ===== PHÂN TRANG ===== -->
-                <div class="d-flex justify-content-between align-items-center mt-3" th:if="${requestPage.totalElements > 0}">
-                    <div class="text-muted small">
-                        Hiển thị
-                        <span th:text="${requestPage.number * requestPage.size + 1}"></span>
-                        -
-                        <span th:text="${requestPage.number * requestPage.size + requests.size()}"></span>
-                        trên tổng
-                        <span th:text="${requestPage.totalElements}"></span>
-                        yêu cầu
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted">
+                            Hiển thị
+                            <span th:text="${requestPage.number * requestPage.size + 1}"></span>
+                            -
+                            <span th:text="${requestPage.number * requestPage.size + requests.size()}"></span>
+                            trên tổng
+                            <span th:text="${requestPage.totalElements}"></span>
+                            yêu cầu
+                        </div>
+                        <nav th:if="${requestPage.totalPages > 1}">
+                            <ul class="pagination mb-0">
+                                <li class="page-item" th:classappend="${requestPage.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/new-book-requests(page=${requestPage.number - 1}, status=${status})}">
+                                        Trước
+                                    </a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, requestPage.totalPages - 1)}" th:classappend="${i == requestPage.number} ? 'active'">
+                                    <a class="page-link" th:text="${i + 1}" th:href="@{/new-book-requests(page=${i}, status=${status})}"></a>
+                                </li>
+                                <li class="page-item" th:classappend="${requestPage.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/new-book-requests(page=${requestPage.number + 1}, status=${status})}">
+                                        Sau
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
-                    <nav th:if="${requestPage.totalPages > 1}">
-                        <ul class="pagination mb-0">
-                            <li class="page-item" th:classappend="${requestPage.first} ? 'disabled'">
-                                <a class="page-link" th:href="@{/new-book-requests(page=${requestPage.number - 1}, status=${status})}">Trước</a>
-                            </li>
-                            <li class="page-item" th:each="i : ${#numbers.sequence(0, requestPage.totalPages - 1)}" th:classappend="${i == requestPage.number} ? 'active'">
-                                <a class="page-link" th:text="${i + 1}" th:href="@{/new-book-requests(page=${i}, status=${status})}"></a>
-                            </li>
-                            <li class="page-item" th:classappend="${requestPage.last} ? 'disabled'">
-                                <a class="page-link" th:href="@{/new-book-requests(page=${requestPage.number + 1}, status=${status})}">Sau</a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
 
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- ===== MODAL TẠO YÊU CẦU MỚI ===== -->
     <div class="modal fade" id="createRequestModal" tabindex="-1" aria-labelledby="createRequestModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -158,7 +140,6 @@
                     <h5 class="modal-title" id="createRequestModalLabel">Đề xuất mua sách mới</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <!-- Form gửi về /new-book-requests/create (Hàm POST) -->
                 <form method="post" th:action="@{/new-book-requests/create}">
                     <div class="modal-body">
                         <div class="row g-3">
@@ -166,12 +147,12 @@
                                 <label class="form-label fw-bold">Tên sách <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="bookTitle" required placeholder="Nhập tên cuốn sách bạn muốn đề xuất...">
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Tác giả <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="authorName" required placeholder="Tên tác giả">
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Nhà xuất bản</label>
                                 <input type="text" class="form-control" name="publisher" placeholder="Tên NXB (nếu biết)">
@@ -191,12 +172,62 @@
                     </div>
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-success"><i class="bi bi-send me-1"></i> Gửi yêu cầu</button>
+                        <button type="submit" class="btn btn-success">Gửi yêu cầu</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div th:if="${success}"
+             id="successToast"
+             class="toast text-bg-success border-0"
+             role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+                <button type="button"
+                        class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast">
+                </button>
+            </div>
+        </div>
+        <div th:if="${error}"
+             id="errorToast"
+             class="toast text-bg-danger border-0"
+             role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                <button type="button"
+                        class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const successToast = document.getElementById('successToast');
+            if (successToast) {
+                new bootstrap.Toast(successToast, {
+                    delay: 5000
+                }).show();
+            }
+            const errorToast = document.getElementById('errorToast');
+            if (errorToast) {
+                new bootstrap.Toast(errorToast, {
+                    delay: 5000
+                }).show();
+            }
+        });
+    </script>
 </div>
 </body>
 </html>

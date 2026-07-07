@@ -149,21 +149,3 @@ INSERT INTO book_category (book_id, category_id) VALUES
 (5, 4),
 (6, 1),
 (6, 4);
-
--- Người đang mượn sách (chưa trả)
-INSERT INTO borrow_histories (user_id, copy_id, issued_by, borrow_date, due_date, return_date, return_confirmed_by, delete_flag)
-VALUES (3, 2, 2, '2026-06-15', '2026-06-25', NULL, NULL, 0),
-       (4, 9, 2, '2026-06-22', '2026-07-06', NULL, NULL, 0),
-       (5, 4, 2, '2026-06-24', '2026-07-08', NULL, NULL, 0);
-
--- Phiếu mượn đã trả (dùng để tạo phiếu phạt khi trả trễ)
-INSERT INTO borrow_histories (user_id, copy_id, issued_by, borrow_date, due_date, return_date, return_confirmed_by, delete_flag)
-VALUES (3, 1, 2, '2026-05-01', '2026-05-15', '2026-05-22', 2, 0),
-       (4, 3, 2, '2026-04-10', '2026-04-24', '2026-05-01', 2, 0),
-       (5, 5, 2, '2026-03-01', '2026-03-15', '2026-03-20', 2, 0);
-
--- Phiếu phạt chưa thanh toán (test thanh toán QR)
-INSERT INTO fines (borrow_id, user_id, amount, reason, status, delete_flag)
-VALUES (4, 3, 50000, N'Trả trễ sách Clean Code 7 ngày', 'UNPAID', 0),
-       (5, 4, 75000, N'Trả trễ sách Effective Java', 'UNPAID', 0),
-       (6, 5, 30000, N'Trả trễ sách Refactoring', 'UNPAID', 0);
