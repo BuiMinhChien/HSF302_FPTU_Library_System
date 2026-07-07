@@ -11,175 +11,187 @@
 <body>
 <div layout:fragment="content">
     <div class="container py-4">
-        <div class="card shadow-sm border-0">
-
-            <div class="card-header d-flex justify-content-between align-items-center bg-dark text-white">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-people-fill fs-5"></i>
-                    <h4 class="mb-0 text-white">Quản lý Tài khoản Hệ thống</h4>
-                </div>
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    Quản lý Tài khoản Hệ thống
+                </h4>
             </div>
 
             <div class="card-body">
-                <!-- Thông báo -->
-                <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${param.success}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${param.error}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-
-                <!-- Form Tìm Kiếm & Lọc -->
-                <form method="get" th:action="@{/admin/accounts}" class="row g-3 mb-4 bg-light p-3 rounded">
+                <form method="get" th:action="@{/admin/accounts}" class="row g-3 mb-3">
                     <div class="col-md-5">
-                        <label class="form-label fw-bold text-muted small">Tìm kiếm</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                            <input type="text" name="keyword" class="form-control" 
-                                   th:value="${keyword}" placeholder="Nhập tên, email hoặc mã số...">
-                        </div>
+                        <input type="text" name="keyword" class="form-control"
+                               th:value="${keyword}" placeholder="Nhập tên, email hoặc mã số...">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-bold text-muted small">Phân quyền</label>
                         <select name="role" class="form-select">
-                            <option value="">-- Tất cả vai trò --</option>
+                            <option value="">Tất cả vai trò</option>
                             <option value="ADMIN" th:selected="${role != null and role.name() == 'ADMIN'}">Quản trị viên (Admin)</option>
                             <option value="LIBRARIAN" th:selected="${role != null and role.name() == 'LIBRARIAN'}">Thủ thư (Librarian)</option>
                             <option value="READER" th:selected="${role != null and role.name() == 'READER'}">Độc giả (Sinh viên/GV)</option>
                         </select>
                     </div>
-                    <div class="col-md-2 d-flex align-items-end">
+                    <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-funnel-fill me-1"></i> Lọc
+                            Tìm kiếm
                         </button>
                     </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <a th:href="@{/admin/accounts}" class="btn btn-outline-secondary w-100">Xóa lọc</a>
+                    <div class="col-md-2">
+                        <a th:href="@{/admin/accounts}" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Đặt lại
+                        </a>
                     </div>
                 </form>
 
-                <!-- Bảng Danh Sách -->
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle border">
-                        <thead class="table-dark">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
                         <tr>
                             <th>STT</th>
                             <th>Họ & Tên</th>
                             <th>Mã số</th>
                             <th>Liên hệ</th>
+                            <th>Địa chỉ</th>
                             <th>Vai trò</th>
                             <th>Trạng thái</th>
-                            <th class="text-center">Thao tác</th>
+                            <th>Tùy chọn</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(accounts)}">
-                            <td colspan="7" class="text-center text-muted py-5">
-                                <i class="bi bi-search fs-2 d-block mb-2"></i>
-                                Không tìm thấy tài khoản nào phù hợp.
+                            <td colspan="8" class="text-center text-muted">
+                                Chưa có tài khoản nào
                             </td>
                         </tr>
                         <tr th:each="acc, stat : ${accounts}">
-                            <td class="fw-bold" th:text="${accountPage.number * accountPage.size + stat.count}"></td>
-                            
-                            <!-- Tên -->
+                            <td th:text="${accountPage.number * accountPage.size + stat.count}"></td>
                             <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2" 
-                                         style="width: 40px; height: 40px; font-weight: bold;" 
-                                         th:text="${#strings.substring(acc.fullName, 0, 1).toUpperCase()}">
-                                    </div>
-                                    <div>
-                                        <strong th:text="${acc.fullName}"></strong>
-                                    </div>
-                                </div>
+                                <strong th:text="${acc.fullName}"></strong>
                             </td>
-
-                            <!-- Mã số -->
-                            <td><span class="badge bg-light text-dark border" th:text="${acc.code}"></span></td>
-                            
-                            <!-- Liên hệ -->
                             <td>
-                                <div class="small"><i class="bi bi-envelope me-1"></i><span th:text="${acc.email}"></span></div>
-                                <div class="small text-muted" th:if="${acc.phone != null}"><i class="bi bi-telephone me-1"></i><span th:text="${acc.phone}"></span></div>
+                                <span class="badge bg-light text-dark border" th:text="${acc.code}"></span>
                             </td>
-                            
-                            <!-- Vai trò -->
+                            <td>
+                                <div th:text="${acc.email}"></div>
+                                <small class="text-muted" th:if="${acc.phone != null}" th:text="${acc.phone}"></small>
+                            </td>
+                            <td th:text="${acc.address ?: '-'}"></td>
                             <td>
                                 <span class="badge"
                                       th:classappend="
-                                          ${acc.role.name() == 'ADMIN'} ? ' bg-danger' :
-                                          (${acc.role.name() == 'LIBRARIAN'} ? ' bg-info text-dark' : ' bg-primary')">
-                                    <i class="bi" th:classappend="
-                                          ${acc.role.name() == 'ADMIN'} ? ' bi-shield-lock-fill' :
-                                          (${acc.role.name() == 'LIBRARIAN'} ? ' bi-person-badge' : ' bi-person')"></i>
+                                            ${acc.role.name() == 'ADMIN'} ? ' bg-danger' :
+                                            (${acc.role.name() == 'LIBRARIAN'} ? ' bg-info text-dark' : ' bg-primary')">
                                     <span th:text="${acc.role}"></span>
                                 </span>
                             </td>
-
-                            <!-- Trạng thái -->
                             <td>
-                                <span th:if="${acc.status}" class="badge bg-success-subtle text-success border border-success-subtle">
-                                    <i class="bi bi-circle-fill small me-1"></i>Hoạt động
-                                </span>
-                                <span th:unless="${acc.status}" class="badge bg-danger-subtle text-danger border border-danger-subtle">
-                                    <i class="bi bi-lock-fill small me-1"></i>Bị khóa
+                                <span class="badge" th:classappend="${acc.status} ? ' bg-success' : ' bg-secondary'">
+                                    <span th:text="${acc.status ? 'Hoạt động' : 'Bị khóa'}"></span>
                                 </span>
                             </td>
-                            
-                            <!-- Thao tác Khóa/Mở khóa -->
-                            <td class="text-center">
-                                <!-- Tránh tự khóa chính mình (Tùy chọn) -->
-                                <form method="post" th:action="@{/admin/accounts/toggle-status}" class="d-inline">
-                                    <input type="hidden" name="userId" th:value="${acc.userId}">
-                                    
-                                    <button th:if="${acc.status}" type="submit" class="btn btn-sm btn-outline-danger" 
-                                            title="Khóa tài khoản này"
-                                            onclick="return confirm('Bạn có chắc chắn muốn KHÓA tài khoản này không? Người này sẽ không thể đăng nhập nữa.');">
-                                        <i class="bi bi-lock-fill"></i> Khóa
-                                    </button>
-                                    
-                                    <button th:unless="${acc.status}" type="submit" class="btn btn-sm btn-outline-success" 
-                                            title="Mở khóa tài khoản"
-                                            onclick="return confirm('Xác nhận MỞ KHÓA cho tài khoản này?');">
-                                        <i class="bi bi-unlock-fill"></i> Mở khóa
-                                    </button>
-                                </form>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <form method="post" th:action="@{/admin/accounts/toggle-status}">
+                                        <input type="hidden" name="userId" th:value="${acc.userId}">
+                                        <button th:if="${acc.status}" type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Bạn có chắc chắn muốn khóa tài khoản này không?');">
+                                            Khóa
+                                        </button>
+                                        <button th:unless="${acc.status}" type="submit" class="btn btn-sm btn-outline-success"
+                                                onclick="return confirm('Xác nhận mở khóa cho tài khoản này?');">
+                                            Mở khóa
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         </tbody>
                     </table>
-                </div>
 
-                <!-- Phân trang -->
-                <div class="d-flex justify-content-between align-items-center mt-3" th:if="${accountPage.totalElements > 0}">
-                    <div class="text-muted small">
-                        Hiển thị
-                        <span th:text="${accountPage.number * accountPage.size + 1}"></span>
-                        -
-                        <span th:text="${accountPage.number * accountPage.size + accounts.size()}"></span>
-                        / <span th:text="${accountPage.totalElements}"></span> tài khoản
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted">
+                            Hiển thị
+                            <span th:text="${accountPage.number * accountPage.size + 1}"></span>
+                            -
+                            <span th:text="${accountPage.number * accountPage.size + accounts.size()}"></span>
+                            trên tổng
+                            <span th:text="${accountPage.totalElements}"></span>
+                            tài khoản
+                        </div>
+                        <nav th:if="${accountPage.totalPages > 1}">
+                            <ul class="pagination mb-0">
+                                <li class="page-item" th:classappend="${accountPage.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/accounts(page=${accountPage.number - 1}, keyword=${keyword}, role=${role})}">
+                                        Trước
+                                    </a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, accountPage.totalPages - 1)}" th:classappend="${i == accountPage.number} ? 'active'">
+                                    <a class="page-link" th:text="${i + 1}" th:href="@{/admin/accounts(page=${i}, keyword=${keyword}, role=${role})}"></a>
+                                </li>
+                                <li class="page-item" th:classappend="${accountPage.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/accounts(page=${accountPage.number + 1}, keyword=${keyword}, role=${role})}">
+                                        Sau
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
-                    <nav th:if="${accountPage.totalPages > 1}">
-                        <ul class="pagination mb-0">
-                            <li class="page-item" th:classappend="${accountPage.first} ? 'disabled'">
-                                <a class="page-link" th:href="@{/admin/accounts(page=${accountPage.number - 1}, keyword=${keyword}, role=${role})}">Trước</a>
-                            </li>
-                            <li class="page-item" th:each="i : ${#numbers.sequence(0, accountPage.totalPages - 1)}" th:classappend="${i == accountPage.number} ? 'active'">
-                                <a class="page-link" th:text="${i + 1}" th:href="@{/admin/accounts(page=${i}, keyword=${keyword}, role=${role})}"></a>
-                            </li>
-                            <li class="page-item" th:classappend="${accountPage.last} ? 'disabled'">
-                                <a class="page-link" th:href="@{/admin/accounts(page=${accountPage.number + 1}, keyword=${keyword}, role=${role})}">Sau</a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
 
+                </div>
             </div>
         </div>
     </div>
+
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div th:if="${success}"
+             id="successToast"
+             class="toast text-bg-success border-0"
+             role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+                <button type="button"
+                        class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast">
+                </button>
+            </div>
+        </div>
+        <div th:if="${error}"
+             id="errorToast"
+             class="toast text-bg-danger border-0"
+             role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                <button type="button"
+                        class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const successToast = document.getElementById('successToast');
+            if (successToast) {
+                new bootstrap.Toast(successToast, {
+                    delay: 5000
+                }).show();
+            }
+            const errorToast = document.getElementById('errorToast');
+            if (errorToast) {
+                new bootstrap.Toast(errorToast, {
+                    delay: 5000
+                }).show();
+            }
+        });
+    </script>
 </div>
 </body>
 </html>

@@ -8,5 +8,4 @@ public enum EBorrowRequestStatus {
     WAITING,
     EXPIRED,
     ISSUED,
-    RETURNED,
 }

@@ -67,6 +67,7 @@ public class IssueReturnController {
     // ─────────────────────────────────────────────
     @GetMapping("/confirm-return")
     public String listActiveBorrows(Model model) {
+        //TODO: chuyển cái convert từ object sang dto vào service nhé, controller chỉ điều hướng thôi, để code đây cô nói đấy
         List<BorrowHistoryDto> activeList = borrowHistoryRepository
                 .findByReturnDateIsNull()
                 .stream()
@@ -77,6 +78,7 @@ public class IssueReturnController {
                         .bookTitle(b.getCopy().getBook().getTitle())
                         .borrowDate(b.getBorrowDate())
                         .dueDate(b.getDueDate())
+                        .status(b.getStatus())
                         .build())
                 .collect(Collectors.toList());
         model.addAttribute("activeList", activeList);
@@ -88,8 +90,7 @@ public class IssueReturnController {
     // URL: POST /librarian/confirm-return/{borrowId}
     // ─────────────────────────────────────────────
     @PostMapping("/confirm-return/{borrowId}")
-    public String confirmReturn(@PathVariable Integer borrowId,
-                                RedirectAttributes redirectAttributes) {
+    public String confirmReturn(@PathVariable Integer borrowId, RedirectAttributes redirectAttributes) {
         try {
             borrowHistoryService.confirmReturn(borrowId);
             redirectAttributes.addFlashAttribute("success", "Xác nhận trả sách thành công!");

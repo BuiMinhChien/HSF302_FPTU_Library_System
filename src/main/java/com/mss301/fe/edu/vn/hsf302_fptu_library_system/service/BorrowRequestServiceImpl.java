@@ -1,4 +1,5 @@
 package com.mss301.fe.edu.vn.hsf302_fptu_library_system.service;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowHistoryStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.BorrowHistoryRepository;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BorrowHistory;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBookCopyStatus;
@@ -197,6 +198,7 @@ public class BorrowRequestServiceImpl implements BorrowRequestService {
                 .issuedBy(librarian)
                 .borrowDate(LocalDateTime.now())
                 .dueDate(LocalDateTime.now().plusDays(7))
+                .status(EBorrowHistoryStatus.BORROWING)
                 .build();
         borrowHistoryRepository.save(history);
     }
