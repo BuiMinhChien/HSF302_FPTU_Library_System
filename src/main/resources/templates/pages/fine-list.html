@@ -11,20 +11,12 @@
 <div layout:fragment="content">
     <div class="container py-4">
         <div class="card shadow-sm">
-            <div class="card-header d-flex align-items-center gap-2">
-                <i class="bi bi-cash-coin fs-5 text-danger"></i>
-                <h4 class="mb-0">Phiếu phạt của tôi</h4>
+            <div class="card-header">
+                <h4 class="mb-0">
+                    Phiếu phạt của tôi
+                </h4>
             </div>
             <div class="card-body">
-                <div th:if="${success}" class="alert alert-success">
-                    <i class="bi bi-check-circle-fill me-2"></i>
-                    <span th:text="${success}"></span>
-                </div>
-                <div th:if="${error}" class="alert alert-danger">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    <span th:text="${error}"></span>
-                </div>
-
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle">
                         <thead class="table-light">
@@ -35,38 +27,43 @@
                             <th>Số tiền</th>
                             <th>Ngày tạo</th>
                             <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <th>Tùy chọn</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(fines)}">
-                            <td colspan="7" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
-                                Bạn chưa có khoản phạt nào.
+                            <td colspan="7" class="text-center text-muted">
+                                Chưa có khoản phạt nào
                             </td>
                         </tr>
                         <tr th:each="fine, stat : ${fines}">
-                            <td th:text="${stat.count}">1</td>
-                            <td th:text="${fine.bookTitle}">Sách</td>
-                            <td th:text="${fine.reason}">Lý do</td>
-                            <td th:text="${#numbers.formatDecimal(fine.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
-                            <td th:text="${fine.createdAt != null ? #temporals.format(fine.createdAt, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
+                            <td th:text="${stat.count}"></td>
+                            <td th:text="${fine.bookTitle}"></td>
+                            <td th:text="${fine.reason}"></td>
+                            <td th:text="${#numbers.formatDecimal(fine.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
                             <td>
-                                <span th:if="${fine.status.name() == 'UNPAID'}"
-                                      class="badge bg-warning text-dark">Chưa thanh toán</span>
-                                <span th:if="${fine.status.name() == 'PAID'}"
-                                      class="badge bg-success">Đã thanh toán</span>
+                                <div th:if="${fine.createdAt != null}">
+                                    <div class="fw-semibold" th:text="${#temporals.format(fine.createdAt, 'dd/MM/yyyy')}"></div>
+                                    <small class="text-muted" th:text="${#temporals.format(fine.createdAt, 'HH:mm:ss')}"></small>
+                                </div>
+                                <span th:if="${fine.createdAt == null}">-</span>
                             </td>
                             <td>
-                                <button th:if="${fine.canPay}"
-                                        type="button"
-                                        class="btn btn-sm btn-primary btn-pay-fine"
-                                        th:data-fine-id="${fine.fineId}">
-                                    <i class="bi bi-credit-card me-1"></i> Thanh toán
-                                </button>
-                                <span th:if="${!fine.canPay}" class="text-success">
-                                    <i class="bi bi-check-circle me-1"></i> Đã thanh toán
+                                <span class="badge"
+                                      th:classappend="${fine.status.name() == 'UNPAID'} ? ' bg-warning text-dark' : ' bg-success'">
+                                    <span th:text="${fine.status.name() == 'UNPAID' ? 'Chưa thanh toán' : 'Đã thanh toán'}"></span>
                                 </span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <button th:if="${fine.canPay}"
+                                            type="button"
+                                            class="btn btn-sm btn-outline-primary btn-pay-fine"
+                                            th:data-fine-id="${fine.fineId}">
+                                        Thanh toán
+                                    </button>
+                                    <span th:if="${!fine.canPay}" class="text-muted small">-</span>
+                                </div>
                             </td>
                         </tr>
                         </tbody>
@@ -80,9 +77,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="payModalLabel">
-                        <i class="bi bi-qr-code me-2"></i>Quét mã QR để thanh toán
-                    </h5>
+                    <h5 class="modal-title" id="payModalLabel">Quét mã QR để thanh toán</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body text-center">
@@ -113,7 +108,7 @@
                             Đang chờ xác nhận chuyển khoản...
                         </p>
                         <button type="button" id="payModalDemoBtn" class="btn btn-primary w-100 d-none">
-                            <i class="bi bi-check-circle me-1"></i> Đã chuyển khoản — Hoàn tất (demo)
+                            Đã chuyển khoản — Hoàn tất (demo)
                         </button>
                     </div>
                 </div>
@@ -121,136 +116,182 @@
         </div>
     </div>
 
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div th:if="${success}"
+             id="successToast"
+             class="toast text-bg-success border-0"
+             role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+                <button type="button"
+                        class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast">
+                </button>
+            </div>
+        </div>
+        <div th:if="${error}"
+             id="errorToast"
+             class="toast text-bg-danger border-0"
+             role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                <button type="button"
+                        class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast">
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
+
 <script layout:fragment="scripts" th:inline="javascript">
-	(() => {
-		const modalEl = document.getElementById("payModal");
-		const modal = new bootstrap.Modal(modalEl);
+    (() => {
+        // Kích hoạt Toast thông báo mẫu chuẩn
+        document.addEventListener('DOMContentLoaded', function () {
+            const successToast = document.getElementById('successToast');
+            if (successToast) {
+                new bootstrap.Toast(successToast, { delay: 5000 }).show();
+            }
+            const errorToast = document.getElementById('errorToast');
+            if (errorToast) {
+                new bootstrap.Toast(errorToast, { delay: 5000 }).show();
+            }
+        });
 
-		let pollTimer = null;
-		let currentOrderCode = null;
+        const modalEl = document.getElementById("payModal");
+        const modal = new bootstrap.Modal(modalEl);
 
-		const formatAmount = (amount) =>
-				new Intl.NumberFormat("vi-VN").format(amount) + " đ";
+        let pollTimer = null;
+        let currentOrderCode = null;
 
-		const resetModal = () => {
-			clearInterval(pollTimer);
-			pollTimer = null;
-			currentOrderCode = null;
+        const formatAmount = (amount) =>
+            new Intl.NumberFormat("vi-VN").format(amount) + " đ";
 
-			document.getElementById("payModalLoading").classList.remove("d-none");
-			document.getElementById("payModalError").classList.add("d-none");
-			document.getElementById("payModalContent").classList.add("d-none");
-			document.getElementById("payModalWaiting").classList.add("d-none");
-			document.getElementById("payModalDemoBtn").classList.add("d-none");
-		};
+        const resetModal = () => {
+            clearInterval(pollTimer);
+            pollTimer = null;
+            currentOrderCode = null;
 
-		const showError = (message) => {
-			document.getElementById("payModalLoading").classList.add("d-none");
-			document.getElementById("payModalContent").classList.add("d-none");
+            document.getElementById("payModalLoading").classList.remove("d-none");
+            document.getElementById("payModalError").classList.add("d-none");
+            document.getElementById("payModalContent").classList.add("d-none");
+            document.getElementById("payModalWaiting").classList.add("d-none");
+            document.getElementById("payModalDemoBtn").classList.add("d-none");
+        };
 
-			const errorEl = document.getElementById("payModalError");
-			errorEl.textContent = message;
-			errorEl.classList.remove("d-none");
-		};
+        const showError = (message) => {
+            document.getElementById("payModalLoading").classList.add("d-none");
+            document.getElementById("payModalContent").classList.add("d-none");
 
-		const handlePaid = () => {
-			clearInterval(pollTimer);
-			modal.hide();
-			window.location.reload();
-		};
+            const errorEl = document.getElementById("payModalError");
+            errorEl.textContent = message;
+            errorEl.classList.remove("d-none");
+        };
 
-		const startPolling = (orderCode) => {
-			document.getElementById("payModalWaiting").classList.remove("d-none");
+        const handlePaid = () => {
+            clearInterval(pollTimer);
+            modal.hide();
+            window.location.reload();
+        };
 
-			pollTimer = setInterval(async () => {
-				try {
-					const res = await fetch(`/reader/fines/pay/status?orderCode=${orderCode}`);
-					if (!res.ok) return;
+        const startPolling = (orderCode) => {
+            document.getElementById("payModalWaiting").classList.remove("d-none");
 
-					const data = await res.json();
+            pollTimer = setInterval(async () => {
+                try {
+                    const res = await fetch(`/reader/fines/pay/status?orderCode=${orderCode}`);
+                    if (!res.ok) return;
 
-					if (data.paymentStatus === "SUCCESS") {
-						handlePaid();
-					}
-				} catch (e) {
-					// Ignore transient errors while polling
-				}
-			}, 3000);
-		};
+                    const data = await res.json();
 
-		const openPayment = async (fineId) => {
-			resetModal();
-			modal.show();
+                    if (data.paymentStatus === "SUCCESS") {
+                        handlePaid();
+                    }
+                } catch (e) {
+                    // Ignore transient errors while polling
+                }
+            }, 3000);
+        };
 
-			try {
-				const res = await fetch(`/reader/fines/${fineId}/pay/init`);
-				const data = await res.json();
+        const openPayment = async (fineId) => {
+            resetModal();
+            modal.show();
 
-				if (!res.ok) {
-					showError(data.message || "Không thể tạo mã QR thanh toán.");
-					return;
-				}
+            try {
+                const res = await fetch(`/reader/fines/${fineId}/pay/init`);
+                const data = await res.json();
 
-				currentOrderCode = data.orderCode;
+                if (!res.ok) {
+                    showError(data.message || "Không thể tạo mã QR thanh toán.");
+                    return;
+                }
 
-				document.getElementById("payModalLoading").classList.add("d-none");
-				document.getElementById("payModalContent").classList.remove("d-none");
+                currentOrderCode = data.orderCode;
 
-				document.getElementById("payModalFineId").textContent = data.fineId;
-				document.getElementById("payModalAmount").textContent = formatAmount(data.amount);
-				document.getElementById("payModalQr").src = data.qrImageUrl || "";
+                document.getElementById("payModalLoading").classList.add("d-none");
+                document.getElementById("payModalContent").classList.remove("d-none");
 
-				const hintEl = document.getElementById("payModalHint");
+                document.getElementById("payModalFineId").textContent = data.fineId;
+                document.getElementById("payModalAmount").textContent = formatAmount(data.amount);
+                document.getElementById("payModalQr").src = data.qrImageUrl || "";
 
-				if (data.mockEnabled) {
-					hintEl.textContent =
-							"Chế độ demo: quét QR không chuyển được. Bấm nút bên dưới để hoàn tất.";
+                const hintEl = document.getElementById("payModalHint");
 
-					document.getElementById("payModalDemoBtn")
-							.classList.remove("d-none");
-				} else {
-					hintEl.textContent =
-							"Mở app ngân hàng, chọn Quét QR và quét mã bên dưới. Không cần mở trang PayOS.";
+                if (data.mockEnabled) {
+                    hintEl.textContent =
+                        "Chế độ demo: quét QR không chuyển được. Bấm nút bên dưới để hoàn tất.";
 
-					startPolling(data.orderCode);
-				}
+                    document.getElementById("payModalDemoBtn")
+                        .classList.remove("d-none");
+                } else {
+                    hintEl.textContent =
+                        "Mở app ngân hàng, chọn Quét QR và quét mã bên dưới. Không cần mở trang PayOS.";
 
-			} catch (e) {
-				showError("Không thể kết nối máy chủ. Vui lòng thử lại.");
-			}
-		};
+                    startPolling(data.orderCode);
+                }
 
-		document.querySelectorAll(".btn-pay-fine").forEach((btn) => {
-			btn.addEventListener("click", () => openPayment(btn.dataset.fineId));
-		});
+            } catch (e) {
+                showError("Không thể kết nối máy chủ. Vui lòng thử lại.");
+            }
+        };
 
-		document.getElementById("payModalDemoBtn").addEventListener("click", async () => {
-			if (!currentOrderCode) return;
+        document.querySelectorAll(".btn-pay-fine").forEach((btn) => {
+            btn.addEventListener("click", () => openPayment(btn.dataset.fineId));
+        });
 
-			try {
-				const res = await fetch(
-						`/reader/fines/pay/complete-json?orderCode=${currentOrderCode}`,
-						{
-							method: "POST"
-						}
-				);
+        document.getElementById("payModalDemoBtn").addEventListener("click", async () => {
+            if (!currentOrderCode) return;
 
-				const data = await res.json();
+            try {
+                const res = await fetch(
+                    `/reader/fines/pay/complete-json?orderCode=${currentOrderCode}`,
+                    {
+                        method: "POST"
+                    }
+                );
 
-				if (res.ok && data.paymentStatus === "SUCCESS") {
-					handlePaid();
-				} else {
-					showError("Không thể hoàn tất thanh toán demo.");
-				}
-			} catch (e) {
-				showError("Không thể hoàn tất thanh toán demo.");
-			}
-		});
+                const data = await res.json();
 
-		modalEl.addEventListener("hidden.bs.modal", resetModal);
+                if (res.ok && data.paymentStatus === "SUCCESS") {
+                    handlePaid();
+                } else {
+                    showError("Không thể hoàn tất thanh toán demo.");
+                }
+            } catch (e) {
+                showError("Không thể hoàn tất thanh toán demo.");
+            }
+        });
 
-	})();
+        modalEl.addEventListener("hidden.bs.modal", resetModal);
+
+    })();
 </script>
 </body>
 </html>

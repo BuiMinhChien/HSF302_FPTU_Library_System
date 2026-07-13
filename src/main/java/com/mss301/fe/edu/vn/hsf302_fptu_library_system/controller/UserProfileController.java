@@ -1,6 +1,6 @@
 package com.mss301.fe.edu.vn.hsf302_fptu_library_system.controller;
 
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.User;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.UserProfileDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -17,7 +17,7 @@ public class UserProfileController {
 
     @GetMapping
     public String viewProfile(Model model) {
-        User user = userProfileService.getCurrentUserProfile();
+        UserProfileDto user = userProfileService.getCurrentUserProfile();
         model.addAttribute("user", user);
         return "pages/profile";
     }

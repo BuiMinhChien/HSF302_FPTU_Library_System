@@ -1,6 +1,7 @@
 package com.mss301.fe.edu.vn.hsf302_fptu_library_system.service;
 
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBookCopyStatus;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowHistoryStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowRequestStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BookCopy;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BorrowHistory;
@@ -49,7 +50,7 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
         BorrowRequest request = borrowRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu #" + requestId));
 
-        if (request.getStatus() != EBorrowRequestStatus.APPROVED) {
+        if (request.getStatus() != EBorrowRequestStatus.WAITING) {
             throw new RuntimeException("Yêu cầu này chưa được duyệt, không thể giao sách!");
         }
 
@@ -87,6 +88,7 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
 
         history.setReturnDate(LocalDateTime.now());
         history.setReturnConfirmedBy(librarian);
+        history.setStatus(EBorrowHistoryStatus.RETURNED);
         borrowHistoryRepository.save(history);
 
         BookCopy copy = history.getCopy();
