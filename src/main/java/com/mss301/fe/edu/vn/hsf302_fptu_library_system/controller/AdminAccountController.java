@@ -1,6 +1,7 @@
 package com.mss301.fe.edu.vn.hsf302_fptu_library_system.controller;
 
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.ERole;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.AccountFormDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.User;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.service.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,33 @@ public class AdminAccountController {
             redirectAttributes.addAttribute("success", "Cập nhật trạng thái tài khoản thành công!");
         } catch (Exception e) {
             redirectAttributes.addAttribute("error", e.getMessage());
+        }
+        return "redirect:/admin/accounts";
+    }
+
+    // 3. Xử lý Thêm mới tài khoản
+    @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String addAccount(@ModelAttribute AccountFormDto dto, RedirectAttributes redirectAttributes) {
+        try {
+            accountService.saveAccount(dto);
+            redirectAttributes.addAttribute("success", "Thêm tài khoản mới thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addAttribute("error", "Lỗi thêm mới: " + e.getMessage());
+        }
+        return "redirect:/admin/accounts";
+    }
+
+    // 4. Xử lý Sửa thông tin tài khoản
+    @PostMapping("/edit/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String editAccount(@PathVariable("id") Integer id, @ModelAttribute AccountFormDto dto, RedirectAttributes redirectAttributes) {
+        try {
+            dto.setUserId(id);
+            accountService.saveAccount(dto);
+            redirectAttributes.addAttribute("success", "Cập nhật thông tin tài khoản thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addAttribute("error", "Lỗi cập nhật: " + e.getMessage());
         }
         return "redirect:/admin/accounts";
     }
