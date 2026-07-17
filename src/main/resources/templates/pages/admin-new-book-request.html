@@ -13,11 +13,10 @@
     <div class="container py-4">
         <div class="card shadow-sm">
 
-            <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-shield-check fs-5"></i>
-                    <h4 class="mb-0 text-white">Quản lý Đề xuất sách mới</h4>
-                </div>
+            <div class="card-header">
+                <h4 class="mb-0">
+                    Danh sách yêu cầu sách mới
+                </h4>
             </div>
 
             <div class="card-body">
@@ -31,20 +30,33 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
-                <!-- Form Lọc Trạng Thái -->
+                <!-- Form Lọc Trạng Thái & Từ Khóa -->
                 <form method="get" th:action="@{/admin/new-book-requests}" class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small mb-1">Từ khóa</label>
+                        <input type="text" name="keyword" class="form-control"
+                               placeholder="Tên sách, tác giả hoặc người gửi..." th:value="${keyword}">
+                    </div>
                     <div class="col-md-3">
+                        <label class="form-label fw-semibold small mb-1">Trạng thái</label>
                         <select name="status" class="form-select">
-                            <option value="">-- Tất cả trạng thái --</option>
+                            <option value="">Tất cả trạng thái</option>
                             <option value="PENDING" th:selected="${status != null and status.name() == 'PENDING'}">Đang chờ duyệt</option>
                             <option value="APPROVED" th:selected="${status != null and status.name() == 'APPROVED'}">Đã duyệt</option>
                             <option value="REJECTED" th:selected="${status != null and status.name() == 'REJECTED'}">Đã từ chối</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-outline-primary w-100">
-                            <i class="bi bi-funnel me-1"></i> Lọc dữ liệu
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small mb-1">Ngày gửi</label>
+                        <input type="date" name="fromDate" class="form-control" th:value="${fromDate}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i> Tìm
                         </button>
+                        <a th:href="@{/admin/new-book-requests}" class="btn btn-outline-secondary" title="Đặt lại">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </a>
                     </div>
                 </form>
 
@@ -59,12 +71,13 @@
                             <th>Lý do mua</th>
                             <th>Ngày gửi</th>
                             <th>Trạng thái</th>
+                            <th>Người xử lý</th>
                             <th class="text-center">Hành động</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(requests)}">
-                            <td colspan="7" class="text-center text-muted py-4">
+                            <td colspan="8" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-4 d-block mb-2"></i>
                                 Hệ thống chưa có yêu cầu mua sách nào.
                             </td>
@@ -112,7 +125,19 @@
                                 </span>
                             </td>
                             
-                            <!-- Nút Hành động (Chỉ hiện khi PENDING) -->
+                            <!-- Người xử lý -->
+                            <td>
+                                <div th:if="${request.status.name() != 'PENDING'}">
+                                    <strong th:text="${request.approvedBy?.fullName ?: 'System Administrator'}"></strong>
+                                    <div th:if="${request.approvedDate != null}" class="small text-muted" th:text="${#temporals.format(request.approvedDate, 'dd/MM/yyyy HH:mm')}"></div>
+                                    <div th:if="${request.rejectionReason != null and request.rejectionReason != ''}" class="text-danger small mt-1">
+                                        Lý do: <span th:text="${request.rejectionReason}"></span>
+                                    </div>
+                                </div>
+                                <span th:if="${request.status.name() == 'PENDING'}" class="text-muted">-</span>
+                            </td>
+
+                            <!-- Nút Hành động -->
                             <td class="text-center">
                                 <div th:if="${request.status.name() == 'PENDING'}" class="d-flex justify-content-center gap-2">
                                     <!-- Nút Duyệt -->
@@ -124,18 +149,39 @@
                                         </button>
                                     </form>
                                     
-                                    <!-- Nút Từ chối -->
-                                    <form method="post" th:action="@{/admin/new-book-requests/reject}">
-                                        <input type="hidden" name="requestId" th:value="${request.newBookRequestId}">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Từ chối yêu cầu"
-                                                onclick="return confirm('Xác nhận TỪ CHỐI yêu cầu mua sách này?');">
-                                            <i class="bi bi-x-lg"></i> Từ chối
-                                        </button>
-                                    </form>
+                                    <!-- Nút Từ chối (Bật Modal) -->
+                                    <button type="button" class="btn btn-sm btn-danger" title="Từ chối yêu cầu"
+                                            data-bs-toggle="modal" th:data-bs-target="'#rejectModal-' + ${request.newBookRequestId}">
+                                        <i class="bi bi-x-lg"></i> Từ chối
+                                    </button>
+
+                                    <!-- Modal Nhập Lý Do Từ Chối -->
+                                    <div class="modal fade text-start" th:id="'rejectModal-' + ${request.newBookRequestId}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form method="post" th:action="@{/admin/new-book-requests/reject}">
+                                                    <input type="hidden" name="requestId" th:value="${request.newBookRequestId}">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title fw-bold"><i class="bi bi-x-circle me-2"></i>Từ chối yêu cầu</h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p class="mb-2">Xác nhận từ chối mua cuốn sách: <strong th:text="${request.bookTitle}"></strong>?</p>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">Lý do từ chối <span class="text-danger">*</span></label>
+                                                            <textarea class="form-control" name="rejectionReason" rows="3" required placeholder="Nhập lý do từ chối mua cuốn sách này..."></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                        <button type="submit" class="btn btn-danger">Xác nhận từ chối</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span th:if="${request.status.name() != 'PENDING'}" class="text-muted small">
-                                    Đã xử lý bởi <br> <strong th:text="${request.approvedBy?.fullName ?: 'Admin'}"></strong>
-                                </span>
+                                <span th:if="${request.status.name() != 'PENDING'}" class="text-muted">-</span>
                             </td>
                         </tr>
                         </tbody>
@@ -154,13 +200,13 @@
                     <nav th:if="${requestPage.totalPages > 1}">
                         <ul class="pagination mb-0">
                             <li class="page-item" th:classappend="${requestPage.first} ? 'disabled'">
-                                <a class="page-link" th:href="@{/admin/new-book-requests(page=${requestPage.number - 1}, status=${status})}">Trước</a>
+                                <a class="page-link" th:href="@{/admin/new-book-requests(page=${requestPage.number - 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}" aria-label="Previous">&laquo;</a>
                             </li>
                             <li class="page-item" th:each="i : ${#numbers.sequence(0, requestPage.totalPages - 1)}" th:classappend="${i == requestPage.number} ? 'active'">
-                                <a class="page-link" th:text="${i + 1}" th:href="@{/admin/new-book-requests(page=${i}, status=${status})}"></a>
+                                <a class="page-link" th:text="${i + 1}" th:href="@{/admin/new-book-requests(page=${i}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}"></a>
                             </li>
                             <li class="page-item" th:classappend="${requestPage.last} ? 'disabled'">
-                                <a class="page-link" th:href="@{/admin/new-book-requests(page=${requestPage.number + 1}, status=${status})}">Sau</a>
+                                <a class="page-link" th:href="@{/admin/new-book-requests(page=${requestPage.number + 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}" aria-label="Next">&raquo;</a>
                             </li>
                         </ul>
                     </nav>

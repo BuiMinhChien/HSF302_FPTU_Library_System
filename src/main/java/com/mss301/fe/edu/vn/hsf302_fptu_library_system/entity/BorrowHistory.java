@@ -27,7 +27,7 @@ public class BorrowHistory extends BaseEntity {
     private BookCopy copy;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private EBorrowHistoryStatus status;
 
     @ManyToOne

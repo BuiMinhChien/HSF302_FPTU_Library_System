@@ -105,9 +105,13 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, In
             OR LOWER(br.user.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))
             OR LOWER(br.user.code) LIKE LOWER(CONCAT('%', :keyword, '%'))
         )
+        AND (:fromDate IS NULL OR br.approvedDate >= :fromDate)
+        AND (:toDate IS NULL OR br.approvedDate <= :toDate)
     """)
     Page<BorrowRequest> findBorrowersThisWeek(
             @Param("keyword") String keyword,
+            @Param("fromDate") java.time.LocalDateTime fromDate,
+            @Param("toDate") java.time.LocalDateTime toDate,
             Pageable pageable
     );
 }

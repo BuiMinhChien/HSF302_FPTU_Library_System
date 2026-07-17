@@ -12,31 +12,30 @@
 <div layout:fragment="content">
     <div class="container py-4">
         <div class="card shadow-sm border-0">
-            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-calendar2-check-fill fs-5 text-dark"></i>
-                    <h4 class="mb-0 text-dark fw-bold">Danh sách chờ nhận sách</h4>
-                </div>
+            <div class="card-header">
+                <h4 class="mb-0">
+                    Danh sách chờ nhận sách
+                </h4>
             </div>
 
             <div class="card-body">
-                <!-- Form Tìm kiếm & Lọc -->
-                <form method="get" th:action="@{/librarian/borrowers-this-week}" class="row g-3 mb-4 bg-light p-3 rounded border">
-                    <div class="col-md-8">
-                        <label class="form-label fw-bold text-muted small">Từ khóa</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                            <input type="text" name="keyword" class="form-control"
-                                   th:value="${keyword}" placeholder="Tên SV, Mã SV, Tên sách...">
-                        </div>
+                <form method="get" th:action="@{/librarian/borrowers-this-week}" class="row g-3 mb-3">
+                    <div class="col-md-7">
+                        <label class="form-label fw-semibold small mb-1">Từ khóa</label>
+                        <input type="text" name="keyword" class="form-control"
+                               th:value="${keyword}" placeholder="Tên sinh viên, mã số sinh viên hoặc tên sách...">
                     </div>
-                    <div class="col-md-2 d-flex align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small mb-1">Ngày duyệt</label>
+                        <input type="date" name="fromDate" class="form-control" th:value="${fromDate}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end gap-2">
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-funnel-fill me-1"></i> Tìm kiếm
+                            <i class="bi bi-search me-1"></i> Tìm
                         </button>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <a th:href="@{/librarian/borrowers-this-week}" class="btn btn-outline-secondary w-100">Xóa lọc</a>
+                        <a th:href="@{/librarian/borrowers-this-week}" class="btn btn-outline-secondary" title="Đặt lại">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </a>
                     </div>
                 </form>
 
@@ -113,13 +112,13 @@
                     <nav th:if="${requestPage.totalPages > 1}">
                         <ul class="pagination mb-0">
                             <li class="page-item" th:classappend="${requestPage.first} ? 'disabled'">
-                                <a class="page-link" th:href="@{/librarian/borrowers-this-week(page=${requestPage.number - 1}, keyword=${keyword})}">Trước</a>
+                                <a class="page-link" th:href="@{/librarian/borrowers-this-week(page=${requestPage.number - 1}, keyword=${keyword}, fromDate=${fromDate})}" aria-label="Previous">&laquo;</a>
                             </li>
                             <li class="page-item" th:each="i : ${#numbers.sequence(0, requestPage.totalPages - 1)}" th:classappend="${i == requestPage.number} ? 'active'">
-                                <a class="page-link" th:text="${i + 1}" th:href="@{/librarian/borrowers-this-week(page=${i}, keyword=${keyword})}"></a>
+                                <a class="page-link" th:text="${i + 1}" th:href="@{/librarian/borrowers-this-week(page=${i}, keyword=${keyword}, fromDate=${fromDate})}"></a>
                             </li>
                             <li class="page-item" th:classappend="${requestPage.last} ? 'disabled'">
-                                <a class="page-link" th:href="@{/librarian/borrowers-this-week(page=${requestPage.number + 1}, keyword=${keyword})}">Sau</a>
+                                <a class="page-link" th:href="@{/librarian/borrowers-this-week(page=${requestPage.number + 1}, keyword=${keyword}, fromDate=${fromDate})}" aria-label="Next">&raquo;</a>
                             </li>
                         </ul>
                     </nav>

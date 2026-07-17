@@ -21,10 +21,9 @@ public class AccountServiceImpl implements AccountService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public Page<User> searchAccounts(String keyword, ERole role, int page, int size) {
-        // mặc định sắp xếp theo danh sách tăng dần
-        Pageable pageable = PageRequest.of(page, size, Sort.by("code").ascending());
-        return userRepository.searchAccounts(keyword, role, pageable);
+    public Page<User> searchAccounts(String keyword, ERole role, Boolean status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("userId").descending());
+        return userRepository.searchAccounts(keyword, role, status, pageable);
     }
 
     @Override

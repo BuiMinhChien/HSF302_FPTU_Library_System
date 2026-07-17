@@ -23,7 +23,13 @@
 
             <div class="card-body">
                 <form method="get" th:action="@{/new-book-requests}" class="row g-3 mb-3">
-                    <div class="col-md-8">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small mb-1">Từ khóa</label>
+                        <input type="text" name="keyword" class="form-control"
+                               placeholder="Tên sách hoặc tác giả..." th:value="${keyword}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small mb-1">Trạng thái</label>
                         <select name="status" class="form-select">
                             <option value="">Tất cả trạng thái</option>
                             <option value="PENDING" th:selected="${status != null and status.name() == 'PENDING'}">Đang chờ duyệt</option>
@@ -31,14 +37,16 @@
                             <option value="REJECTED" th:selected="${status != null and status.name() == 'REJECTED'}">Đã bị từ chối</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">
-                            Tìm kiếm
-                        </button>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small mb-1">Ngày gửi</label>
+                        <input type="date" name="fromDate" class="form-control" th:value="${fromDate}">
                     </div>
-                    <div class="col-md-2">
-                        <a th:href="@{/new-book-requests}" class="btn btn-outline-secondary w-100">
-                            <i class="bi bi-arrow-counterclockwise me-1"></i> Đặt lại
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i> Tìm
+                        </button>
+                        <a th:href="@{/new-book-requests}" class="btn btn-outline-secondary" title="Đặt lại">
+                            <i class="bi bi-arrow-counterclockwise"></i>
                         </a>
                     </div>
                 </form>
@@ -112,16 +120,16 @@
                         <nav th:if="${requestPage.totalPages > 1}">
                             <ul class="pagination mb-0">
                                 <li class="page-item" th:classappend="${requestPage.first} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/new-book-requests(page=${requestPage.number - 1}, status=${status})}">
-                                        Trước
+                                    <a class="page-link" th:href="@{/new-book-requests(page=${requestPage.number - 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}" aria-label="Previous">
+                                        &laquo;
                                     </a>
                                 </li>
                                 <li class="page-item" th:each="i : ${#numbers.sequence(0, requestPage.totalPages - 1)}" th:classappend="${i == requestPage.number} ? 'active'">
-                                    <a class="page-link" th:text="${i + 1}" th:href="@{/new-book-requests(page=${i}, status=${status})}"></a>
+                                    <a class="page-link" th:text="${i + 1}" th:href="@{/new-book-requests(page=${i}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}"></a>
                                 </li>
                                 <li class="page-item" th:classappend="${requestPage.last} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/new-book-requests(page=${requestPage.number + 1}, status=${status})}">
-                                        Sau
+                                    <a class="page-link" th:href="@{/new-book-requests(page=${requestPage.number + 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}" aria-label="Next">
+                                        &raquo;
                                     </a>
                                 </li>
                             </ul>

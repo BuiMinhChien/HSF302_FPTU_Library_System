@@ -1,24 +1,31 @@
 {
-  "updated_at": "2026-07-02T03:00:00Z",
+  "updated_at": "2026-07-13T17:28:10Z",
   "working_on": {
-    "feature": "Librarian View Borrowers this week",
-    "task": "Reviewing system end-to-end integration",
+    "feature": "Admin Account Management (Create/Edit)",
+    "task": "Added functionality to add new accounts and edit existing ones via Modals",
     "status": "completed",
-    "files": [],
+    "files": [
+      "AccountFormDto.java",
+      "AccountService.java",
+      "AccountServiceImpl.java",
+      "AdminAccountController.java",
+      "admin-account-list.html"
+    ],
     "blockers": [],
-    "notes": "Student's tasks are fully completed."
+    "notes": "Admin account CRUD operations are fully functional."
   },
   "pending_tasks": [
-    { "task": "Test end-to-end with manually inserted BorrowHistory data", "priority": "high", "notes": "Waiting for user to restart and check." }
+    { "task": "Testing the Admin Add/Edit features directly in the running app", "priority": "medium", "notes": "Waiting for user to deploy/run and verify." }
   ],
   "recent_changes": [
-    { "timestamp": "2026-07-01T20:00:00Z", "type": "feature", "description": "Added BorrowHistory query for Librarian (borrowers this week) and updated navbar.", "files": ["BorrowHistoryRepository.java", "BorrowHistoryService.java", "BorrowHistoryServiceImpl.java", "navbar.html"] }
+    { "timestamp": "2026-07-13T14:00:00Z", "type": "feature", "description": "Implemented Add and Edit account modals for Admin.", "files": ["AccountFormDto.java", "AccountServiceImpl.java", "AdminAccountController.java", "admin-account-list.html"] },
+    { "timestamp": "2026-07-13T14:02:00Z", "type": "chore", "description": "Resolved git merge conflict between fix/admin-crud and main branch in admin-account-list.html.", "files": ["admin-account-list.html"] }
   ],
   "errors_encountered": [
-    { "error": "No BorrowHistory records found", "solution": "Identified teammate's code did not implement 'Issue Book' (transition from WAITING to ISSUED). Added dummy SQL insert to data.sql for testing.", "resolved": true },
-    { "error": "Missing S3 Keys", "solution": "Identified spring.profiles.include=secret in application.properties. Instructed user to create application-secret.properties and add to .gitignore.", "resolved": true }
+    { "error": "Git merge conflict in admin-account-list.html", "solution": "Manually combined HEAD and origin/main to keep both Modals and Toast notifications.", "resolved": true },
+    { "error": "Accidental ppt files tracked by Git", "solution": "Ran git rm -r tmp_slide/ to clean up the repository.", "resolved": true }
   ],
   "decisions_made": [
-    { "decision": "Do NOT fix teammate's code in BorrowRequestService", "reason": "Scope boundary. The student is only responsible for their own tasks. Messing with other teammate's logic could break their expectations. Using SQL mock data instead." }
+    { "decision": "Use Modals for Add/Edit Account in Admin page", "reason": "Keeps the user on the same page and provides a faster, smoother experience compared to redirecting to a new page. Consistent with the Category management page." }
   ]
 }

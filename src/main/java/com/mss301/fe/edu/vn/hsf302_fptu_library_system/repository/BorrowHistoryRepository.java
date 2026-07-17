@@ -9,22 +9,25 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BorrowHistoryRepository extends JpaRepository<BorrowHistory, Integer> {
 
-    //cái phaanf query naày chỉ viết do phan truong hop nguoi dung nhap null thi nó ko có hàm sẵn hỗ trợ
+    // Lọc lịch sử mượn theo từ khóa (tên sách, barcode) và khoảng thời gian mượn
     @Query("""
         SELECT bh
         FROM BorrowHistory bh
         WHERE bh.user.userId = :userId
         AND (
-            :keyword IS NULL
-            OR :keyword = ''
+            :keyword IS NULL OR :keyword = ''
             OR LOWER(bh.copy.book.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(bh.copy.barcode) LIKE LOWER(CONCAT('%', :keyword, '%'))
         )
+        AND (:fromDate IS NULL OR bh.borrowDate >= :fromDate)
+        AND (:toDate IS NULL OR bh.borrowDate <= :toDate)
     """)
-
     Page<BorrowHistory> search(
-            @Param("userId") Integer userId,   // ID của user đang đăng nhập
-            @Param("keyword") String keyword,  // từ khóa tìm kiếm (tên sách)
-            Pageable pageable                  // thông tin phân trang (page, size, sort)
+            @Param("userId") Integer userId,
+            @Param("keyword") String keyword,
+            @Param("fromDate") java.time.LocalDateTime fromDate,
+            @Param("toDate") java.time.LocalDateTime toDate,
+            Pageable pageable
     );
 
     @Query("""
