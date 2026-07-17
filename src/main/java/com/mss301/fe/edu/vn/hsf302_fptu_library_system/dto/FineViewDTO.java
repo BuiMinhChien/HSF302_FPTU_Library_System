@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 public class FineViewDTO {
     private Integer fineId;
     private Integer borrowId;
+    private String readerName;
+    private String readerCode;
     private String bookTitle;
     private String reason;
     private BigDecimal amount;

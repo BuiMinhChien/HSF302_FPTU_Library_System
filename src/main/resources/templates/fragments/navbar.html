@@ -42,6 +42,12 @@
                     <i class="bi bi-cash me-1"></i>Phiếu phạt
                 </a>
             </li>
+            <li class="nav-item"
+                sec:authorize="hasAnyRole('READER')">
+                <a class="nav-link fw-bold" th:href="@{/reader/fines/payments}">
+                    <i class="bi bi-receipt me-1"></i>Lịch sử nộp phạt
+                </a>
+            </li>
 <!--            DÀNH CHO LIBRARIAN-->
             <li class="nav-item"
                 sec:authorize="hasAnyRole('LIBRARIAN')">
@@ -59,6 +65,12 @@
                 sec:authorize="hasAnyRole('LIBRARIAN')">
                 <a class="nav-link fw-bold" th:href="@{/librarian/borrow-requests}">
                     <i class="bi bi-book me-1"></i>Yêu cầu mượn sách
+                </a>
+            </li>
+            <li class="nav-item"
+                sec:authorize="hasAnyRole('LIBRARIAN')">
+                <a class="nav-link fw-bold" th:href="@{/librarian/fines/manage}">
+                    <i class="bi bi-cash-coin me-1"></i>Quản lý phiếu phạt
                 </a>
             </li>
             <li class="nav-item"

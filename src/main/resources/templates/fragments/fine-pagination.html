@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="readerPagination(finePage, search)" class="d-flex justify-content-center mt-3">
+    <nav th:if="${finePage.totalElements > 0}">
+        <ul class="pagination mb-0">
+            <li class="page-item" th:classappend="${finePage.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/reader/fines(
+                        page=${finePage.number - 1},
+                        size=${search.size},
+                        bookTitle=${search.bookTitle},
+                        status=${search.status}
+                   )}">
+                    Trước
+                </a>
+            </li>
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, finePage.totalPages - 1)}"
+                th:classappend="${i == finePage.number} ? 'active'">
+                <a class="page-link"
+                   th:text="${i + 1}"
+                   th:href="@{/reader/fines(
+                        page=${i},
+                        size=${search.size},
+                        bookTitle=${search.bookTitle},
+                        status=${search.status}
+                   )}">
+                </a>
+            </li>
+            <li class="page-item" th:classappend="${finePage.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/reader/fines(
+                        page=${finePage.number + 1},
+                        size=${search.size},
+                        bookTitle=${search.bookTitle},
+                        status=${search.status}
+                   )}">
+                    Sau
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<div th:fragment="managePagination(finePage, search)" class="d-flex justify-content-center mt-3">
+    <nav th:if="${finePage.totalElements > 0}">
+        <ul class="pagination mb-0">
+            <li class="page-item" th:classappend="${finePage.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/librarian/fines/manage(
+                        page=${finePage.number - 1},
+                        size=${search.size},
+                        bookTitle=${search.bookTitle},
+                        fullName=${search.fullName},
+                        studentCode=${search.studentCode},
+                        status=${search.status}
+                   )}">
+                    Trước
+                </a>
+            </li>
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, finePage.totalPages - 1)}"
+                th:classappend="${i == finePage.number} ? 'active'">
+                <a class="page-link"
+                   th:text="${i + 1}"
+                   th:href="@{/librarian/fines/manage(
+                        page=${i},
+                        size=${search.size},
+                        bookTitle=${search.bookTitle},
+                        fullName=${search.fullName},
+                        studentCode=${search.studentCode},
+                        status=${search.status}
+                   )}">
+                </a>
+            </li>
+            <li class="page-item" th:classappend="${finePage.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/librarian/fines/manage(
+                        page=${finePage.number + 1},
+                        size=${search.size},
+                        bookTitle=${search.bookTitle},
+                        fullName=${search.fullName},
+                        studentCode=${search.studentCode},
+                        status=${search.status}
+                   )}">
+                    Sau
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<div th:fragment="paymentHistoryPagination(paymentPage, search)" class="d-flex justify-content-center mt-3">
+    <nav th:if="${paymentPage.totalElements > 0}">
+        <ul class="pagination mb-0">
+            <li class="page-item" th:classappend="${paymentPage.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/reader/fines/payments(
+                        page=${paymentPage.number - 1},
+                        size=${search.size},
+                        bookTitle=${search.bookTitle}
+                   )}">
+                    Trước
+                </a>
+            </li>
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, paymentPage.totalPages - 1)}"
+                th:classappend="${i == paymentPage.number} ? 'active'">
+                <a class="page-link"
+                   th:text="${i + 1}"
+                   th:href="@{/reader/fines/payments(
+                        page=${i},
+                        size=${search.size},
+                        bookTitle=${search.bookTitle}
+                   )}">
+                </a>
+            </li>
+            <li class="page-item" th:classappend="${paymentPage.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/reader/fines/payments(
+                        page=${paymentPage.number + 1},
+                        size=${search.size},
+                        bookTitle=${search.bookTitle}
+                   )}">
+                    Sau
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+</body>
+</html>

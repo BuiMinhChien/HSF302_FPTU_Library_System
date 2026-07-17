@@ -4,6 +4,8 @@ import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EFineStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EPaymentMethod;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EPaymentStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.FinePaymentDTO;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.FinePaymentHistorySearchRequest;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.FinePaymentHistoryViewDTO;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.Fine;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.FinePayment;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.User;
@@ -11,6 +13,10 @@ import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.FinePaymentRep
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.util.CommonFunction;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -172,6 +178,21 @@ public class FinePaymentServiceImpl implements FinePaymentService {
                 .mockEnabled(payOSService.isMockEnabled())
                 .qrImageUrl(cached != null ? cached.getQrImageUrl() : null)
                 .build();
+    }
+
+    @Override
+    public Page<FinePaymentHistoryViewDTO> getPaymentHistoryForCurrentReader(FinePaymentHistorySearchRequest request) {
+        User reader = commonFunction.getCurrentUser();
+        Pageable pageable = PageRequest.of(
+                request.getPage(),
+                request.getSize(),
+                Sort.by(Sort.Direction.DESC, "paymentDate")
+        );
+        return finePaymentRepository.searchByUser(
+                reader.getUserId(),
+                request.getBookTitle(),
+                pageable
+        );
     }
 
     @Override
