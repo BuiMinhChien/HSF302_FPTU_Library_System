@@ -1,5 +1,6 @@
 package com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity;
 
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowHistoryStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +25,10 @@ public class BorrowHistory extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "copy_id")
     private BookCopy copy;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EBorrowHistoryStatus status;
 
     @ManyToOne
     @JoinColumn(name = "issued_by")

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Giao sách</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-box-arrow-up-right fs-5 text-success"></i>
+                <h4 class="mb-0">Giao sách — Danh sách yêu cầu đã duyệt</h4>
+            </div>
+            <div class="card-body">
+
+                <!-- Thông báo thành công / lỗi -->
+                <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                <!-- Bảng danh sách -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Sinh viên</th>
+                            <th>Mã SV</th>
+                            <th>Tên sách</th>
+                            <th>Ngày yêu cầu</th>
+                            <th>Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Nếu danh sách trống -->
+                        <tr th:if="${#lists.isEmpty(approvedList)}">
+                            <td colspan="6" class="text-center text-muted py-4">
+                                Không có yêu cầu nào đã được duyệt chờ giao sách
+                            </td>
+                        </tr>
+                        <!-- Duyệt từng yêu cầu -->
+                        <tr th:each="req, idx : ${approvedList}">
+                            <td th:text="${idx.count}"></td>
+                            <td th:text="${req.username}"></td>
+                            <td th:text="${req.studentCode}"></td>
+                            <td th:text="${req.bookTitle}"></td>
+                            <td th:text="${#temporals.format(req.createdDate, 'dd/MM/yyyy')}"></td>
+                            <td>
+                                <!-- Nút bấm giao sách — gửi POST lên server -->
+                                <form th:action="@{/librarian/issue/{id}(id=${req.requestId})}"
+                                      method="post"
+                                      onsubmit="return confirm('Xác nhận giao sách cho ' + '[[${req.username}]]' + '?')">
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>Giao sách
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

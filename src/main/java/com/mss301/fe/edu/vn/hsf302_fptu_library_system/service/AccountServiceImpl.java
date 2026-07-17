@@ -1,9 +1,11 @@
 package com.mss301.fe.edu.vn.hsf302_fptu_library_system.service;
 
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.ERole;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.AccountFormDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.User;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AccountServiceImpl implements AccountService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Page<User> searchAccounts(String keyword, ERole role, int page, int size) {
@@ -35,6 +38,46 @@ public class AccountServiceImpl implements AccountService {
         user.setStatus(!user.getStatus());
         
         //lưu lại
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void saveAccount(AccountFormDto dto) {
+        User user;
+        if (dto.getUserId() != null) {
+            // Sửa tài khoản
+            user = userRepository.findById(dto.getUserId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản cần sửa!"));
+            
+            // Cập nhật mật khẩu nếu có nhập mới
+            if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
+                user.setPassword(passwordEncoder.encode(dto.getPassword()));
+            }
+        } else {
+            // Thêm mới tài khoản
+            if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+                throw new RuntimeException("Email đã được sử dụng!");
+            }
+            
+            user = new User();
+            user.setCode(dto.getCode());
+            user.setStatus(true); // Mặc định mở khóa
+            
+            // Yêu cầu mật khẩu khi tạo mới
+            if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
+                throw new RuntimeException("Vui lòng nhập mật khẩu cho tài khoản mới!");
+            }
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        // Cập nhật thông tin chung
+        user.setFullName(dto.getFullName());
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
+        user.setAddress(dto.getAddress());
+        user.setRole(dto.getRole());
+        
         userRepository.save(user);
     }
 }

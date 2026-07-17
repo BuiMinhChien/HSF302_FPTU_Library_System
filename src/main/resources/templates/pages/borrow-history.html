@@ -12,36 +12,28 @@
 <div layout:fragment="content">
     <div class="container py-4">
         <div class="card shadow-sm">
-
-            <!-- ===== TIÊU ĐỀ TRANG ===== -->
-            <div class="card-header d-flex align-items-center gap-2">
-                <i class="bi bi-clock-history fs-5 text-primary"></i>
-                <h4 class="mb-0">Lịch sử mượn sách</h4>
+            <div class="card-header">
+                <h4 class="mb-0">
+                    Lịch sử mượn sách
+                </h4>
             </div>
-
             <div class="card-body">
-
-                <!-- ===== FORM TÌM KIẾM ===== -->
-                <!-- Khi submit, gửi GET request đến /borrow-history?keyword=... -->
                 <form method="get"
                       th:action="@{/borrow-history}"
                       class="row g-3 mb-3">
-                    <!-- Ô nhập tên sách -->
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                         <input type="text"
                                name="keyword"
                                class="form-control"
                                placeholder="Tìm theo tên sách..."
-                               th:value="${keyword}"/> <!-- giữ lại từ khóa đã nhập -->
+                               th:value="${keyword}"/>
                     </div>
-                    <!-- Nút tìm kiếm -->
                     <div class="col-md-2">
                         <button type="submit"
                                 class="btn btn-primary w-100">
-                            <i class="bi bi-search me-1"></i> Tìm kiếm
+                            Tìm kiếm
                         </button>
                     </div>
-                    <!-- Nút đặt lại — xóa filter, quay về trang đầu -->
                     <div class="col-md-2">
                         <a th:href="@{/borrow-history}"
                            class="btn btn-outline-secondary w-100">
@@ -50,10 +42,8 @@
                     </div>
                 </form>
 
-                <!-- ===== BẢNG LỊCH SỬ MƯỢN SÁCH ===== -->
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle">
-                        <!-- Header bảng -->
                         <thead class="table-light">
                         <tr>
                             <th>STT</th>
@@ -65,156 +55,171 @@
                             <th>Trạng thái</th>
                         </tr>
                         </thead>
-
                         <tbody>
-                        <!-- Hiển thị khi danh sách rỗng -->
                         <tr th:if="${#lists.isEmpty(histories)}">
-                            <td colspan="7" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                            <td colspan="7" class="text-center text-muted">
                                 Bạn chưa có lịch sử mượn sách nào.
                             </td>
                         </tr>
-
-                        <!-- Lặp qua từng bản ghi lịch sử -->
-                        <!-- stat.count: số thứ tự (bắt đầu từ 1) -->
                         <tr th:each="history, stat : ${histories}">
-
-                            <!-- STT: tính theo trang hiện tại để không bị reset về 1 mỗi trang -->
                             <td th:text="${historyPage.number * historyPage.size + stat.count}"></td>
-
-                            <!-- Tên sách: đi qua quan hệ BorrowHistory → BookCopy → Book → title -->
                             <td th:text="${history.copy.book.title}"></td>
-
-                            <!-- Barcode của bản copy vật lý được mượn -->
                             <td>
                                 <span class="badge bg-light text-dark border"
                                       th:text="${history.copy.barcode}">
                                 </span>
                             </td>
-
-                            <!-- Ngày mượn: format dd/MM/yyyy HH:mm -->
                             <td>
                                 <div th:if="${history.borrowDate != null}">
                                     <div class="fw-semibold"
                                          th:text="${#temporals.format(history.borrowDate, 'dd/MM/yyyy')}">
                                     </div>
                                     <small class="text-muted"
-                                           th:text="${#temporals.format(history.borrowDate, 'HH:mm')}">
+                                           th:text="${#temporals.format(history.borrowDate, 'HH:mm:ss')}">
                                     </small>
                                 </div>
                                 <span th:if="${history.borrowDate == null}">-</span>
                             </td>
-
-                            <!-- Hạn trả -->
                             <td>
                                 <div th:if="${history.dueDate != null}">
                                     <div class="fw-semibold"
                                          th:text="${#temporals.format(history.dueDate, 'dd/MM/yyyy')}">
                                     </div>
                                     <small class="text-muted"
-                                           th:text="${#temporals.format(history.dueDate, 'HH:mm')}">
+                                           th:text="${#temporals.format(history.dueDate, 'HH:mm:ss')}">
                                     </small>
                                 </div>
                                 <span th:if="${history.dueDate == null}">-</span>
                             </td>
-
-                            <!-- Ngày trả thực tế (null = chưa trả) -->
                             <td>
                                 <div th:if="${history.returnDate != null}">
                                     <div class="fw-semibold"
                                          th:text="${#temporals.format(history.returnDate, 'dd/MM/yyyy')}">
                                     </div>
                                     <small class="text-muted"
-                                           th:text="${#temporals.format(history.returnDate, 'HH:mm')}">
+                                           th:text="${#temporals.format(history.returnDate, 'HH:mm:ss')}">
                                     </small>
                                 </div>
-                                <!-- Nếu chưa trả thì hiện dấu gạch -->
                                 <span th:if="${history.returnDate == null}" class="text-muted">-</span>
                             </td>
-
-                            <!-- Trạng thái: Đã trả / Chưa trả / Trả trễ -->
                             <td>
-                                <!-- Đã trả đúng hạn -->
                                 <span th:if="${history.returnDate != null and history.returnDate.isBefore(history.dueDate)}"
                                       class="badge bg-success">
-                                    <i class="bi bi-check-circle me-1"></i> Đã trả đúng hạn
+                                    Đã trả đúng hạn
                                 </span>
-                                <!-- Trả trễ -->
                                 <span th:if="${history.returnDate != null and !history.returnDate.isBefore(history.dueDate)}"
                                       class="badge bg-warning text-dark">
-                                    <i class="bi bi-exclamation-circle me-1"></i> Trả trễ hạn
+                                    Trả trễ hạn
                                 </span>
-                                <!-- Chưa trả -->
                                 <span th:if="${history.returnDate == null}"
                                       class="badge bg-secondary">
-                                    <i class="bi bi-hourglass-split me-1"></i> Chưa trả
+                                    Chưa trả
                                 </span>
                             </td>
-
                         </tr>
                         </tbody>
                     </table>
-                </div>
 
-                <!-- ===== PHÂN TRANG ===== -->
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                    <!-- Hiển thị thông tin: "Hiển thị 1 - 10 trên tổng 47 lịch sử" -->
-                    <div class="text-muted small">
-                        Hiển thị
-                        <span th:text="${historyPage.number * historyPage.size + 1}"></span>
-                        -
-                        <span th:text="${historyPage.number * historyPage.size + histories.size()}"></span>
-                        trên tổng
-                        <span th:text="${historyPage.totalElements}"></span>
-                        lịch sử
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted">
+                            Hiển thị
+                            <span th:text="${historyPage.number * historyPage.size + 1}"></span>
+                            -
+                            <span th:text="${historyPage.number * historyPage.size + histories.size()}"></span>
+                            trên tổng
+                            <span th:text="${historyPage.totalElements}"></span>
+                            dòng
+                        </div>
+                        <nav th:if="${historyPage.totalPages > 1}">
+                            <ul class="pagination mb-0">
+                                <li class="page-item"
+                                    th:classappend="${historyPage.first} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/borrow-history(
+                                            page=${historyPage.number - 1},
+                                            keyword=${keyword}
+                                        )}">
+                                        Trước
+                                    </a>
+                                </li>
+                                <li class="page-item"
+                                    th:each="i : ${#numbers.sequence(0, historyPage.totalPages - 1)}"
+                                    th:classappend="${i == historyPage.number} ? 'active'">
+                                    <a class="page-link"
+                                       th:text="${i + 1}"
+                                       th:href="@{/borrow-history(
+                                            page=${i},
+                                            keyword=${keyword}
+                                        )}">
+                                    </a>
+                                </li>
+                                <li class="page-item"
+                                    th:classappend="${historyPage.last} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/borrow-history(
+                                            page=${historyPage.number + 1},
+                                            keyword=${keyword}
+                                        )}">
+                                        Sau
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
-
-                    <!-- Các nút trang (chỉ hiện khi có > 1 trang) -->
-                    <nav th:if="${historyPage.totalPages > 1}">
-                        <ul class="pagination mb-0">
-                            <!-- Nút "Trước": disabled khi đang ở trang đầu -->
-                            <li class="page-item"
-                                th:classappend="${historyPage.first} ? 'disabled'">
-                                <a class="page-link"
-                                   th:href="@{/borrow-history(
-                                        page=${historyPage.number - 1},
-                                        keyword=${keyword}
-                                    )}">
-                                    <i class="bi bi-chevron-left"></i> Trước
-                                </a>
-                            </li>
-
-                            <!-- Số trang: vòng lặp từ 0 đến totalPages - 1 -->
-                            <li class="page-item"
-                                th:each="i : ${#numbers.sequence(0, historyPage.totalPages - 1)}"
-                                th:classappend="${i == historyPage.number} ? 'active'">
-                                <a class="page-link"
-                                   th:text="${i + 1}"
-                                   th:href="@{/borrow-history(
-                                        page=${i},
-                                        keyword=${keyword}
-                                    )}">
-                                </a>
-                            </li>
-
-                            <!-- Nút "Sau": disabled khi đang ở trang cuối -->
-                            <li class="page-item"
-                                th:classappend="${historyPage.last} ? 'disabled'">
-                                <a class="page-link"
-                                   th:href="@{/borrow-history(
-                                        page=${historyPage.number + 1},
-                                        keyword=${keyword}
-                                    )}">
-                                    Sau <i class="bi bi-chevron-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
                 </div>
+            </div>
+        </div>
+    </div>
 
-            </div><!-- end card-body -->
-        </div><!-- end card -->
-    </div><!-- end container -->
-</div><!-- end layout:fragment -->
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div th:if="${success}"
+             id="successToast"
+             class="toast text-bg-success border-0"
+             role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+                <button type="button"
+                        class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast">
+                </button>
+            </div>
+        </div>
+        <div th:if="${error}"
+             id="errorToast"
+             class="toast text-bg-danger border-0"
+             role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                <button type="button"
+                        class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const successToast = document.getElementById('successToast');
+            if (successToast) {
+                new bootstrap.Toast(successToast, {
+                    delay: 5000
+                }).show();
+            }
+            const errorToast = document.getElementById('errorToast');
+            if (errorToast) {
+                new bootstrap.Toast(errorToast, {
+                    delay: 5000
+                }).show();
+            }
+        });
+    </script>
+</div>
 </body>
 </html>
