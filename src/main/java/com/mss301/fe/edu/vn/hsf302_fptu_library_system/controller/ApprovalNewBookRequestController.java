@@ -19,23 +19,25 @@ public class ApprovalNewBookRequestController {
 
     private final NewBookRequestService newBookRequestService;
 
-    //màn hình danh sách
+    // Màn hình danh sách duyệt
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public String showAllRequests(
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) ENewBookRequestStatus status,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate fromDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model
     ) {
-        // gọi sv laayasy danh sách của toàn trường
-        Page<NewBookRequest> requestPage = newBookRequestService.searchAllRequests(status, page, size);
+        Page<NewBookRequest> requestPage = newBookRequestService.searchAllRequests(keyword, status, fromDate, page, size);
 
         model.addAttribute("requests", requestPage.getContent());
         model.addAttribute("requestPage", requestPage);
+        model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
+        model.addAttribute("fromDate", fromDate);
 
-        //trả về giao diện
         return "pages/admin-new-book-request";
     }
 
@@ -52,12 +54,16 @@ public class ApprovalNewBookRequestController {
         return "redirect:/admin/new-book-requests";
     }
 
-    //Xử lý nút Từ chối
+    // Xử lý nút Từ chối
     @PostMapping("/reject")
     @PreAuthorize("hasRole('ADMIN')")
-    public String rejectRequest(@RequestParam("requestId") Integer requestId, RedirectAttributes redirectAttributes) {
+    public String rejectRequest(
+            @RequestParam("requestId") Integer requestId,
+            @RequestParam(value = "rejectionReason", required = false) String rejectionReason,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
-            newBookRequestService.rejectRequest(requestId);
+            newBookRequestService.rejectRequest(requestId, rejectionReason);
             redirectAttributes.addAttribute("success", "Đã từ chối yêu cầu!");
         } catch (Exception e) {
             redirectAttributes.addAttribute("error", e.getMessage());

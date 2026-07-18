@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 public interface BorrowHistoryService {
 
     // Hàm CŨ của nhóm — không thay đổi logic
-    Page<BorrowHistory> getCurrentUserHistory(String keyword, int page, int size);
+    Page<BorrowHistory> getCurrentUserHistory(String keyword, java.time.LocalDate fromDate, java.time.LocalDate toDate, int page, int size);
 
     // Hàm MỚI — Giao sách vật lý cho sinh viên
     BorrowHistory issueBook(Integer requestId);

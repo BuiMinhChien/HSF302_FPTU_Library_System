@@ -25,16 +25,18 @@ public class AdminAccountController {
     public String showAllAccounts(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) ERole role,
+            @RequestParam(required = false) Boolean status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model
     ) {
-        Page<User> accountPage = accountService.searchAccounts(keyword, role, page, size);
+        Page<User> accountPage = accountService.searchAccounts(keyword, role, status, page, size);
 
         model.addAttribute("accounts", accountPage.getContent());
         model.addAttribute("accountPage", accountPage);
         model.addAttribute("keyword", keyword);
         model.addAttribute("role", role);
+        model.addAttribute("status", status);
 
         return "pages/admin-account-list";
     }

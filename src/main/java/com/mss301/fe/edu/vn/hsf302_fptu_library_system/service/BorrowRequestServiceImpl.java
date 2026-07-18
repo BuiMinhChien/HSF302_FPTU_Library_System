@@ -170,9 +170,11 @@ public class BorrowRequestServiceImpl implements BorrowRequestService {
         //
     }
     @Override
-    public Page<BorrowRequestDto> getBorrowersThisWeek(String keyword, int page, int size) {
+    public Page<BorrowRequestDto> getBorrowersThisWeek(String keyword, java.time.LocalDate fromDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "approvedDate"));
-        return borrowRequestRepository.findBorrowersThisWeek(keyword, pageable)
+        LocalDateTime startDateTime = (fromDate != null) ? fromDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = (fromDate != null) ? fromDate.atTime(23, 59, 59) : null;
+        return borrowRequestRepository.findBorrowersThisWeek(keyword, startDateTime, endDateTime, pageable)
                 .map(borrowRequestMapper::toDTO);
     }
     @Override

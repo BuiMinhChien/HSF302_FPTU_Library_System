@@ -21,23 +21,36 @@
                 <form method="get"
                       th:action="@{/borrow-history}"
                       class="row g-3 mb-3">
-                    <div class="col-md-8">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small mb-1">Từ khóa</label>
                         <input type="text"
                                name="keyword"
                                class="form-control"
-                               placeholder="Tìm theo tên sách..."
+                               placeholder="Nhập tên sách hoặc mã Barcode..."
                                th:value="${keyword}"/>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small mb-1">Từ ngày mượn</label>
+                        <input type="date"
+                               name="fromDate"
+                               class="form-control"
+                               th:value="${fromDate}"/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small mb-1">Đến ngày mượn</label>
+                        <input type="date"
+                               name="toDate"
+                               class="form-control"
+                               th:value="${toDate}"/>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end gap-2">
                         <button type="submit"
                                 class="btn btn-primary w-100">
-                            Tìm kiếm
+                            <i class="bi bi-search me-1"></i> Tìm
                         </button>
-                    </div>
-                    <div class="col-md-2">
                         <a th:href="@{/borrow-history}"
-                           class="btn btn-outline-secondary w-100">
-                            <i class="bi bi-arrow-counterclockwise me-1"></i> Đặt lại
+                           class="btn btn-outline-secondary" title="Đặt lại">
+                            <i class="bi bi-arrow-counterclockwise"></i>
                         </a>
                     </div>
                 </form>
@@ -137,9 +150,11 @@
                                     <a class="page-link"
                                        th:href="@{/borrow-history(
                                             page=${historyPage.number - 1},
-                                            keyword=${keyword}
-                                        )}">
-                                        Trước
+                                            keyword=${keyword},
+                                            fromDate=${fromDate},
+                                            toDate=${toDate}
+                                        )}" aria-label="Previous">
+                                        &laquo;
                                     </a>
                                 </li>
                                 <li class="page-item"
@@ -149,7 +164,9 @@
                                        th:text="${i + 1}"
                                        th:href="@{/borrow-history(
                                             page=${i},
-                                            keyword=${keyword}
+                                            keyword=${keyword},
+                                            fromDate=${fromDate},
+                                            toDate=${toDate}
                                         )}">
                                     </a>
                                 </li>
@@ -158,9 +175,11 @@
                                     <a class="page-link"
                                        th:href="@{/borrow-history(
                                             page=${historyPage.number + 1},
-                                            keyword=${keyword}
-                                        )}">
-                                        Sau
+                                            keyword=${keyword},
+                                            fromDate=${fromDate},
+                                            toDate=${toDate}
+                                        )}" aria-label="Next">
+                                        &raquo;
                                     </a>
                                 </li>
                             </ul>

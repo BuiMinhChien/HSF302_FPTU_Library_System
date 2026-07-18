@@ -36,11 +36,14 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
     // HÀM CŨ — giữ nguyên logic của nhóm
     // ════════════════════════════════════════════════
     @Override
-    public Page<BorrowHistory> getCurrentUserHistory(String keyword, int page, int size) {
+    public Page<BorrowHistory> getCurrentUserHistory(String keyword, java.time.LocalDate fromDate, java.time.LocalDate toDate, int page, int size) {
         User user = commonFunction.getCurrentUser();
         Pageable pageable = PageRequest.of(page, size, Sort.by("borrowDate").descending());
-        return borrowHistoryRepository.search(user.getUserId(), keyword, pageable);
 
+        LocalDateTime startDateTime = (fromDate != null) ? fromDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = (toDate != null) ? toDate.atTime(23, 59, 59) : null;
+
+        return borrowHistoryRepository.search(user.getUserId(), keyword, startDateTime, endDateTime, pageable);
     }
 
     @Override

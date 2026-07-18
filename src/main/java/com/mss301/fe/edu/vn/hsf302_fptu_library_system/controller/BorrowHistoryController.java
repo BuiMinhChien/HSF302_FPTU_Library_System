@@ -20,19 +20,23 @@ public class BorrowHistoryController {
     // Reader vào trang này để xem lịch sử mượn sách của mình
     @GetMapping
     public String borrowHistory(
-            @RequestParam(required = false) String keyword,// từ khóa tìm kiếm, không bắt buộc
-            @RequestParam(defaultValue = "0") int page,// trang hiện tại, mặc định = 0
-            @RequestParam(defaultValue = "10") int size,// số dòng/trang, mặc định = 10
-            Model model                                            // object để đẩy data sang Thymeleaf
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate fromDate,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate toDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model
     ) {
-        // Gọi sv lấy danh sách lịch sử có phân trang
+        // Gọi service lấy danh sách lịch sử có tìm kiếm và phân trang
         Page<BorrowHistory> historyPage =
-                borrowHistoryService.getCurrentUserHistory(keyword, page, size);
+                borrowHistoryService.getCurrentUserHistory(keyword, fromDate, toDate, page, size);
 
-        // Đẩy dữ liệu vào model để Thymeleaf có thể đọc và render ra HTML
-        model.addAttribute("historyPage", historyPage);           // object Page (chứa thông tin phân trang)
-        model.addAttribute("histories", historyPage.getContent()); // danh sách lịch sửi
-        model.addAttribute("keyword", keyword);                    // giữ lại keyword trên thanh tìm kiếm
+        // Đẩy dữ liệu ra model cho Thymeleaf
+        model.addAttribute("historyPage", historyPage);
+        model.addAttribute("histories", historyPage.getContent());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("fromDate", fromDate);
+        model.addAttribute("toDate", toDate);
 
         // Trả về tên file Thymeleaf template (không cần đuôi .html)
         return "/pages/borrow-history";

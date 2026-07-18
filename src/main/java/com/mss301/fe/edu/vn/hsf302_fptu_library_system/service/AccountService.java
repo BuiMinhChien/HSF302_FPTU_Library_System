@@ -5,8 +5,8 @@ import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.User;
 import org.springframework.data.domain.Page;
 
 public interface AccountService {
-    //lấy danh sách tài khoản
-    Page<User> searchAccounts(String keyword, ERole role, int page, int size);
+    // Lấy danh sách tài khoản theo từ khóa, role và status
+    Page<User> searchAccounts(String keyword, ERole role, Boolean status, int page, int size);
     
     //mở hoặc khóa danh sách tài khoản
     void toggleAccountStatus(Integer userId);
