@@ -23,7 +23,7 @@ public class BookController {
             @RequestParam(required = false) String keyword,         // từ khoá tìm kiếm
             @RequestParam(required = false, defaultValue = "title") String searchType, // loại tìm kiếm
             @RequestParam(defaultValue = "0") int page,             // trang hiện tại
-            @RequestParam(defaultValue = "10") int size,            // 10 sách/trang (2 hàng × 5 cột)
+            @RequestParam(defaultValue = "10") int size,            // 10 sách/trang (2 hàng × 5 cột)n)
             Model model
     ) {
         // Gọi service lấy danh sách sách có phân trang

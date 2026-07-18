@@ -39,7 +39,8 @@ public class CategoryServiceImpl implements CategoryService {
                 .bookCount(bookCount)
                 .build();
     }
-
+//Logic chặn trùng tên existsByCategoryName chạy câu SQL SELECT COUNT(*)
+// WHERE category_name = ? nếu trả về true, ném Exeotion
     @Override
     public void save(Category category) {
         if (categoryRepository.existsByCategoryName(category.getCategoryName())) {
@@ -58,7 +59,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setDescription(form.getDescription());
         categoryRepository.save(category);
     }
-
+// kt xem danh sách có phần tử ko, để tránh lỗi Foreign Key Constraint hoặc mất data
     @Override
     public void delete(Integer id) {
         Category category = categoryRepository.findById(id)

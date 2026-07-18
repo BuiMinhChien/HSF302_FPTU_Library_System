@@ -82,10 +82,9 @@ public class BookServiceImpl implements BookService {
                 .build();
     }
 
-    // ===== METHOD MỚI =====
     @Override
     public Page<BookListDto> searchBooks(String keyword, String searchType, int page, int size) {
-        // Tạo đối tượng phân trang,lấy size sách, trang thứ page
+        // Tạo đối tượng phân trang,lấy size sách, trang thứ page trang 0, lấy 10 item
         Pageable pageable = PageRequest.of(page, size);
         // Chọn query theo loại tìm kiếm
         Page<Book> bookPage;
@@ -137,6 +136,7 @@ public class BookServiceImpl implements BookService {
         }
 
         return bookPage.map(book -> {
+            // Đếm số bản sách còn trống
             long availableCopies = book.getBookCopies() != null ? book.getBookCopies().stream()
                     .filter(copy -> copy.getStatus() == EBookCopyStatus.AVAILABLE).count() : 0;
             return BookFormDto.builder()

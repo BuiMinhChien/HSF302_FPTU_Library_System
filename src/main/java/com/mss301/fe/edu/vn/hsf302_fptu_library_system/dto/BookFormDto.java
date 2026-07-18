@@ -19,5 +19,5 @@ public class BookFormDto {
     private List<Integer> categoryIds;   // Danh sách ID category đang chọn
     private List<Integer> authorIds;     // Danh sách ID author đang chọn
     private int totalCopies;             // Tổng số bản in
-    private int availableCopies;         // Số bản còn sẵn
+    private int availableCopies;         // Số bản còn sẵnn
 }

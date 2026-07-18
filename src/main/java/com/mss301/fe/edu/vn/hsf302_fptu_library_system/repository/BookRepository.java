@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Integer> {
-    // Tìm theo tiêu đề (title) - LIKE '%Java%' tìm tất cả các key
+    // Tìm theo tiêu đề (title) - LIKE '%Java%' tìm tất cả các keyy
     @Query("SELECT b FROM Book b WHERE (:keyword IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Book> findByTitleContaining(@Param("keyword") String keyword, Pageable pageable);
      //Tìm tác giả
