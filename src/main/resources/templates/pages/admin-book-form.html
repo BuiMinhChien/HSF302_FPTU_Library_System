@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${bookForm.bookId == null ? 'Thêm sách mới' : 'Sửa thông tin sách'}">Thêm/Sửa Sách</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="mb-4">
+            <a th:href="@{/admin/books}" class="text-decoration-none text-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
+            </a>
+        </div>
+
+        <h2 class="fw-bold mb-4" style="color: #f37021;">
+            <i class="bi bi-journal-text me-2"></i><span th:text="${bookForm.bookId == null ? 'Thêm sách mới' : 'Sửa thông tin sách'}"></span>
+        </h2>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form th:action="${bookForm.bookId == null ? '/admin/books/add' : '/admin/books/edit/' + bookForm.bookId}"
+                      method="post" th:object="${bookForm}">
+                    <input type="hidden" th:field="*{bookId}">
+
+                    <div class="row">
+                        <!-- Cột trái: Thông tin cơ bản -->
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Tên sách <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" th:field="*{title}" required>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Mã ISBN <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" th:field="*{isbn}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Năm xuất bản</label>
+                                    <input type="number" class="form-control" th:field="*{publishYear}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Nhà xuất bản</label>
+                                <input type="text" class="form-control" th:field="*{publisher}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Mô tả</label>
+                                <textarea class="form-control" th:field="*{description}" rows="4"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">URL Ảnh bìa</label>
+                                <input type="url" class="form-control" th:field="*{bookCoverUrl}" placeholder="https://example.com/cover.jpg">
+                            </div>
+                        </div>
+
+                        <!-- Cột phải: Thể loại & Tác giả -->
+                        <div class="col-md-4">
+                            <!-- Chọn danh mục -->
+                            <div class="card mb-3">
+                                <div class="card-header bg-light fw-bold">Chọn Danh mục</div>
+                                <div class="card-body" style="max-height: 200px; overflow-y: auto;">
+                                    <div class="form-check" th:each="cat : ${categories}">
+                                        <input class="form-check-input" type="checkbox" th:value="${cat.categoryId}" th:field="*{categoryIds}" th:id="'cat-' + ${cat.categoryId}">
+                                        <label class="form-check-label" th:for="'cat-' + ${cat.categoryId}" th:text="${cat.categoryName}"></label>
+                                    </div>
+                                    <div th:if="${#lists.isEmpty(categories)}" class="text-danger small">
+                                        Chưa có danh mục nào. Vui lòng thêm danh mục trước.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Chọn tác giả -->
+                            <div class="card mb-3">
+                                <div class="card-header bg-light fw-bold">Chọn Tác giả</div>
+                                <div class="card-body" style="max-height: 200px; overflow-y: auto;">
+                                    <div class="form-check" th:each="auth : ${authors}">
+                                        <input class="form-check-input" type="checkbox" th:value="${auth.authorId}" th:field="*{authorIds}" th:id="'auth-' + ${auth.authorId}">
+                                        <label class="form-check-label" th:for="'auth-' + ${auth.authorId}" th:text="${auth.authorName}"></label>
+                                    </div>
+                                    <div th:if="${#lists.isEmpty(authors)}" class="text-danger small">
+                                        Chưa có tác giả nào. Vui lòng thêm tác giả trước.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                        <a th:href="@{/admin/books}" class="btn btn-secondary me-2">Hủy</a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-save me-1"></i>Lưu sách
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
