@@ -1,0 +1,64 @@
+{
+  "meta": { "schema_version": "1.1.0", "awf_version": "3.3.0" },
+  "project": { 
+    "name": "HSF302_FPTU_Library_System", 
+    "type": "Spring Boot MVC - Thư viện FPTU", 
+    "status": "Development - Bùi Minh Chiến's tasks are done" 
+  },
+  "tech_stack": { 
+    "backend": {
+      "framework": "Spring Boot 4.1.0",
+      "data": "Spring Data JPA",
+      "security": "Spring Security",
+      "mail": "Spring Mail"
+    },
+    "frontend": {
+      "template_engine": "Thymeleaf"
+    },
+    "database": {
+      "type": "SQL Server"
+    },
+    "tools": [
+      "Lombok",
+      "AWS S3"
+    ]
+  },
+  "database_schema": { 
+    "tables": ["users", "roles", "books", "book_copies", "borrow_requests", "borrow_histories", "new_book_requests"], 
+    "relationships": ["User -> BorrowRequest", "User -> BorrowHistory", "User -> NewBookRequest"] 
+  },
+  "api_endpoints": [
+    "/books",
+    "/borrow-requests",
+    "/borrow-history",
+    "/new-book-requests",
+    "/admin/accounts",
+    "/librarian/borrowers-this-week",
+    "/librarian/borrow-requests"
+  ],
+  "business_rules": [
+    "Borrow Request lifecycle: PENDING -> WAITING (Approved) -> ISSUED -> RETURNED",
+    "Missing business rule: The system currently stops at WAITING. The ISSUED state (which creates BorrowHistory) is missing from teammate's code.",
+    "Only readers can make borrow/new book requests",
+    "Librarian handles borrow request approvals"
+  ],
+  "features": [
+    "View Borrowing History (Reader) - DONE",
+    "Manage New Book Request (Reader) - DONE",
+    "Approve New Book Request (Admin) - DONE",
+    "Manage Account (Admin) - DONE",
+    "Borrowers this week (Librarian) - DONE"
+  ],
+  "knowledge_items": { 
+    "patterns": [
+      "Service Interface + ServiceImpl + Controller + Thymeleaf"
+    ], 
+    "gotchas": [
+      "Teammate's AWS S3 keys are dummy. Real keys must be added in a gitignored application-secret.properties loaded via spring.profiles.include=secret",
+      "Missing ISSUED transition in teammate's BorrowRequest code causes BorrowHistory to remain empty. Requires manual data insertion into data.sql for testing UI dependent on BorrowHistory."
+    ], 
+    "conventions": [
+      "Use CommonFunction.getCurrentUser() for securing user identification"
+    ] 
+  }
+}

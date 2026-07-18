@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý danh mục sách</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <div class="container py-4">
+
+    <!-- ── Tiêu đề + Nút Thêm ── -->
+    <div class="card shadow-sm p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Quản lý danh mục sách</h5>
+        <button type="button" class="btn btn-success"
+                data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+          <i class="bi bi-plus-circle me-1"></i> Thêm danh mục mới
+        </button>
+      </div>
+
+      <!-- ── Thông báo ── -->
+      <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+      <!-- ── Thanh tìm kiếm ── -->
+      <form th:action="@{/admin/categories}" method="get" class="row g-2 mb-3">
+        <div class="col">
+          <input type="text" class="form-control" name="keyword"
+                 th:value="${keyword}" placeholder="Tìm theo tên danh mục...">
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-search me-1"></i> Tìm kiếm
+          </button>
+        </div>
+        <div class="col-auto">
+          <a th:href="@{/admin/categories}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-clockwise me-1"></i> Đặt lại
+          </a>
+        </div>
+        <input type="hidden" name="size" th:value="${size}">
+      </form>
+
+      <!-- ── Bảng danh sách ── -->
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+          <tr>
+            <th style="width: 50px;">STT</th>
+            <th>Tên danh mục</th>
+            <th>Mô tả</th>
+            <th class="text-center">Số lượng sách</th>
+            <th class="text-center" style="width: 130px;">Thao tác</th>
+          </tr>
+          </thead>
+          <tbody>
+
+          <tr th:each="category, stat : ${categories}">
+            <!-- STT tính theo trang hiện tại -->
+            <td th:text="${currentPage * size + stat.count}">1</td>
+            <td class="fw-bold" th:text="${category.categoryName}">Tên danh mục</td>
+            <td th:text="${category.description}">Mô tả</td>
+            <td class="text-center" th:text="${category.bookCount}">0</td>
+            <td class="text-center">
+              <!-- Nút Sửa -->
+              <button type="button" class="btn btn-sm btn-outline-primary me-1"
+                      data-bs-toggle="modal"
+                      th:data-bs-target="'#editModal-' + ${category.categoryId}">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <!-- Nút Xóa -->
+              <button type="button" class="btn btn-sm btn-outline-danger"
+                      data-bs-toggle="modal"
+                      th:data-bs-target="'#deleteModal-' + ${category.categoryId}">
+                <i class="bi bi-trash"></i>
+              </button>
+
+              <!-- Modal Sửa -->
+              <div class="modal fade text-start"
+                   th:id="'editModal-' + ${category.categoryId}"
+                   tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <form th:action="@{/admin/categories/edit/{id}(id=${category.categoryId})}" method="post">
+                      <div class="modal-header">
+                        <h5 class="modal-title fw-bold">
+                          <i class="bi bi-pencil-square me-2"></i>Sửa danh mục
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="mb-3">
+                          <label class="form-label fw-bold">Tên danh mục <span class="text-danger">*</span></label>
+                          <input type="text" class="form-control" name="categoryName"
+                                 th:value="${category.categoryName}" required>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label fw-bold">Mô tả</label>
+                          <textarea class="form-control" name="description" rows="3"
+                                    th:text="${category.description}"></textarea>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Modal Xóa -->
+              <div class="modal fade text-start"
+                   th:id="'deleteModal-' + ${category.categoryId}"
+                   tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <form th:action="@{/admin/categories/delete/{id}(id=${category.categoryId})}" method="post">
+                      <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title fw-bold">
+                          <i class="bi bi-exclamation-triangle me-2"></i>Xác nhận xóa
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body">
+                        <p>Bạn có chắc muốn xóa danh mục
+                          <strong class="text-danger" th:text="${category.categoryName}"></strong>?
+                        </p>
+                        <p th:if="${category.bookCount > 0}" class="text-danger fw-bold">
+                          <i class="bi bi-exclamation-circle me-1"></i>
+                          Danh mục này đang có <span th:text="${category.bookCount}"></span> cuốn sách, không thể xóa!
+                        </p>
+                        <p th:if="${category.bookCount == 0}" class="text-muted small">
+                          Hành động này không thể hoàn tác.
+                        </p>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-danger"
+                                th:disabled="${category.bookCount > 0}">Xóa danh mục</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+            </td>
+          </tr>
+
+          <!-- Danh sách rỗng -->
+          <tr th:if="${#lists.isEmpty(categories)}">
+            <td colspan="5" class="text-center py-4 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+              Không tìm thấy danh mục nào.
+            </td>
+          </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Footer: Hiển thị X - Y trên tổng Z ── -->
+      <div class="d-flex justify-content-between align-items-center mt-3"
+           th:if="${totalItems > 0}">
+        <small class="text-muted">
+          Hiển thị <span th:text="${start}"></span> - <span th:text="${end}"></span>
+          trên tổng <span th:text="${totalItems}"></span> danh mục
+        </small>
+
+        <!-- ── Phân trang ── -->
+        <nav th:if="${totalPages > 1}">
+          <ul class="pagination pagination-sm mb-0">
+            <!-- Nút Trước -->
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+              <a class="page-link"
+                 th:href="@{/admin/categories(keyword=${keyword}, page=${currentPage - 1}, size=${size})}">
+                &laquo;
+              </a>
+            </li>
+            <!-- Các trang số -->
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                th:classappend="${i == currentPage} ? 'active'">
+              <a class="page-link"
+                 th:href="@{/admin/categories(keyword=${keyword}, page=${i}, size=${size})}"
+                 th:text="${i + 1}">1</a>
+            </li>
+            <!-- Nút Sau -->
+            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+              <a class="page-link"
+                 th:href="@{/admin/categories(keyword=${keyword}, page=${currentPage + 1}, size=${size})}">
+                &raquo;
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Modal Thêm mới (nằm ngoài vòng lặp) ── -->
+  <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form th:action="@{/admin/categories/add}" method="post">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title fw-bold">
+              <i class="bi bi-plus-circle me-2"></i>Thêm danh mục mới
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Tên danh mục <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="categoryName"
+                     required placeholder="Nhập tên danh mục...">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Mô tả</label>
+              <textarea class="form-control" name="description"
+                        rows="3" placeholder="Nhập mô tả..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary">Thêm mới</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

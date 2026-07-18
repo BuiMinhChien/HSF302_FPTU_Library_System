@@ -110,7 +110,6 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, In
             @Param("keyword") String keyword,
             Pageable pageable
     );
-
     // Lấy danh sách yêu cầu mượn tạo mới sau thời điểm chỉ định
     List<BorrowRequest> findByCreatedAtAfter(LocalDateTime startDate);
 }

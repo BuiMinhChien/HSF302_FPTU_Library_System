@@ -10,4 +10,7 @@ public interface AccountService {
     
     //mở hoặc khóa danh sách tài khoản
     void toggleAccountStatus(Integer userId);
+
+    // Lưu tài khoản (Thêm mới hoặc Cập nhật)
+    void saveAccount(com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.AccountFormDto dto);
 }

@@ -3,6 +3,7 @@ package com.mss301.fe.edu.vn.hsf302_fptu_library_system.service;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EFineStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BorrowHistoryOptionDTO;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.FineCreateRequest;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.FineSearchRequest;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.FineViewDTO;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BorrowHistory;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.Fine;
@@ -12,6 +13,10 @@ import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.FineRepository
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.util.CommonFunction;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,12 +32,38 @@ public class FineServiceImpl implements FineService {
 
     @Override
     @Transactional
-    public List<FineViewDTO> getFinesForCurrentReader() {
+    public Page<FineViewDTO> getFinesForCurrentReader(FineSearchRequest request) {
         User reader = commonFunction.getCurrentUser();
-        return fineRepository.findByUserWithDetails(reader.getUserId())
-                .stream()
-                .map(this::toViewDTO)
-                .toList();
+        Pageable pageable = PageRequest.of(
+                request.getPage(),
+                request.getSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+        return fineRepository.searchByUser(
+                        reader.getUserId(),
+                        request.getBookTitle(),
+                        request.getStatus(),
+                        pageable
+                )
+                .map(this::toViewDTO);
+    }
+
+    @Override
+    @Transactional
+    public Page<FineViewDTO> getAllFines(FineSearchRequest request) {
+        Pageable pageable = PageRequest.of(
+                request.getPage(),
+                request.getSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+        return fineRepository.search(
+                        request.getBookTitle(),
+                        request.getFullName(),
+                        request.getStudentCode(),
+                        request.getStatus(),
+                        pageable
+                )
+                .map(this::toViewDTO);
     }
 
     @Override
@@ -87,6 +118,8 @@ public class FineServiceImpl implements FineService {
         return FineViewDTO.builder()
                 .fineId(fine.getFineId())
                 .borrowId(fine.getBorrowHistory() != null ? fine.getBorrowHistory().getBorrowId() : null)
+                .readerName(fine.getUser() != null ? fine.getUser().getFullName() : "")
+                .readerCode(fine.getUser() != null ? fine.getUser().getCode() : "")
                 .bookTitle(bookTitle)
                 .reason(fine.getReason())
                 .amount(fine.getAmount())

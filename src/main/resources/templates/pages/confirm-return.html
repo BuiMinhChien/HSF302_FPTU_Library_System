@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Xác nhận trả sách</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-box-arrow-in-down-left fs-5 text-primary"></i>
+                <h4 class="mb-0">Xác nhận trả sách — Danh sách đang mượn</h4>
+            </div>
+            <div class="card-body">
+
+                <!-- Thông báo thành công / lỗi -->
+                <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                <!-- Bảng danh sách -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Sinh viên</th>
+                            <th>Mã SV</th>
+                            <th>Tên sách</th>
+                            <th>Ngày mượn</th>
+                            <th>Hạn trả</th>
+                            <th>Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Nếu danh sách trống -->
+                        <tr th:if="${#lists.isEmpty(activeList)}">
+                            <td colspan="7" class="text-center text-muted py-4">
+                                Hiện không có ai đang mượn sách
+                            </td>
+                        </tr>
+                        <!-- Duyệt từng bản ghi đang mượn -->
+                        <tr th:each="borrow, idx : ${activeList}">
+                            <td th:text="${idx.count}"></td>
+                            <td th:text="${borrow.studentName}"></td>
+                            <td th:text="${borrow.studentCode}"></td>
+                            <td th:text="${borrow.bookTitle}"></td>
+                            <td th:text="${#temporals.format(borrow.borrowDate, 'dd/MM/yyyy')}"></td>
+                            <!-- Đánh dấu đỏ nếu quá hạn -->
+                            <td>
+                                <span th:text="${#temporals.format(borrow.dueDate, 'dd/MM/yyyy')}"
+                                      th:class="${borrow.dueDate.isBefore(#temporals.createNow())} ? 'text-danger fw-bold' : ''">
+                                </span>
+                            </td>
+                            <td>
+                                <!-- Nút xác nhận trả sách -->
+                                <form th:action="@{/librarian/confirm-return/{id}(id=${borrow.borrowId})}"
+                                      method="post"
+                                      onsubmit="return confirm('Xác nhận ' + '[[${borrow.studentName}]]' + ' đã trả sách?')">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-check-circle me-1"></i>Xác nhận trả
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

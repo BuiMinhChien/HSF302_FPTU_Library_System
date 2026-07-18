@@ -4,18 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Repository;
 
 @Data
-@Builder
+@Builder // tạo đối tượng
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookListDto {
 private Integer bookId;
 private String title;
-private String publisher;
-private Integer publishYear;
+private String publisher; //nsb
+private Integer publishYear; //năm sb
 private String bookCoverUrl;
-private  Long availableCopies;
+private  Long availableCopies; //số bản rỗi
 }
 

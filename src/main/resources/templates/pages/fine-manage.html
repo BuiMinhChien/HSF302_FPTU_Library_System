@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý phiếu phạt</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-cash-coin me-2 text-danger"></i>Quản lý phiếu phạt
+                </h4>
+                <a th:href="@{/librarian/fines/create}" class="btn btn-danger btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>Tạo phiếu phạt
+                </a>
+            </div>
+            <div class="card-body">
+                <div th:if="${success}" class="alert alert-success">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+                <div th:if="${error}" class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+
+                <form method="get"
+                      th:action="@{/librarian/fines/manage}"
+                      class="mb-4">
+                    <input type="hidden" name="page" value="0">
+                    <div class="row g-3">
+                        <div class="col-md-9">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-8">
+                                    <input type="text"
+                                           name="bookTitle"
+                                           class="form-control"
+                                           placeholder="Tên sách..."
+                                           th:value="${search.bookTitle}">
+                                </div>
+                                <div class="col-md-4">
+                                    <select name="status" class="form-select">
+                                        <option value="">Tất cả trạng thái</option>
+                                        <option value="UNPAID"
+                                                th:selected="${search.status != null and search.status.name() == 'UNPAID'}">
+                                            Chưa thanh toán
+                                        </option>
+                                        <option value="PAID"
+                                                th:selected="${search.status != null and search.status.name() == 'PAID'}">
+                                            Đã thanh toán
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <input type="text"
+                                           name="fullName"
+                                           class="form-control"
+                                           placeholder="Tên độc giả..."
+                                           th:value="${search.fullName}">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text"
+                                           name="studentCode"
+                                           class="form-control"
+                                           placeholder="Mã sinh viên..."
+                                           th:value="${search.studentCode}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-grid gap-3 h-100">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search me-1"></i>Tìm kiếm
+                                </button>
+                                <a th:href="@{/librarian/fines/manage}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>STT</th>
+                            <th>Độc giả</th>
+                            <th>Mã SV</th>
+                            <th>Sách</th>
+                            <th>Lý do</th>
+                            <th>Số tiền</th>
+                            <th>Ngày tạo</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(fines)}">
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                Không có phiếu phạt nào.
+                            </td>
+                        </tr>
+                        <tr th:each="fine, stat : ${fines}">
+                            <td th:text="${finePage.number * finePage.size + stat.count}">1</td>
+                            <td th:text="${fine.readerName}">Độc giả</td>
+                            <td th:text="${fine.readerCode}">SE123</td>
+                            <td th:text="${fine.bookTitle}">Sách</td>
+                            <td th:text="${fine.reason}">Lý do</td>
+                            <td th:text="${#numbers.formatDecimal(fine.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                            <td th:text="${fine.createdAt != null ? #temporals.format(fine.createdAt, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
+                            <td>
+                                <span th:if="${fine.status.name() == 'UNPAID'}"
+                                      class="badge bg-warning text-dark">Chưa thanh toán</span>
+                                <span th:if="${fine.status.name() == 'PAID'}"
+                                      class="badge bg-success">Đã thanh toán</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div th:replace="~{fragments/fine-pagination :: managePagination(finePage=${finePage}, search=${search})}"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -10,6 +10,7 @@ import com.mss301.fe.edu.vn.hsf302_fptu_library_system.service.EmailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -25,10 +26,13 @@ public class BorrowExpirationJob {
     private final BookCopyRepository bookCopyRepository;
     private final EmailService emailService;
 
+    @Value("${borrow.request.expire-days}")
+    private long expireDays;
+
     @Scheduled(cron = "0 */3 * * * *")
     public void expireWaitingRequests() {
         log.info("Start checking expired waiting requests");
-        LocalDateTime expiredThreshold = LocalDateTime.now().minusDays(3);
+        LocalDateTime expiredThreshold = LocalDateTime.now().minusDays(expireDays);
         List<BorrowRequest> waitingRequests =
                 borrowRequestRepository.findByStatusAndUpdatedAtBefore(
                         EBorrowRequestStatus.WAITING,
@@ -43,7 +47,7 @@ public class BorrowExpirationJob {
             }
             borrowRequestRepository.save(request);
             log.info(
-                    "Request {} expired after 3 days waiting",
+                    "Request {} expired after "+expireDays+" days waiting",
                     request.getRequestId()
             );
             try {

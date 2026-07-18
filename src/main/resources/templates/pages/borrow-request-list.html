@@ -66,7 +66,7 @@
                     <div class="col-md-2">
                         <a th:href="@{/borrow-requests}"
                            class="btn btn-outline-secondary w-100">
-                            Đặt lại
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Đặt lại
                         </a>
                     </div>
                 </form>
@@ -159,7 +159,7 @@
                             <span th:text="${requestPage.number * requestPage.size + requests.size()}"></span>
                             trên tổng
                             <span th:text="${requestPage.totalElements}"></span>
-                            yêu cầu
+                            dòng
                         </div>
                         <nav th:if="${requestPage.totalPages > 1}">
                             <ul class="pagination mb-0">
