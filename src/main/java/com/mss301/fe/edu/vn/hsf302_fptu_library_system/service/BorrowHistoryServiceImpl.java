@@ -70,6 +70,7 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
         BorrowHistory history = BorrowHistory.builder()
                 .user(request.getUser())
                 .copy(copy)
+                .status(EBorrowHistoryStatus.BORROWING)
                 .issuedBy(librarian)
                 .borrowDate(LocalDateTime.now())
                 .dueDate(LocalDateTime.now().plusDays(14))

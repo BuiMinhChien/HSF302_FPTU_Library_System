@@ -31,4 +31,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             @Param("status") Boolean status,
             Pageable pageable
     );
+    long countByRole(ERole role);
 }

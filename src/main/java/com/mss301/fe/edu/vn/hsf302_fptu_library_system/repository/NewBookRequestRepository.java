@@ -53,4 +53,8 @@ public interface NewBookRequestRepository extends JpaRepository<NewBookRequest, 
             Pageable pageable
     );
 
+    long countByStatus(ENewBookRequestStatus status);
+
+    // Lấy danh sách yêu cầu đề xuất sách mới sau thời điểm chỉ định
+    java.util.List<NewBookRequest> findByCreatedAtAfter(java.time.LocalDateTime startDate);
 }

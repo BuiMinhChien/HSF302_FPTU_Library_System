@@ -46,6 +46,9 @@ public interface BorrowHistoryRepository extends JpaRepository<BorrowHistory, In
 
     // Lấy danh sách sách đang mượn chưa trả (returnDate còn trống)
     java.util.List<BorrowHistory> findByReturnDateIsNull();
+
+    // Lấy danh sách lượt mượn từ sau thời điểm chỉ định (dùng để thống kê biến động)
+    java.util.List<BorrowHistory> findByBorrowDateAfter(java.time.LocalDateTime startDate);
 }
 
 //param là gán giá trị vô câu query
