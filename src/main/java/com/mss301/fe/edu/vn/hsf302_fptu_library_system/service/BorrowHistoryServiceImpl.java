@@ -31,10 +31,7 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
     private final BorrowRequestRepository borrowRequestRepository;
     private final BookCopyRepository bookCopyRepository;
     private final CommonFunction commonFunction;
-
-    // ════════════════════════════════════════════════
-    // HÀM CŨ — giữ nguyên logic của nhóm
-    // ════════════════════════════════════════════════
+    
     @Override
     public Page<BorrowHistory> getCurrentUserHistory(String keyword, int page, int size) {
         User user = commonFunction.getCurrentUser();
