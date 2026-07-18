@@ -1,64 +1,31 @@
 {
-  "project": {
-    "name": "HSF302_FPTU_Library_System",
-    "type": "Spring Boot MVC - Thư viện FPTU",
-    "tech_stack": [
-      "Java 17",
-      "Spring Boot 4.1.0",
-      "Spring Data JPA",
-      "Spring Security",
-      "Thymeleaf",
-      "SQL Server",
-      "Lombok",
-      "AWS S3",
-      "Spring Mail"
-    ]
-  },
-  "session": {
-    "date": "2026-07-01",
-    "role": "Mentor - Hướng dẫn, KHÔNG tự ý code vào project (Được phép can thiệp file HTML)",
-    "student": "Bùi Minh Chiến (chien181004@gmail.com)"
-  },
-  "my_features": [
-    "View Borrowing History (Reader) - DONE",
-    "Manage New Book Request (Reader) - DONE",
-    "Approve New Book Request (Admin) - DONE",
-    "Manage Account (Admin) - DONE"
-  ],
-  "current_task": {
-    "feature": "ALL COMPLETED",
+  "updated_at": "2026-07-13T17:28:10Z",
+  "working_on": {
+    "feature": "Admin Account Management (Create/Edit)",
+    "task": "Added functionality to add new accounts and edit existing ones via Modals",
     "status": "completed",
-    "progress": "Đã HOÀN THÀNH TOÀN BỘ 100% CÁC CHỨC NĂNG ĐƯỢC GIAO. Chức năng Manage Account đã được làm xong (Khóa/Mở khóa), đã fix lỗi RedirectAttributes để truyền thông báo mà không bị lỗi 500 do khoảng trắng.",
-    "files_created": [
-      "repository/UserRepository.java",
-      "service/AccountService.java",
-      "service/AccountServiceImpl.java",
-      "controller/AdminAccountController.java",
-      "templates/pages/admin-account-list.html"
+    "files": [
+      "AccountFormDto.java",
+      "AccountService.java",
+      "AccountServiceImpl.java",
+      "AdminAccountController.java",
+      "admin-account-list.html"
     ],
-    "next_step": "Nghỉ ngơi, chuẩn bị báo cáo bảo vệ đồ án! 🎉"
+    "blockers": [],
+    "notes": "Admin account CRUD operations are fully functional."
   },
-  "context_learned": {
-    "pattern": "Service Interface + ServiceImpl + Controller + Thymeleaf",
-    "pagination": "Page/Pageable giúp tối ưu hiệu năng DB và UX (giảm lag, chia nhỏ data)",
-    "current_user": "Dùng CommonFunction.getCurrentUser() thay vì gửi userId từ frontend để bảo mật. Dùng để gán người tạo (request.setUser) hoặc người duyệt (request.setApprovedBy)",
-    "query": "@Query JPQL dùng :status IS NULL OR r.status = :status để lọc tuỳ chọn (tất cả hoặc theo trạng thái cụ thể)",
-    "transactional": "@Transactional đảm bảo tính ACID khi can thiệp vào Database (rollback nếu lỗi giữa chừng)",
-    "git": "Biết cách viết commit message chuẩn Conventional Commits",
-    "redirect": "Sử dụng RedirectAttributes.addAttribute() để truyền tham số có tiếng Việt/khoảng trắng qua URL an toàn khi redirect, tránh lỗi 500.",
-    "mvc_architecture": "Thấu hiểu luồng đi của dữ liệu từ móng lên ngọn: Repository (CSDL) -> Service (Nghiệp vụ, lắp ghép Lego) -> Controller (Bộ định tuyến & Trạm thu phí Security) -> View (Hiển thị HTML/Thymeleaf)."
-  },
-  "team_notes": {
-    "already_done_by_team": [
-      "BorrowRequestController (Manage Borrow Request)",
-      "ApprovalBorrowRequestController (Approve Book Borrowing Request)",
-      "AuthController (Login, Forgot Password, Change Password)",
-      "CronJob: BorrowAssignmentJob, BorrowExpirationJob",
-      "CommonFunction.getCurrentUser()"
-    ],
-    "db_password_local": "123 (tài khoản sa)",
-    "s3_keys": "dummy - cần xin teammate key thật nếu cần upload ảnh"
-  },
-  "saved_at": "2026-07-01T14:53:00+07:00",
-  "trigger": "auto-save"
+  "pending_tasks": [
+    { "task": "Testing the Admin Add/Edit features directly in the running app", "priority": "medium", "notes": "Waiting for user to deploy/run and verify." }
+  ],
+  "recent_changes": [
+    { "timestamp": "2026-07-13T14:00:00Z", "type": "feature", "description": "Implemented Add and Edit account modals for Admin.", "files": ["AccountFormDto.java", "AccountServiceImpl.java", "AdminAccountController.java", "admin-account-list.html"] },
+    { "timestamp": "2026-07-13T14:02:00Z", "type": "chore", "description": "Resolved git merge conflict between fix/admin-crud and main branch in admin-account-list.html.", "files": ["admin-account-list.html"] }
+  ],
+  "errors_encountered": [
+    { "error": "Git merge conflict in admin-account-list.html", "solution": "Manually combined HEAD and origin/main to keep both Modals and Toast notifications.", "resolved": true },
+    { "error": "Accidental ppt files tracked by Git", "solution": "Ran git rm -r tmp_slide/ to clean up the repository.", "resolved": true }
+  ],
+  "decisions_made": [
+    { "decision": "Use Modals for Add/Edit Account in Admin page", "reason": "Keeps the user on the same page and provides a faster, smoother experience compared to redirecting to a new page. Consistent with the Category management page." }
+  ]
 }

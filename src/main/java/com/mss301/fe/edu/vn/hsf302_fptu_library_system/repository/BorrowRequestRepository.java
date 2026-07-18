@@ -93,4 +93,27 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, In
             @Param("status") EBorrowRequestStatus status,
             Pageable pageable
     );
+    // lấy danh sách sách mượn ngay từ trạng thái waiting
+    @Query("""
+        SELECT br
+        FROM BorrowRequest br
+        WHERE br.status = 'WAITING'
+        AND (
+            :keyword IS NULL
+            OR :keyword = ''
+            OR LOWER(br.book.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(br.user.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(br.user.code) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        )
+        AND (:fromDate IS NULL OR br.approvedDate >= :fromDate)
+        AND (:toDate IS NULL OR br.approvedDate <= :toDate)
+    """)
+    Page<BorrowRequest> findBorrowersThisWeek(
+            @Param("keyword") String keyword,
+            @Param("fromDate") java.time.LocalDateTime fromDate,
+            @Param("toDate") java.time.LocalDateTime toDate,
+            Pageable pageable
+    );
+    // Lấy danh sách yêu cầu mượn tạo mới sau thời điểm chỉ định
+    List<BorrowRequest> findByCreatedAtAfter(LocalDateTime startDate);
 }

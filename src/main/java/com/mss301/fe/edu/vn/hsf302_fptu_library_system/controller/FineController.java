@@ -2,10 +2,15 @@ package com.mss301.fe.edu.vn.hsf302_fptu_library_system.controller;
 
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.FineCreateRequest;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.FinePaymentDTO;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.FinePaymentHistorySearchRequest;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.FinePaymentHistoryViewDTO;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.FineSearchRequest;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.FineViewDTO;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.service.FinePaymentService;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.service.FineService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,9 +33,21 @@ public class FineController {
     private final FinePaymentService finePaymentService;
 
     @GetMapping("/reader/fines")
-    public String listFines(Model model) {
-        model.addAttribute("fines", fineService.getFinesForCurrentReader());
+    public String listFines(@ModelAttribute FineSearchRequest search, Model model) {
+        Page<FineViewDTO> finePage = fineService.getFinesForCurrentReader(search);
+        model.addAttribute("finePage", finePage);
+        model.addAttribute("fines", finePage.getContent());
+        model.addAttribute("search", search);
         return "pages/fine-list";
+    }
+
+    @GetMapping("/reader/fines/payments")
+    public String paymentHistory(@ModelAttribute FinePaymentHistorySearchRequest search, Model model) {
+        var paymentPage = finePaymentService.getPaymentHistoryForCurrentReader(search);
+        model.addAttribute("paymentPage", paymentPage);
+        model.addAttribute("payments", paymentPage.getContent());
+        model.addAttribute("search", search);
+        return "pages/fine-payment-history";
     }
 
     @GetMapping("/reader/fines/{fineId}/pay")
@@ -85,6 +102,15 @@ public class FineController {
     @ResponseBody
     public FinePaymentDTO completePaymentJson(@RequestParam Long orderCode) {
         return finePaymentService.handleSuccess(orderCode);
+    }
+
+    @GetMapping("/librarian/fines/manage")
+    public String manageFines(@ModelAttribute FineSearchRequest search, Model model) {
+        Page<FineViewDTO> finePage = fineService.getAllFines(search);
+        model.addAttribute("finePage", finePage);
+        model.addAttribute("fines", finePage.getContent());
+        model.addAttribute("search", search);
+        return "pages/fine-manage";
     }
 
     @GetMapping("/librarian/fines/create")

@@ -21,12 +21,14 @@ public class NewBookRequestServiceImpl implements NewBookRequestService {
     private final NewBookRequestRepository newBookRequestRepository;
     private final CommonFunction commonFunction;
     @Override
-    public Page<NewBookRequest> searchMyRequests(ENewBookRequestStatus status, int page, int size) {
-        // Tự động lấy User đang đăng nhập hiện tại
+    public Page<NewBookRequest> searchMyRequests(String keyword, ENewBookRequestStatus status, java.time.LocalDate fromDate, java.time.LocalDate toDate, int page, int size) {
         User currentUser = commonFunction.getCurrentUser();
-        //biến phaan trang
         Pageable pageable = PageRequest.of(page, size, Sort.by("requestDate").descending());
-        return newBookRequestRepository.searchByUser(currentUser.getUserId(), status, pageable);
+
+        LocalDateTime startDateTime = (fromDate != null) ? fromDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = (fromDate != null) ? fromDate.atTime(23, 59, 59) : null;
+
+        return newBookRequestRepository.searchByUser(currentUser.getUserId(), keyword, status, startDateTime, endDateTime, pageable);
     }
 
     @Override
@@ -41,11 +43,12 @@ public class NewBookRequestServiceImpl implements NewBookRequestService {
         newBookRequestRepository.save(request);
     }
     @Override
-    public Page<NewBookRequest> searchAllRequests(ENewBookRequestStatus status, int page, int size) {
+    public Page<NewBookRequest> searchAllRequests(String keyword, ENewBookRequestStatus status, java.time.LocalDate fromDate, int page, int size) {
         // Sắp xếp ngày tạo từ mới nhất xuống cũ nhất
         Pageable pageable = PageRequest.of(page, size, Sort.by("requestDate").descending());
-        // Gọi thẳng hàm mới viết ở Repository
-        return newBookRequestRepository.searchAllRequests(status, pageable);
+        LocalDateTime startDateTime = (fromDate != null) ? fromDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = (fromDate != null) ? fromDate.atTime(23, 59, 59) : null;
+        return newBookRequestRepository.searchAllRequests(keyword, status, startDateTime, endDateTime, pageable);
     }
     @Override
     @Transactional
@@ -63,11 +66,12 @@ public class NewBookRequestServiceImpl implements NewBookRequestService {
     }
     @Override
     @Transactional
-    public void rejectRequest(Integer requestId) {
+    public void rejectRequest(Integer requestId, String rejectionReason) {
         //tìm ra yêu cầu đó
         NewBookRequest request = newBookRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu này!"));
         request.setStatus(ENewBookRequestStatus.REJECTED);
+        request.setRejectionReason(rejectionReason);
         request.setApprovedBy(commonFunction.getCurrentUser());
         request.setApprovedDate(LocalDateTime.now());
 

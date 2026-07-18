@@ -16,15 +16,21 @@ public class NewBookRequestController {
     private final NewBookRequestService newBookRequestService;
     @GetMapping
     public String showMyRequests(
-            @RequestParam(required = false) ENewBookRequestStatus status, // Trạng thái cần lọc (có thể null)
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) ENewBookRequestStatus status,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate fromDate,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate toDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model
     ) {
-        Page<NewBookRequest> requestPage = newBookRequestService.searchMyRequests(status, page, size);
+        Page<NewBookRequest> requestPage = newBookRequestService.searchMyRequests(keyword, status, fromDate, toDate, page, size);
         model.addAttribute("requests", requestPage.getContent());
         model.addAttribute("requestPage", requestPage);
-        model.addAttribute("status", status); // Trả lại status để giữ lựa chọn trên giao diện
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("status", status);
+        model.addAttribute("fromDate", fromDate);
+        model.addAttribute("toDate", toDate);
         return "pages/new-book-request-list";
     }
 

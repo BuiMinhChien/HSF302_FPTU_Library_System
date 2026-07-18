@@ -10,25 +10,51 @@ import org.springframework.data.repository.query.Param;
 
 public interface NewBookRequestRepository extends JpaRepository<NewBookRequest, Integer> {
 
-    // phn tranh lọc theo yêu cầu của người dùng
+    // Phân trang và lọc yêu cầu của độc giả theo từ khóa, trạng thái và ngày tạo
     @Query("""
         SELECT r FROM NewBookRequest r 
         WHERE r.user.userId = :userId 
         AND (:status IS NULL OR r.status = :status)
+        AND (
+            :keyword IS NULL OR :keyword = ''
+            OR LOWER(r.bookTitle) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(r.authorName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        )
+        AND (:fromDate IS NULL OR r.requestDate >= :fromDate)
+        AND (:toDate IS NULL OR r.requestDate <= :toDate)
     """)
     Page<NewBookRequest> searchByUser(
             @Param("userId") Integer userId,
+            @Param("keyword") String keyword,
             @Param("status") ENewBookRequestStatus status,
+            @Param("fromDate") java.time.LocalDateTime fromDate,
+            @Param("toDate") java.time.LocalDateTime toDate,
             Pageable pageable
     );
-    // thủ thư sẽ lấy tất cả yêu cầu của hệ thống , có lọc traạng thái
+    // Thủ thư/Admin lấy tất cả yêu cầu, hỗ trợ lọc theo từ khóa, trạng thái và ngày gửi
     @Query("""
         SELECT r FROM NewBookRequest r 
         WHERE (:status IS NULL OR r.status = :status)
+        AND (
+            :keyword IS NULL OR :keyword = ''
+            OR LOWER(r.bookTitle) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(r.authorName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(r.user.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(r.user.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        )
+        AND (:fromDate IS NULL OR r.requestDate >= :fromDate)
+        AND (:toDate IS NULL OR r.requestDate <= :toDate)
     """)
     Page<NewBookRequest> searchAllRequests(
+            @Param("keyword") String keyword,
             @Param("status") ENewBookRequestStatus status,
+            @Param("fromDate") java.time.LocalDateTime fromDate,
+            @Param("toDate") java.time.LocalDateTime toDate,
             Pageable pageable
     );
 
+    long countByStatus(ENewBookRequestStatus status);
+
+    // Lấy danh sách yêu cầu đề xuất sách mới sau thời điểm chỉ định
+    java.util.List<NewBookRequest> findByCreatedAtAfter(java.time.LocalDateTime startDate);
 }

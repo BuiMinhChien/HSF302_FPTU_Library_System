@@ -1,5 +1,7 @@
 package com.mss301.fe.edu.vn.hsf302_fptu_library_system.service;
-
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowHistoryStatus;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.BorrowHistoryRepository;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BorrowHistory;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBookCopyStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowRequestStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BorrowRequestDto;
@@ -36,6 +38,7 @@ public class BorrowRequestServiceImpl implements BorrowRequestService {
     private final CommonFunction commonFunction;
     private final EmailService emailService;
     private final BookCopyRepository bookCopyRepository;
+    private final BorrowHistoryRepository borrowHistoryRepository;
 
     @Override
     public String createBorrowRequest(Integer bookId, String email) {
@@ -164,5 +167,41 @@ public class BorrowRequestServiceImpl implements BorrowRequestService {
             request.setStatus(EBorrowRequestStatus.APPROVED);
         }
         borrowRequestRepository.save(request);
+        //
+    }
+    @Override
+    public Page<BorrowRequestDto> getBorrowersThisWeek(String keyword, java.time.LocalDate fromDate, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "approvedDate"));
+        LocalDateTime startDateTime = (fromDate != null) ? fromDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = (fromDate != null) ? fromDate.atTime(23, 59, 59) : null;
+        return borrowRequestRepository.findBorrowersThisWeek(keyword, startDateTime, endDateTime, pageable)
+                .map(borrowRequestMapper::toDTO);
+    }
+    @Override
+    public void issueBook(Integer requestId) {
+        User librarian = commonFunction.getCurrentUser();
+        BorrowRequest request = borrowRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Borrow request not found"));
+
+        if (request.getStatus() != EBorrowRequestStatus.WAITING) {
+            throw new RuntimeException("Request is not in WAITING status");
+        }
+
+        request.setStatus(EBorrowRequestStatus.ISSUED);
+        borrowRequestRepository.save(request);
+        BookCopy copy = request.getReservedCopy();
+        if (copy != null) {
+            copy.setStatus(EBookCopyStatus.BORROWED);
+            bookCopyRepository.save(copy);
+        }
+        BorrowHistory history = BorrowHistory.builder()
+                .user(request.getUser())
+                .copy(copy)
+                .issuedBy(librarian)
+                .borrowDate(LocalDateTime.now())
+                .dueDate(LocalDateTime.now().plusDays(7))
+                .status(EBorrowHistoryStatus.BORROWING)
+                .build();
+        borrowHistoryRepository.save(history);
     }
 }

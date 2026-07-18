@@ -23,10 +23,13 @@ public interface UserRepository extends JpaRepository<User, Integer> {
                OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) 
                OR LOWER(u.code) LIKE LOWER(CONCAT('%', :keyword, '%')))
         AND (:role IS NULL OR u.role = :role)
+        AND (:status IS NULL OR u.status = :status)
     """)
     Page<User> searchAccounts(
             @Param("keyword") String keyword,
             @Param("role") ERole role,
+            @Param("status") Boolean status,
             Pageable pageable
     );
+    long countByRole(ERole role);
 }
