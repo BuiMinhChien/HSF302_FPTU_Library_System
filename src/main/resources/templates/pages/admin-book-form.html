@@ -55,6 +55,11 @@
                                 <label class="form-label fw-bold">URL Ảnh bìa</label>
                                 <input type="url" class="form-control" th:field="*{bookCoverUrl}" placeholder="https://example.com/cover.jpg">
                             </div>
+                            <!-- Thêm trường Số lượng bản in (Chỉ hiển thị khi thêm mới) -->
+                            <div class="mb-3" th:if="${bookForm.bookId == null}">
+                                <label class="form-label fw-bold">Số lượng bản in nhập về <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" th:field="*{totalCopies}" min="1" value="1" required placeholder="Nhập số lượng bản in (BookCopy)...">
+                            </div>
                         </div>
 
                         <!-- Cột phải: Thể loại & Tác giả -->

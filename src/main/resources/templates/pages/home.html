@@ -29,9 +29,9 @@
                         <option value="isbn" th:selected="${searchType == 'isbn'}">ISBN</option>
                     </select>
 
-                    <input type="text" name="keyword" class="form-control border-0" placeholder="Nhập từ khoá tìm kiếm..." th:value="${keyword}"/>
+                    <input type="search" name="keyword" class="form-control border-0 shadow-none" placeholder="Nhập từ khoá tìm kiếm..." th:value="${keyword}" autocomplete="off"/>
 
-                    <button type="submit" class="btn text-white fw-bold px-4" style="background-color: #c44f00;">
+                    <button type="submit" class="btn text-white fw-bold px-4" style="background-color: #c44f00; z-index: 2;">
                         <i class="bi bi-search me-1"></i> Tìm kiếm
                     </button>
                 </div>
@@ -64,11 +64,7 @@
             </div>
         </div>
 
-        <div th:if="${keyword != null and keyword != ''}" class="mb-3">
-            <a th:href="@{/books}" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-x-circle me-1"></i> Xoá tìm kiếm, xem tất cả
-            </a>
-        </div>
+        <!-- Nút xóa tìm kiếm cũ (đã được chuyển vào trong ô nhập liệu) -->
 
         <div th:if="${#lists.isEmpty(books)}" class="text-center py-5">
             <i class="bi bi-search display-4 text-muted d-block mb-3"></i>
@@ -130,6 +126,20 @@
             </nav>
         </div>
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var searchInput = document.querySelector('input[type="search"][name="keyword"]');
+            if(searchInput) {
+                // Sự kiện 'search' tự động kích hoạt khi người dùng bấm dấu X trên ô input type="search"
+                searchInput.addEventListener('search', function() {
+                    if(this.value === '') {
+                        window.location.href = '/books';
+                    }
+                });
+            }
+        });
+    </script>
 </div>
 </body>
 </html>

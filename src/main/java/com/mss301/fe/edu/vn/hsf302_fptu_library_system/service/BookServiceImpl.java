@@ -9,7 +9,9 @@ import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BookListDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.AppFile;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.Book;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.Category;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BookCopy;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.AuthorRepository;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.BookCopyRepository;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.BookRepository;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.CategoryRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,6 +32,7 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final CategoryRepository categoryRepository;
     private final AuthorRepository authorRepository;
+    private final BookCopyRepository bookCopyRepository;
 
     @Override
     public BookDetailDto getBookDetail(Integer bookId) {
@@ -132,7 +135,7 @@ public class BookServiceImpl implements BookService {
         if (keyword == null || keyword.isBlank()) {
             bookPage = bookRepository.findAll(pageable);
         } else {
-            bookPage = bookRepository.findByTitleContaining(keyword, pageable);
+            bookPage = bookRepository.searchAdminBooks(keyword, pageable);
         }
 
         return bookPage.map(book -> {
@@ -193,6 +196,20 @@ public class BookServiceImpl implements BookService {
             book.setBookCover(cover);
         }
         bookRepository.save(book);
+
+        // Tự động sinh ra các bản sao vật lý (BookCopy)
+        if (form.getTotalCopies() > 0) {
+            java.util.List<BookCopy> copies = new java.util.ArrayList<>();
+            for (int i = 1; i <= form.getTotalCopies(); i++) {
+                BookCopy copy = new BookCopy();
+                copy.setBook(book);
+                // Mã barcode = B-{Mã Sách}-{Random 4 chữ số} để tránh trùng lặp
+                copy.setBarcode("B-" + book.getBookId() + "-" + i + "-" + java.util.UUID.randomUUID().toString().substring(0, 4).toUpperCase());
+                copy.setStatus(EBookCopyStatus.AVAILABLE);
+                copies.add(copy);
+            }
+            bookCopyRepository.saveAll(copies);
+        }
     }
 
     // Thay thế hàm updateBook cũ bằng đoạn này:

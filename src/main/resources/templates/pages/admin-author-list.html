@@ -10,38 +10,41 @@
 <body>
 <div layout:fragment="content">
     <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold" style="color: #f37021;"><i class="bi bi-people me-2"></i>Quản lý tác giả</h2>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAuthorModal">
-                <i class="bi bi-person-plus me-1"></i> Thêm tác giả mới
-            </button>
-        </div>
-
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-
-        <!-- Thanh tìm kiếm -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-body bg-light">
-                <form th:action="@{/admin/authors}" method="get" class="d-flex w-50">
-                    <input type="text" name="keyword" class="form-control me-2" placeholder="Tìm tên tác giả..." th:value="${keyword}">
-                    <button type="submit" class="btn btn-outline-primary"><i class="bi bi-search"></i></button>
-                    <a th:if="${keyword != null and keyword != ''}" th:href="@{/admin/authors}" class="btn btn-outline-secondary ms-2">Xóa</a>
-                </form>
+        <div class="card shadow-sm border-0">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Danh sách tác giả</h4>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAuthorModal">
+                    <i class="bi bi-person-plus me-1"></i> Thêm tác giả mới
+                </button>
             </div>
-        </div>
 
-        <!-- Bảng danh sách -->
-        <div class="card shadow-sm">
-            <div class="card-body p-0">
+            <div class="card-body">
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+                    <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
+                    <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <form th:action="@{/admin/authors}" method="get" class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small mb-1">Từ khóa tìm kiếm</label>
+                        <input type="text" name="keyword" class="form-control" placeholder="Tìm tên tác giả..." th:value="${keyword}" autocomplete="off">
+                    </div>
+                    <div class="col-md-auto d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary text-nowrap">
+                            <i class="bi bi-search me-1"></i> Tìm kiếm
+                        </button>
+                        <a th:href="@{/admin/authors}" class="btn btn-outline-danger" title="Xóa tìm kiếm">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    </div>
+                </form>
+
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0 align-middle">
+                    <table class="table table-bordered table-hover align-middle">
                         <thead class="table-light">
                         <tr>
                             <th scope="col" class="text-center" style="width: 80px;">Ảnh</th>
@@ -132,21 +135,32 @@
                         </tr>
                         </tbody>
                     </table>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted">
+                            Hiển thị
+                            <span th:text="${authorPage.number * authorPage.size + (authorPage.totalElements > 0 ? 1 : 0)}"></span>
+                            -
+                            <span th:text="${authorPage.number * authorPage.size + authorPage.numberOfElements}"></span>
+                            trên tổng
+                            <span th:text="${authorPage.totalElements}"></span>
+                            tác giả
+                        </div>
+                        <nav th:if="${authorPage.totalPages > 1}">
+                            <ul class="pagination mb-0">
+                                <li class="page-item" th:classappend="${authorPage.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/authors(page=${authorPage.number - 1}, keyword=${keyword})}">&laquo;</a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, authorPage.totalPages - 1)}" th:classappend="${i == authorPage.number} ? 'active'">
+                                    <a class="page-link" th:text="${i + 1}" th:href="@{/admin/authors(page=${i}, keyword=${keyword})}"></a>
+                                </li>
+                                <li class="page-item" th:classappend="${authorPage.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/authors(page=${authorPage.number + 1}, keyword=${keyword})}">&raquo;</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
-            </div>
-            <!-- Phân trang -->
-            <div class="card-footer bg-white" th:if="${authorPage.totalPages > 1}">
-                <ul class="pagination justify-content-center mb-0">
-                    <li class="page-item" th:classappend="${authorPage.first} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/authors(page=${authorPage.number - 1}, keyword=${keyword})}">Trước</a>
-                    </li>
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, authorPage.totalPages - 1)}" th:classappend="${i == authorPage.number} ? 'active'">
-                        <a class="page-link" th:text="${i + 1}" th:href="@{/admin/authors(page=${i}, keyword=${keyword})}"></a>
-                    </li>
-                    <li class="page-item" th:classappend="${authorPage.last} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/authors(page=${authorPage.number + 1}, keyword=${keyword})}">Sau</a>
-                    </li>
-                </ul>
             </div>
         </div>
     </div>

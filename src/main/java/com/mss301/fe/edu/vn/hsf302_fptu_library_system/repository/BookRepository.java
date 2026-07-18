@@ -24,5 +24,9 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     @Query("SELECT b FROM Book b WHERE (:keyword IS NULL OR LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Book> findByIsbnContaining(@Param("keyword") String keyword, Pageable pageable);
 
+    // Tìm kiếm sách đa trường (Title, Author, Publisher, ISBN) cho Admin
+    @Query("SELECT DISTINCT b FROM Book b LEFT JOIN b.authors a WHERE (:keyword IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(a.authorName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.publisher) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Book> searchAdminBooks(@Param("keyword") String keyword, Pageable pageable);
+
 
 }

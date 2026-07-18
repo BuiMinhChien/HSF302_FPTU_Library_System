@@ -12,14 +12,16 @@
   <div class="container py-4">
 
     <!-- ── Tiêu đề + Nút Thêm ── -->
-    <div class="card shadow-sm p-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold mb-0">Quản lý danh mục sách</h5>
-        <button type="button" class="btn btn-success"
+    <div class="card shadow-sm border-0">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Quản lý danh mục sách</h4>
+        <button type="button" class="btn btn-primary"
                 data-bs-toggle="modal" data-bs-target="#addCategoryModal">
           <i class="bi bi-plus-circle me-1"></i> Thêm danh mục mới
         </button>
       </div>
+
+      <div class="card-body">
 
       <!-- ── Thông báo ── -->
       <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
@@ -34,19 +36,18 @@
       </div>
 
       <!-- ── Thanh tìm kiếm ── -->
-      <form th:action="@{/admin/categories}" method="get" class="row g-2 mb-3">
-        <div class="col">
+      <form th:action="@{/admin/categories}" method="get" class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold small mb-1">Từ khóa tìm kiếm</label>
           <input type="text" class="form-control" name="keyword"
-                 th:value="${keyword}" placeholder="Tìm theo tên danh mục...">
+                 th:value="${keyword}" placeholder="Tìm theo tên danh mục..." autocomplete="off">
         </div>
-        <div class="col-auto">
-          <button type="submit" class="btn btn-primary">
+        <div class="col-md-auto d-flex align-items-end gap-2">
+          <button type="submit" class="btn btn-primary text-nowrap">
             <i class="bi bi-search me-1"></i> Tìm kiếm
           </button>
-        </div>
-        <div class="col-auto">
-          <a th:href="@{/admin/categories}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-clockwise me-1"></i> Đặt lại
+          <a th:href="@{/admin/categories}" class="btn btn-outline-danger" title="Xóa tìm kiếm">
+            <i class="bi bi-x-lg"></i>
           </a>
         </div>
         <input type="hidden" name="size" th:value="${size}">
@@ -54,8 +55,8 @@
 
       <!-- ── Bảng danh sách ── -->
       <div class="table-responsive">
-        <table class="table table-hover mb-0">
-          <thead>
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-light">
           <tr>
             <th style="width: 50px;">STT</th>
             <th>Tên danh mục</th>
@@ -206,7 +207,8 @@
           </ul>
         </nav>
       </div>
-
+      
+      </div> <!-- End card-body -->
     </div>
   </div>
 
