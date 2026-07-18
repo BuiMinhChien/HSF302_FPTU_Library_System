@@ -28,4 +28,7 @@ public interface FineRepository extends JpaRepository<Fine, Integer> {
     Optional<Fine> findByFineIdWithUser(@Param("fineId") Integer fineId);
 
     boolean existsByBorrowHistory_BorrowIdAndDeleteFlagFalse(Integer borrowId);
+
+    // Lấy danh sách phiếu phạt tạo mới từ sau thời điểm chỉ định
+    List<Fine> findByCreatedAtAfter(java.time.LocalDateTime startDate);
 }

@@ -29,4 +29,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             @Param("role") ERole role,
             Pageable pageable
     );
+    long countByRole(ERole role);
 }
