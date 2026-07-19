@@ -1,4 +1,5 @@
 package com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowHistoryStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BorrowHistory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -6,6 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
 @Repository
 public interface BorrowHistoryRepository extends JpaRepository<BorrowHistory, Integer> {
 
@@ -42,13 +46,39 @@ public interface BorrowHistoryRepository extends JpaRepository<BorrowHistory, In
             )
             ORDER BY bh.returnDate DESC
             """)
-    java.util.List<BorrowHistory> findReturnedWithoutFine();
+    List<BorrowHistory> findReturnedWithoutFine();
+
+    @Query("""
+        SELECT bh
+        FROM BorrowHistory bh
+        WHERE 
+          (
+                :fullName IS NULL
+                OR :fullName = ''
+                OR LOWER(bh.user.fullName) LIKE LOWER(CONCAT('%', :fullName, '%'))
+          )
+          AND (
+                :bookTitle IS NULL
+                OR :bookTitle = ''
+                OR LOWER(bh.copy.book.title) LIKE LOWER(CONCAT('%', :bookTitle, '%'))
+          )
+          AND (
+                :status IS NULL
+                OR :status = ''
+                OR bh.status = :status
+          )
+    """)
+    Page<BorrowHistory> searchActiveBorrows(
+            @Param("fullName") String fullName,
+            @Param("bookTitle") String bookTitle,
+            @Param("status") EBorrowHistoryStatus status,
+            Pageable pageable
+    );
 
     // Lấy danh sách sách đang mượn chưa trả (returnDate còn trống)
-    java.util.List<BorrowHistory> findByReturnDateIsNull();
+    List<BorrowHistory> findByReturnDateIsNull();
 
     // Lấy danh sách lượt mượn từ sau thời điểm chỉ định (dùng để thống kê biến động)
-    java.util.List<BorrowHistory> findByBorrowDateAfter(java.time.LocalDateTime startDate);
+    List<BorrowHistory> findByBorrowDateAfter(java.time.LocalDateTime startDate);
 }
 
-//param là gán giá trị vô câu query

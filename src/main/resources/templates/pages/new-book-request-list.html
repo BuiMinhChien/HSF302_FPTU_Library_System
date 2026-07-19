@@ -58,6 +58,7 @@
                             <th>STT</th>
                             <th>Tên sách</th>
                             <th>Tác giả / NXB</th>
+                            <th>Lý do</th>
                             <th>Ngày gửi</th>
                             <th>Trạng thái</th>
                             <th>Lý do từ chối</th>
@@ -71,7 +72,6 @@
                         </tr>
                         <tr th:each="request, stat : ${requests}">
                             <td th:text="${requestPage.number * requestPage.size + stat.count}"></td>
-
                             <td>
                                 <strong th:text="${request.bookTitle}"></strong><br>
                                 <a th:if="${request.purchaseLink != null and request.purchaseLink != ''}"
@@ -79,12 +79,13 @@
                                     Link tham khảo
                                 </a>
                             </td>
-
                             <td>
                                 <span th:text="${request.authorName}"></span>
                                 <div class="small text-muted" th:text="${request.publisher ?: '-'}"></div>
                             </td>
-
+                            <td>
+                                <span th:text="${request.reason}"></span>
+                            </td>
                             <td>
                                 <div th:if="${request.requestDate != null}">
                                     <div class="fw-semibold" th:text="${#temporals.format(request.requestDate, 'dd/MM/yyyy')}"></div>
@@ -92,7 +93,6 @@
                                 </div>
                                 <span th:if="${request.requestDate == null}">-</span>
                             </td>
-
                             <td>
                                 <span class="badge"
                                       th:classappend="
@@ -115,13 +115,13 @@
                             <span th:text="${requestPage.number * requestPage.size + requests.size()}"></span>
                             trên tổng
                             <span th:text="${requestPage.totalElements}"></span>
-                            yêu cầu
+                            dòng
                         </div>
                         <nav th:if="${requestPage.totalPages > 1}">
                             <ul class="pagination mb-0">
                                 <li class="page-item" th:classappend="${requestPage.first} ? 'disabled'">
                                     <a class="page-link" th:href="@{/new-book-requests(page=${requestPage.number - 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}" aria-label="Previous">
-                                        &laquo;
+                                        Trước
                                     </a>
                                 </li>
                                 <li class="page-item" th:each="i : ${#numbers.sequence(0, requestPage.totalPages - 1)}" th:classappend="${i == requestPage.number} ? 'active'">
@@ -129,7 +129,7 @@
                                 </li>
                                 <li class="page-item" th:classappend="${requestPage.last} ? 'disabled'">
                                     <a class="page-link" th:href="@{/new-book-requests(page=${requestPage.number + 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}" aria-label="Next">
-                                        &raquo;
+                                        Sau
                                     </a>
                                 </li>
                             </ul>

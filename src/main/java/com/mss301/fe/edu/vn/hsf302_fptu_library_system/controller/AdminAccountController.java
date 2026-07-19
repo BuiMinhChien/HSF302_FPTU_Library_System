@@ -2,13 +2,15 @@ package com.mss301.fe.edu.vn.hsf302_fptu_library_system.controller;
 
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.ERole;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.AccountFormDto;
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.User;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.UserProfileDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.service.AccountService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -30,14 +32,12 @@ public class AdminAccountController {
             @RequestParam(defaultValue = "10") int size,
             Model model
     ) {
-        Page<User> accountPage = accountService.searchAccounts(keyword, role, status, page, size);
-
+        Page<UserProfileDto> accountPage = accountService.searchAccounts(keyword, role, status, page, size);
         model.addAttribute("accounts", accountPage.getContent());
         model.addAttribute("accountPage", accountPage);
         model.addAttribute("keyword", keyword);
         model.addAttribute("role", role);
         model.addAttribute("status", status);
-
         return "pages/admin-account-list";
     }
 
@@ -54,30 +54,45 @@ public class AdminAccountController {
         return "redirect:/admin/accounts";
     }
 
-    // 3. Xử lý Thêm mới tài khoản
-    @PostMapping("/add")
+    @GetMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
-    public String addAccount(@ModelAttribute AccountFormDto dto, RedirectAttributes redirectAttributes) {
-        try {
-            accountService.saveAccount(dto);
-            redirectAttributes.addAttribute("success", "Thêm tài khoản mới thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addAttribute("error", "Lỗi thêm mới: " + e.getMessage());
-        }
-        return "redirect:/admin/accounts";
+    public String addAccountPage(Model model) {
+        model.addAttribute("accountForm", new AccountFormDto());
+        return "pages/account-detail";
     }
 
-    // 4. Xử lý Sửa thông tin tài khoản
-    @PostMapping("/edit/{id}")
+    // 3. Xử lý Thêm mới tài khoản
+    @PostMapping({"/add","/edit"})
     @PreAuthorize("hasRole('ADMIN')")
-    public String editAccount(@PathVariable("id") Integer id, @ModelAttribute AccountFormDto dto, RedirectAttributes redirectAttributes) {
-        try {
-            dto.setUserId(id);
-            accountService.saveAccount(dto);
-            redirectAttributes.addAttribute("success", "Cập nhật thông tin tài khoản thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addAttribute("error", "Lỗi cập nhật: " + e.getMessage());
+    public String addAccount(
+            @Valid @ModelAttribute("accountForm") AccountFormDto dto,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "pages/account-detail";
         }
-        return "redirect:/admin/accounts";
+        try {
+            accountService.saveAccount(dto);
+            if(dto.getUserId() != null){
+                redirectAttributes.addFlashAttribute("success", "Cập nhật tài khoản thành công!");
+            }
+            else redirectAttributes.addFlashAttribute("success", "Thêm tài khoản mới thành công!");
+            return "redirect:/admin/accounts";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            if(dto.getUserId() != null){
+                return "redirect:/admin/accounts/edit/" + dto.getUserId();
+            }
+            else return "redirect:/admin/accounts/add";
+        }
+    }
+
+    @GetMapping("/edit/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String editAccountPage(@PathVariable Integer userId, Model model) {
+        AccountFormDto dto = accountService.getAccountForEdit(userId);
+        model.addAttribute("accountForm", dto);
+        model.addAttribute("isEdit", true);
+        return "pages/account-detail";
     }
 }

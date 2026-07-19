@@ -4,6 +4,8 @@ import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowRequestSt
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BorrowRequestDto;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDate;
+
 public interface BorrowRequestService {
     String createBorrowRequest(Integer bookId, String email);
     Page<BorrowRequestDto> getCurrentUserRequests(
@@ -23,6 +25,6 @@ public interface BorrowRequestService {
     void cancelPendingRequest(Integer requestId);
     void rejectRequest(Integer requestId, String rejectionReason);
     void approveRequest(Integer requestId);
-    Page<BorrowRequestDto> getBorrowersThisWeek(String keyword, java.time.LocalDate fromDate, int page, int size);
+    Page<BorrowRequestDto> getBorrowers(String keyword, LocalDate fromDate, int page, int size);
     void issueBook(Integer requestId);
 }

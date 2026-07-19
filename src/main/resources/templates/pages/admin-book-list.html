@@ -10,83 +10,100 @@
 <body>
 <div layout:fragment="content">
     <div class="container py-4">
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-sm">
+
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Danh sách các đầu sách</h4>
                 <a th:href="@{/admin/books/add}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle me-1"></i> Thêm sách mới
+                    Thêm sách mới
                 </a>
             </div>
 
             <div class="card-body">
-                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
-                    <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
-                    <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                
+
+                <!-- Thanh tìm kiếm và bộ lọc -->
                 <form method="get" th:action="@{/admin/books}" class="row g-3 mb-3">
-                    <div class="col-md-6">
+                    <div class="col-md-8">
                         <label class="form-label fw-semibold small mb-1">Từ khóa tìm kiếm</label>
                         <input type="text" name="keyword" class="form-control"
                                th:value="${keyword}" placeholder="Tên sách, tác giả, NXB, ISBN..." autocomplete="off">
                     </div>
-                    <div class="col-md-auto d-flex align-items-end gap-2">
-                        <button type="submit" class="btn btn-primary text-nowrap">
-                            <i class="bi bi-search me-1"></i> Tìm kiếm
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i>Tìm kiếm
                         </button>
-                        <a th:href="@{/admin/books}" class="btn btn-outline-danger" title="Xóa tìm kiếm">
-                            <i class="bi bi-x-lg"></i>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <a th:href="@{/admin/books}" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại
                         </a>
                     </div>
                 </form>
 
+                <!-- Bảng hiển thị dữ liệu -->
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle">
                         <thead class="table-light">
                         <tr>
-                            <th scope="col" style="width: 60px;" class="text-center">Ảnh</th>
+                            <th>STT</th>
+                            <th scope="col" style="width: 80px;" class="text-center">Ảnh</th>
                             <th scope="col">ISBN</th>
                             <th scope="col">Tên sách</th>
+                            <th scope="col">Tác giả</th>
                             <th scope="col">NXB (Năm)</th>
                             <th scope="col" class="text-center">Số bản</th>
-                            <th scope="col" class="text-center" style="width: 150px;">Thao tác</th>
+                            <th scope="col" class="text-center" style="width: 150px;">Tùy chọn</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(bookPage.content)}">
-                            <td colspan="6" class="text-center text-muted py-4">Không tìm thấy sách nào</td>
+                            <td colspan="8" class="text-center text-muted py-4">Không tìm thấy sách nào</td>
                         </tr>
-                        <tr th:each="book : ${bookPage.content}">
+                        <tr th:each="book, stat : ${bookPage.content}">
+                            <td th:text="${bookPage.number * bookPage.size + stat.count}"></td>
                             <td class="text-center">
-                                <img th:if="${book.bookCoverUrl != null}" th:src="${book.bookCoverUrl}" style="width: 40px; height: 60px; object-fit: cover;">
-                                <i th:if="${book.bookCoverUrl == null}" class="bi bi-book fs-3 text-secondary"></i>
+                                <img th:if="${book.bookCoverUrl != null and !#strings.isEmpty(book.bookCoverUrl)}"
+                                     th:src="${book.bookCoverUrl}"
+                                     alt="Bìa sách"
+                                     class="object-fit-cover border shadow-sm rounded-1"
+                                     style="width: 40px; height: 55px;">
+                                <i th:unless="${book.bookCoverUrl != null and !#strings.isEmpty(book.bookCoverUrl)}"
+                                   class="bi bi-book fs-3 text-secondary"></i>
                             </td>
-                            <td class="fw-bold" th:text="${book.isbn}">ISBN</td>
-                            <td class="fw-bold">
-                                <a th:href="@{/books/{id}(id=${book.bookId})}" class="text-decoration-none text-primary" th:text="${book.title}" title="Xem chi tiết sách">Tên sách</a>
+                            <td>
+                                <span class="badge bg-light text-dark border" th:text="${book.isbn}"></span>
+                            </td>
+                            <td>
+                                <a th:href="@{/books/{id}(id=${book.bookId})}" class="text-decoration-none fw-bold text-primary" th:text="${book.title}" title="Xem chi tiết sách">Tên sách</a>
+                            </td>
+                            <td class="text-muted small" th:text="${book.authorNames != null and !book.authorNames.isEmpty()} ? ${#strings.listJoin(book.authorNames, ', ')} : 'Chưa cập nhật'">
+                                Tên tác giả
                             </td>
                             <td th:text="${book.publisher} + ' (' + ${book.publishYear} + ')'">NXB</td>
-                            <td class="text-center">
-                                <span class="badge bg-success" th:text="${book.availableCopies} + '/' + ${book.totalCopies}"></span>
+                            <td class="text-center small">
+                                <div>Tổng số: <strong th:text="${book.totalCopies}">0</strong></div>
+                                <div class="text-success">Sẵn sàng: <span th:text="${book.availableCopies}">0</span></div>
                             </td>
                             <td class="text-center">
-                                <a th:href="@{/admin/books/edit/{id}(id=${book.bookId})}" class="btn btn-sm btn-outline-primary me-1" title="Sửa">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <form th:action="@{/admin/books/delete/{id}(id=${book.bookId})}" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa sách này?')">
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <a th:href="@{/admin/books/edit/{id}(id=${book.bookId})}" class="btn btn-sm btn-outline-primary" title="Sửa thông tin">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <!-- Nút gọi Modal (Sử dụng class d-inline-block thay form) -->
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger delete-book-btn"
+                                            title="Xóa sách"
+                                            th:data-id="${book.bookId}"
+                                            th:data-title="${book.title}">
                                         <i class="bi bi-trash"></i>
                                     </button>
-                                </form>
+                                </div>
                             </td>
                         </tr>
                         </tbody>
                     </table>
 
+                    <!-- Hiển thị chỉ số dòng và Phân trang -->
                     <div class="d-flex justify-content-between align-items-center mt-3">
                         <div class="text-muted">
                             Hiển thị
@@ -95,26 +112,108 @@
                             <span th:text="${bookPage.number * bookPage.size + bookPage.numberOfElements}"></span>
                             trên tổng
                             <span th:text="${bookPage.totalElements}"></span>
-                            cuốn sách
+                            dòng
                         </div>
                         <nav th:if="${bookPage.totalPages > 1}">
                             <ul class="pagination mb-0">
                                 <li class="page-item" th:classappend="${bookPage.first} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/books(page=${bookPage.number - 1}, keyword=${keyword})}">&laquo;</a>
+                                    <a class="page-link" th:href="@{/admin/books(page=${bookPage.number - 1}, keyword=${keyword})}" aria-label="Previous">Trước</a>
                                 </li>
                                 <li class="page-item" th:each="i : ${#numbers.sequence(0, bookPage.totalPages - 1)}" th:classappend="${i == bookPage.number} ? 'active'">
                                     <a class="page-link" th:text="${i + 1}" th:href="@{/admin/books(page=${i}, keyword=${keyword})}"></a>
                                 </li>
                                 <li class="page-item" th:classappend="${bookPage.last} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/books(page=${bookPage.number + 1}, keyword=${keyword})}">&raquo;</a>
+                                    <a class="page-link" th:href="@{/admin/books(page=${bookPage.number + 1}, keyword=${keyword})}" aria-label="Next">Sau</a>
                                 </li>
                             </ul>
                         </nav>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Bootstrap Modal Xác Nhận Xóa Sách (Chỉ cần duy nhất 1 Modal dùng chung) -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteConfirmModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận xóa dữ liệu
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa cuốn sách này không?</p>
+                    <p class="text-secondary small mb-0"><i class="bi bi-info-circle me-1"></i> Lưu ý: Hành động này không thể hoàn tác sau khi đã thực hiện.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <!-- Form ẩn để gửi yêu cầu POST xóa lên Server -->
+                    <form id="deleteBookForm" method="post" action="">
+                        <button type="submit" class="btn btn-danger px-3">Đồng ý xóa</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hệ thống Toast Thông báo góc màn hình chuẩn mẫu -->
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div th:if="${success}" id="successToast" class="toast text-bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        <div th:if="${error}" id="errorToast" class="toast text-bg-danger border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script điều khiển Toast và Modal bằng Vanilla JS -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // 1. Khởi tạo Toast thông báo từ hệ thống
+            const successToast = document.getElementById('successToast');
+            if (successToast) {
+                new bootstrap.Toast(successToast, { delay: 5000 }).show();
+            }
+            const errorToast = document.getElementById('errorToast');
+            if (errorToast) {
+                new bootstrap.Toast(errorToast, { delay: 5000 }).show();
+            }
+
+            // 2. Cấu hình điều khiển Modal Xóa động
+            const deleteButtons = document.querySelectorAll('.delete-book-btn');
+            const deleteModalElement = document.getElementById('deleteConfirmModal');
+
+            if (deleteModalElement && deleteButtons.length > 0) {
+                // Khởi tạo thực thể modal của Bootstrap
+                const deleteModal = new bootstrap.Modal(deleteModalElement);
+                const deleteForm = document.getElementById('deleteBookForm');
+
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        // Trích xuất dữ liệu từ các thuộc tính data-* trên thẻ button
+                        const bookId = this.getAttribute('data-id');
+                        deleteForm.setAttribute('action', `/admin/books/delete/${bookId}`);
+                        deleteModal.show();
+                    });
+                });
+            }
+        });
+    </script>
 </div>
 </body>
 </html>

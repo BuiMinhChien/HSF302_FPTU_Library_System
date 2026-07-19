@@ -20,14 +20,14 @@
                       th:action="@{/reader/fines/payments}"
                       class="row g-3 mb-4">
                     <input type="hidden" name="page" value="0">
-                    <div class="col-md-7">
+                    <div class="col-md-6">
                         <input type="text"
                                name="bookTitle"
                                class="form-control"
                                placeholder="Tìm theo tên sách..."
                                th:value="${search.bookTitle}">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <button type="submit" class="btn btn-primary w-100">
                             <i class="bi bi-search me-1"></i>Tìm kiếm
                         </button>

@@ -15,14 +15,14 @@
     <!-- ===== PHẦN 1: HERO BANNER + SEARCH ===== -->
     <div class="d-flex align-items-center justify-content-center w-100"
          style="background: linear-gradient(rgba(0,0,0,0.28), rgba(0,0,0,0.28)), url('/images/fpt-home.jpg') center bottom / cover no-repeat; min-height: 500px;">
-        <div class="rounded-3 p-4 w-100" style="background: rgba(243, 112, 33, 0.88); max-width: 680px;">
+        <div class="rounded-3 p-4 w-100" style="background: rgba(243, 112, 33, 0.88); max-width: 900px;">
             <h2 class="text-white fw-bold fs-4 mb-3 text-center">
                 <i class="bi bi-book me-2"></i>Tìm kiếm sách
             </h2>
             <!-- =====SEARCH kiếm dính lên URL /books?===== -->
             <form method="get" th:action="@{/books}">
                 <div class="input-group mb-3 shadow-sm">
-                    <select name="searchType" class="form-select border-0" style="max-width: 140px;">
+                    <select name="searchType" class="form-select border-0" style="max-width: 200px;">
                         <option value="title" th:selected="${searchType == 'title' or searchType == null}">Tiêu đề</option>
                         <option value="author" th:selected="${searchType == 'author'}">Tác giả</option>
                         <option value="publisher" th:selected="${searchType == 'publisher'}">Nhà xuất bản</option>
@@ -59,9 +59,9 @@
                     <span th:if="${keyword == null or keyword == ''}">Danh sách sách</span>
                 </span>
             </div>
-            <div class="text-muted small" th:if="${bookPage.totalElements > 0}">
-                Tổng cộng <strong th:text="${bookPage.totalElements}"></strong> cuốn sách
-            </div>
+<!--            <div class="text-muted small" th:if="${bookPage.totalElements > 0}">-->
+<!--                Tổng cộng <strong th:text="${bookPage.totalElements}"></strong> cuốn sách-->
+<!--            </div>-->
         </div>
 
         <!-- Nút xóa tìm kiếm cũ (đã được chuyển vào trong ô nhập liệu) -->
@@ -86,10 +86,10 @@
 
                         <div class="mt-2 small">
                             <span th:if="${book.availableCopies > 0}" class="badge bg-success">
-                                <i class="bi bi-check-circle me-1"></i>Còn <span th:text="${book.availableCopies}"></span> bản
+                                <i class="bi bi-check-circle me-1"></i>Còn <span th:text="${book.availableCopies}"></span> cuốn
                             </span>
                             <span th:if="${book.availableCopies == 0}" class="badge bg-secondary">
-                                <i class="bi bi-x-circle me-1"></i> Hết bản
+                                <i class="bi bi-x-circle me-1"></i> Hết sách
                             </span>
                         </div>
 
@@ -103,8 +103,14 @@
 
         <!-- ===== PHÂN TRANG ===== -->
         <div class="d-flex justify-content-between align-items-center mt-4" th:if="${!#lists.isEmpty(books)}">
-            <div class="text-muted small">
-                Trang <strong th:text="${bookPage.number + 1}"></strong> / <strong th:text="${bookPage.totalPages}"></strong>
+            <div class="text-muted">
+                Hiển thị
+                <span th:text="${bookPage.number * bookPage.size + 1}"></span>
+                -
+                <span th:text="${bookPage.number * bookPage.size + books.size()}"></span>
+                trên tổng số
+                <span th:text="${bookPage.totalElements}"></span>
+                cuốn sách
             </div>
 
             <nav th:if="${bookPage.totalPages > 1}">

@@ -3,6 +3,7 @@ package com.mss301.fe.edu.vn.hsf302_fptu_library_system.service;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBookCopyStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowHistoryStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowRequestStatus;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BorrowHistoryDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BookCopy;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BorrowHistory;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BorrowRequest;
@@ -20,7 +21,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @Transactional
@@ -32,9 +32,6 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
     private final BookCopyRepository bookCopyRepository;
     private final CommonFunction commonFunction;
 
-    // ════════════════════════════════════════════════
-    // HÀM CŨ — giữ nguyên logic của nhóm
-    // ════════════════════════════════════════════════
     @Override
     public Page<BorrowHistory> getCurrentUserHistory(String keyword, java.time.LocalDate fromDate, java.time.LocalDate toDate, int page, int size) {
         User user = commonFunction.getCurrentUser();
@@ -58,7 +55,7 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
         }
 
         BookCopy copy = bookCopyRepository
-                .findFirstByBookAndStatus(request.getBook(), EBookCopyStatus.AVAILABLE)
+                .findFirstByBookAndStatusAndDeleteFlagFalse(request.getBook(), EBookCopyStatus.AVAILABLE)
                 .orElseThrow(() -> new RuntimeException("Hiện không có bản sao sách nào trống!"));
 
         copy.setStatus(EBookCopyStatus.BORROWED);
@@ -84,9 +81,9 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
         User librarian = commonFunction.getCurrentUser();
 
         BorrowHistory history = borrowHistoryRepository.findById(borrowId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch sử mượn #" + borrowId));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch sử mượn mã: " + borrowId));
 
-        if (history.getReturnDate() != null) {
+        if (history.getStatus().equals(EBorrowHistoryStatus.RETURNED)) {
             throw new RuntimeException("Sách này đã được xác nhận trả rồi!");
         }
 
@@ -99,22 +96,55 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
         copy.setStatus(EBookCopyStatus.AVAILABLE);
         bookCopyRepository.save(copy);
 
-
-        List<BorrowRequest> waitingList = borrowRequestRepository
-                .findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus.WAITING);
-
-        BorrowRequest nextPerson = waitingList.stream()
-                .filter(req -> req.getBook().getBookId().equals(copy.getBook().getBookId()))
-                .findFirst()
-                .orElse(null);
-
-        if (nextPerson != null) {
-            nextPerson.setStatus(EBorrowRequestStatus.APPROVED);
-            nextPerson.setApprovedBy(librarian);
-            nextPerson.setApprovedDate(LocalDateTime.now());
-            borrowRequestRepository.save(nextPerson);
-        }
-
+//        List<BorrowRequest> waitingList = borrowRequestRepository
+//                .findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus.WAITING);
+//
+//        BorrowRequest nextPerson = waitingList.stream()
+//                .filter(req -> req.getBook().getBookId().equals(copy.getBook().getBookId()))
+//                .findFirst()
+//                .orElse(null);
+//
+//        if (nextPerson != null) {
+//            nextPerson.setStatus(EBorrowRequestStatus.APPROVED);
+//            nextPerson.setApprovedBy(librarian);
+//            nextPerson.setApprovedDate(LocalDateTime.now());
+//            borrowRequestRepository.save(nextPerson);
+//        }
         return history;
+    }
+
+    @Override
+    public Page<BorrowHistoryDto> getActiveBorrows(
+            String fullName,
+            String bookTitle,
+            EBorrowHistoryStatus status,
+            int page,
+            int size
+    ) {
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "borrowDate")
+        );
+        return borrowHistoryRepository
+                .searchActiveBorrows(
+                        fullName,
+                        bookTitle,
+                        status,
+                        pageable
+                )
+                .map(this::toDto);
+    }
+
+    private BorrowHistoryDto toDto(BorrowHistory entity) {
+        return BorrowHistoryDto.builder()
+                .borrowId(entity.getBorrowId())
+                .studentName(entity.getUser().getFullName())
+                .studentCode(entity.getUser().getCode())
+                .bookTitle(entity.getCopy().getBook().getTitle())
+                .borrowDate(entity.getBorrowDate())
+                .dueDate(entity.getDueDate())
+                .status(entity.getStatus())
+                .build();
     }
 }

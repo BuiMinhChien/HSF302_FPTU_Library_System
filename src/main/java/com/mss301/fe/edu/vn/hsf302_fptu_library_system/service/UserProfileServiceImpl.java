@@ -25,6 +25,7 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .phone(user.getPhone())
                 .address(user.getAddress())
                 .role(user.getRole())
+                .avatarUrl(user.getAvatar().getFileUrl())
                 .build();
     }
 }

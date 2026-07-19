@@ -195,18 +195,18 @@
                         <span th:text="${requestPage.number * requestPage.size + 1}"></span>
                         -
                         <span th:text="${requestPage.number * requestPage.size + requests.size()}"></span>
-                        / <span th:text="${requestPage.totalElements}"></span> yêu cầu
+                        trên tổng <span th:text="${requestPage.totalElements}"></span> dòng
                     </div>
                     <nav th:if="${requestPage.totalPages > 1}">
                         <ul class="pagination mb-0">
                             <li class="page-item" th:classappend="${requestPage.first} ? 'disabled'">
-                                <a class="page-link" th:href="@{/admin/new-book-requests(page=${requestPage.number - 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}" aria-label="Previous">&laquo;</a>
+                                <a class="page-link" th:href="@{/admin/new-book-requests(page=${requestPage.number - 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}" aria-label="Previous">Trước</a>
                             </li>
                             <li class="page-item" th:each="i : ${#numbers.sequence(0, requestPage.totalPages - 1)}" th:classappend="${i == requestPage.number} ? 'active'">
                                 <a class="page-link" th:text="${i + 1}" th:href="@{/admin/new-book-requests(page=${i}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}"></a>
                             </li>
                             <li class="page-item" th:classappend="${requestPage.last} ? 'disabled'">
-                                <a class="page-link" th:href="@{/admin/new-book-requests(page=${requestPage.number + 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}" aria-label="Next">&raquo;</a>
+                                <a class="page-link" th:href="@{/admin/new-book-requests(page=${requestPage.number + 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}" aria-label="Next">Sau</a>
                             </li>
                         </ul>
                     </nav>

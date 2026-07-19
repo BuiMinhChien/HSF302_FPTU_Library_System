@@ -85,7 +85,7 @@
                             <td>
                                 <div th:if="${history.borrowDate != null}">
                                     <div class="fw-semibold"
-                                         th:text="${#temporals.format(history.borrowDate, 'dd/MM/yyyy')}">
+                                         th:text="${#temporals.format(history.borrowDate, 'MM/dd/yyyy')}">
                                     </div>
                                     <small class="text-muted"
                                            th:text="${#temporals.format(history.borrowDate, 'HH:mm:ss')}">
@@ -96,7 +96,7 @@
                             <td>
                                 <div th:if="${history.dueDate != null}">
                                     <div class="fw-semibold"
-                                         th:text="${#temporals.format(history.dueDate, 'dd/MM/yyyy')}">
+                                         th:text="${#temporals.format(history.dueDate, 'MM/dd/yyyy')}">
                                     </div>
                                     <small class="text-muted"
                                            th:text="${#temporals.format(history.dueDate, 'HH:mm:ss')}">
@@ -107,7 +107,7 @@
                             <td>
                                 <div th:if="${history.returnDate != null}">
                                     <div class="fw-semibold"
-                                         th:text="${#temporals.format(history.returnDate, 'dd/MM/yyyy')}">
+                                         th:text="${#temporals.format(history.returnDate, 'MM/dd/yyyy')}">
                                     </div>
                                     <small class="text-muted"
                                            th:text="${#temporals.format(history.returnDate, 'HH:mm:ss')}">
@@ -154,7 +154,7 @@
                                             fromDate=${fromDate},
                                             toDate=${toDate}
                                         )}" aria-label="Previous">
-                                        &laquo;
+                                        Trước
                                     </a>
                                 </li>
                                 <li class="page-item"
@@ -179,7 +179,7 @@
                                             fromDate=${fromDate},
                                             toDate=${toDate}
                                         )}" aria-label="Next">
-                                        &raquo;
+                                        Sau
                                     </a>
                                 </li>
                             </ul>

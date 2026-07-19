@@ -24,6 +24,9 @@ public class AppFile extends BaseEntity {
     @Column(name = "file_name", nullable = false, columnDefinition = "NVARCHAR(255)")
     String fileName;
 
+    @Column(name = "s3_key", nullable = true, length = 500)
+    private String s3Key;
+
     @Column(name = "file_url", nullable = false, length = 500)
     String fileUrl;
 

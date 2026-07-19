@@ -31,7 +31,7 @@ public class BorrowAssignmentJob {
         List<BorrowRequest> requests = borrowRequestRepository.findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus.APPROVED);
         for (BorrowRequest request : requests) {
             Optional<BookCopy> availableCopy = bookCopyRepository
-                            .findFirstByBookAndStatus(
+                            .findFirstByBookAndStatusAndDeleteFlagFalse(
                                     request.getBook(),
                                     EBookCopyStatus.AVAILABLE
                             );

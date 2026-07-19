@@ -217,7 +217,7 @@
                             <span th:text="${requestPage.number * requestPage.size + requests.size()}"></span>
                             trên tổng
                             <span th:text="${requestPage.totalElements}"></span>
-                            yêu cầu
+                            dòng
                         </div>
                         <nav th:if="${requestPage.totalPages > 1}">
                             <ul class="pagination mb-0">
@@ -273,10 +273,7 @@
     </div>
 
 <!--    Modal-->
-    <div class="modal fade"
-         id="rejectModal"
-         tabindex="-1"
-         aria-hidden="true">
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <form id="rejectForm" method="post">

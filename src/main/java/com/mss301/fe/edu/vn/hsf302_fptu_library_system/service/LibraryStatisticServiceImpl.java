@@ -2,7 +2,6 @@ package com.mss301.fe.edu.vn.hsf302_fptu_library_system.service;
 
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBookCopyStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowRequestStatus;
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.ERole;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.ENewBookRequestStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BorrowHistory;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BorrowRequest;
@@ -50,8 +49,8 @@ public class LibraryStatisticServiceImpl implements LibraryStatisticService {
         stats.put("totalAuthors", authorRepository.count());
 
         // Vận hành hiện tại
-        stats.put("totalBorrowed", bookCopyRepository.countByStatus(EBookCopyStatus.BORROWED));
-        stats.put("totalAvailable", bookCopyRepository.countByStatus(EBookCopyStatus.AVAILABLE));
+        stats.put("totalBorrowed", bookCopyRepository.countByStatusAndDeleteFlagFalse(EBookCopyStatus.BORROWED));
+        stats.put("totalAvailable", bookCopyRepository.countByStatusAndDeleteFlagFalse(EBookCopyStatus.AVAILABLE));
         stats.put("totalPending",
                 (long) borrowRequestRepository
                         .findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus.PENDING).size());
