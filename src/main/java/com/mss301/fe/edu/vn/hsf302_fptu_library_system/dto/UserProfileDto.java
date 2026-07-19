@@ -9,10 +9,13 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class UserProfileDto {
+    private Integer userId;
     private String fullName;
     private String code;
     private String email;
     private String phone;
     private String address;
     private ERole role;
+    private String avatarUrl;
+    private boolean status;
 }

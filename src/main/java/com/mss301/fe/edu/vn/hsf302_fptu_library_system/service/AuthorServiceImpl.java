@@ -11,6 +11,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AuthorServiceImpl implements AuthorService {
@@ -36,6 +38,23 @@ public class AuthorServiceImpl implements AuthorService {
                     .bookCount(bookCount)
                     .build();
         });
+    }
+
+    @Override
+    public List<AuthorFormDto> getAllAuthorsForCreate() {
+        return authorRepository.findAll()
+                .stream()
+                .map(author -> {
+                    int bookCount = author.getBooks() != null ? author.getBooks().size() : 0;
+                    return AuthorFormDto.builder()
+                            .authorId(author.getAuthorId())
+                            .authorName(author.getAuthorName())
+                            .biography(author.getBiography())
+                            .avatarUrl(author.getAvatar() != null ? author.getAvatar().getFileUrl() : null)
+                            .bookCount(bookCount)
+                            .build();
+                })
+                .toList();
     }
 
     @Override

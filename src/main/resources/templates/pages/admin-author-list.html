@@ -144,18 +144,18 @@
                             <span th:text="${authorPage.number * authorPage.size + authorPage.numberOfElements}"></span>
                             trên tổng
                             <span th:text="${authorPage.totalElements}"></span>
-                            tác giả
+                            dòng
                         </div>
                         <nav th:if="${authorPage.totalPages > 1}">
                             <ul class="pagination mb-0">
                                 <li class="page-item" th:classappend="${authorPage.first} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/authors(page=${authorPage.number - 1}, keyword=${keyword})}">&laquo;</a>
+                                    <a class="page-link" th:href="@{/admin/authors(page=${authorPage.number - 1}, keyword=${keyword})}">Trước</a>
                                 </li>
                                 <li class="page-item" th:each="i : ${#numbers.sequence(0, authorPage.totalPages - 1)}" th:classappend="${i == authorPage.number} ? 'active'">
                                     <a class="page-link" th:text="${i + 1}" th:href="@{/admin/authors(page=${i}, keyword=${keyword})}"></a>
                                 </li>
                                 <li class="page-item" th:classappend="${authorPage.last} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/authors(page=${authorPage.number + 1}, keyword=${keyword})}">&raquo;</a>
+                                    <a class="page-link" th:href="@{/admin/authors(page=${authorPage.number + 1}, keyword=${keyword})}">Sau</a>
                                 </li>
                             </ul>
                         </nav>

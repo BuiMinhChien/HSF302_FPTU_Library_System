@@ -18,10 +18,6 @@ public class NewBookRequest extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer newBookRequestId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
     @Column(columnDefinition = "NVARCHAR(255)")
     private String bookTitle;
 
@@ -44,6 +40,10 @@ public class NewBookRequest extends BaseEntity {
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String rejectionReason;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "approved_by")

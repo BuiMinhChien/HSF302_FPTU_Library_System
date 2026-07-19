@@ -2,14 +2,8 @@ package com.mss301.fe.edu.vn.hsf302_fptu_library_system.service;
 
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBookCopyStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EFilePurpose;
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.AuthorInfoDto;
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BookDetailDto;
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BookFormDto;
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BookListDto;
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.AppFile;
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.Book;
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.Category;
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.BookCopy;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.*;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.*;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.AuthorRepository;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.BookCopyRepository;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.BookRepository;
@@ -21,8 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,12 +31,14 @@ public class BookServiceImpl implements BookService {
     private final CategoryRepository categoryRepository;
     private final AuthorRepository authorRepository;
     private final BookCopyRepository bookCopyRepository;
+    private final S3Service s3Service;
 
     @Override
     public BookDetailDto getBookDetail(Integer bookId) {
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new EntityNotFoundException("Book not found"));
-        long totalCopies = book.getBookCopies().size();
-        long availableCopies = book.getBookCopies()
+        List<BookCopy> bookCopies = bookCopyRepository.findByBook_BookIdAndDeleteFlagFalse(bookId);
+        long totalCopies = bookCopies.size();
+        long availableCopies = bookCopies
                 .stream()
                 .filter(copy -> copy.getStatus() == EBookCopyStatus.AVAILABLE)
                 .count();
@@ -91,28 +91,24 @@ public class BookServiceImpl implements BookService {
         Pageable pageable = PageRequest.of(page, size);
         // Chọn query theo loại tìm kiếm
         Page<Book> bookPage;
-        if (keyword == null || keyword.isBlank()) {
-            // Không có keyword -> lấy tất cả
-            bookPage = bookRepository.findAll(pageable);
-        } else {
-            switch (searchType != null ? searchType : "title") {
-                case "author":
-                    bookPage = bookRepository.findByAuthorContaining(keyword, pageable);
-                    break;
-                case "publisher":
-                    bookPage = bookRepository.findByPublisherContaining(keyword, pageable);
-                    break;
-                case "isbn":
-                    bookPage = bookRepository.findByIsbnContaining(keyword, pageable);
-                    break;
-                default: // "title" hoặc mặc định
-                    bookPage = bookRepository.findByTitleContaining(keyword, pageable);
-                    break;
-            }
+        switch (searchType != null ? searchType : "title") {
+            case "author":
+                bookPage = bookRepository.findByAuthorContaining(keyword, pageable);
+                break;
+            case "publisher":
+                bookPage = bookRepository.findByPublisherContaining(keyword, pageable);
+                break;
+            case "isbn":
+                bookPage = bookRepository.findByIsbnContaining(keyword, pageable);
+                break;
+            default: // "title" hoặc mặc định
+                bookPage = bookRepository.findByTitleContaining(keyword, pageable);
+                break;
         }
         // Chuyển từng Book entity sang BookListDto (chỉ lấy những trường cần thiết)
         return bookPage.map(book -> {
-            long availableCopies = book.getBookCopies()
+            List<BookCopy> bookCopies = bookCopyRepository.findByBook_BookIdAndDeleteFlagFalse(book.getBookId());
+            long availableCopies = bookCopies
                     .stream()
                     .filter(copy -> copy.getStatus() == EBookCopyStatus.AVAILABLE)
                     .count();
@@ -130,17 +126,12 @@ public class BookServiceImpl implements BookService {
     // MANAGE BOOK
     @Override
     public Page<BookFormDto> getAllBooksForAdmin(String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Book> bookPage;
-        if (keyword == null || keyword.isBlank()) {
-            bookPage = bookRepository.findAll(pageable);
-        } else {
-            bookPage = bookRepository.searchAdminBooks(keyword, pageable);
-        }
-
+        Pageable pageable = PageRequest.of(page, size, Sort.by("bookId").descending());
+        Page<Book> bookPage = bookRepository.searchAdminBooks(keyword, pageable);
         return bookPage.map(book -> {
             // Đếm số bản sách còn trống
-            long availableCopies = book.getBookCopies() != null ? book.getBookCopies().stream()
+            List<BookCopy> bookCopies = bookCopyRepository.findByBook_BookIdAndDeleteFlagFalse(book.getBookId());
+            long availableCopies = bookCopies != null ? bookCopies.stream()
                     .filter(copy -> copy.getStatus() == EBookCopyStatus.AVAILABLE).count() : 0;
             return BookFormDto.builder()
                     .bookId(book.getBookId())
@@ -148,7 +139,8 @@ public class BookServiceImpl implements BookService {
                     .title(book.getTitle())
                     .publisher(book.getPublisher())
                     .publishYear(book.getPublishYear())
-                    .totalCopies(book.getBookCopies() != null ? book.getBookCopies().size() : 0)
+                    .authorNames(book.getAuthors().stream().map(author -> author.getAuthorName()).toList())
+                    .totalCopies(bookCopies != null ? bookCopies.size() : 0)
                     .availableCopies((int) availableCopies)
                     .bookCoverUrl(book.getBookCover() != null ? book.getBookCover().getFileUrl() : null)
                     .build();
@@ -158,6 +150,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookFormDto getBookFormById(Integer id) {
         Book book = bookRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sách"));
+        List<BookCopy> bookCopies = bookCopyRepository.findByBook_BookIdAndDeleteFlagFalse(book.getBookId());
         return BookFormDto.builder()
                 .bookId(book.getBookId())
                 .isbn(book.getIsbn())
@@ -168,87 +161,123 @@ public class BookServiceImpl implements BookService {
                 .bookCoverUrl(book.getBookCover() != null ? book.getBookCover().getFileUrl() : null)
                 .categoryIds(book.getCategories().stream().map(c -> c.getCategoryId()).collect(java.util.stream.Collectors.toList()))
                 .authorIds(book.getAuthors().stream().map(a -> a.getAuthorId()).collect(java.util.stream.Collectors.toList()))
+                .bookCopies(
+                        bookCopies.stream()
+                                .map(copy -> BookCopyFormDto.builder()
+                                        .copyId(copy.getCopyId())
+                                        .barcode(copy.getBarcode())
+                                        .status(copy.getStatus())
+                                        .build())
+                                .toList()
+                )
                 .build();
     }
 
     @Override
-    public void createBook(BookFormDto form) {
-        Book book = new Book();
+    @Transactional
+    public void saveBook(BookFormDto form) {
+        Book book;
+        if (form.getBookId() == null) {
+            book = new Book();
+        } else {
+            book = bookRepository.findById(form.getBookId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sách"));
+        }
+        Optional<Book> existedBook = bookRepository.findByIsbn(form.getIsbn());
+        if (existedBook.isPresent() && !existedBook.get().getBookId().equals(form.getBookId())) {
+            throw new IllegalArgumentException("ISBN đã tồn tại");
+        }
+        // Thông tin sách
         book.setIsbn(form.getIsbn());
         book.setTitle(form.getTitle());
         book.setPublisher(form.getPublisher());
         book.setPublishYear(form.getPublishYear());
         book.setDescription(form.getDescription());
-        // Lấy danh sách category và author từ DB dựa theo ID người dùng tick chọn
-        if (form.getCategoryIds() != null) {
-            book.setCategories(categoryRepository.findAllById(form.getCategoryIds()));
-        }
-        if (form.getAuthorIds() != null) {
-            book.setAuthors(authorRepository.findAllById(form.getAuthorIds()));
-        }
-        // Xử lý ảnh bìa
-        if (form.getBookCoverUrl() != null && !form.getBookCoverUrl().isBlank()) {
-            AppFile cover = new AppFile();
-            cover.setFileName("book-cover.jpg");
-            cover.setFileUrl(form.getBookCoverUrl());
-            cover.setExtension("jpg");
-            cover.setPurpose(EFilePurpose.BOOK_COVER);
-            book.setBookCover(cover);
+        book.setCategories(categoryRepository.findAllById(form.getCategoryIds()));
+        book.setAuthors(authorRepository.findAllById(form.getAuthorIds()));
+        MultipartFile bookCoverFile = form.getBookCoverFile();
+        if (bookCoverFile != null && !bookCoverFile.isEmpty()) {
+            try {
+                // Upload trước
+                UploadResult upload = s3Service.uploadFile(bookCoverFile);
+                // Upload thành công mới xóa ảnh cũ
+                if (book.getBookCover() != null && book.getBookCover().getS3Key() != null) {
+                    s3Service.deleteFileWithKey(book.getBookCover().getS3Key());
+                }
+                AppFile appFile = new AppFile();
+                appFile.setFileName(bookCoverFile.getOriginalFilename());
+                appFile.setFileUrl(upload.url());
+                appFile.setS3Key(upload.key());
+                String original = bookCoverFile.getOriginalFilename();
+                if (original != null && original.contains(".")) {
+                    appFile.setExtension(original.substring(original.lastIndexOf('.') + 1));
+                }
+                appFile.setPurpose(EFilePurpose.BOOK_COVER);
+                book.setBookCover(appFile);
+            } catch (IOException e) {
+                throw new RuntimeException("Không thể tải ảnh lên S3", e);
+            } catch (Exception e) {
+                throw new RuntimeException("Có lỗi xảy ra khi xử lý ảnh", e);
+            }
         }
         bookRepository.save(book);
 
-        // Tự động sinh ra các bản sao vật lý (BookCopy)
-        if (form.getTotalCopies() > 0) {
-            java.util.List<BookCopy> copies = new java.util.ArrayList<>();
-            for (int i = 1; i <= form.getTotalCopies(); i++) {
-                BookCopy copy = new BookCopy();
+//        lấy ra các bản coppy hiện có
+        List<BookCopy> currentCopies = bookCopyRepository.findByBook_BookIdAndDeleteFlagFalse(book.getBookId());
+//        dùng map thay list để get Id nhanh hơn
+        Map<Integer, BookCopy> currentMap = new HashMap<>();
+        for (BookCopy copy : currentCopies) {
+            currentMap.put(copy.getCopyId(), copy);
+        }
+
+        List<BookCopy> saveList = new ArrayList<>(); //danh sách chứa các bản copy cả cũ lẫn mới
+        Set<Integer> remainIds = new HashSet<>(); //danh sách các id từ form truyền về đã có sẵn trong db -> giữ lại
+        for (BookCopyFormDto dto : form.getBookCopies()) { //duyệt các book copy từ form
+            BookCopy copy;
+            // Update
+            if (dto.getCopyId() != null) { //nếu có id chứng tỏ là bản copy cũ có sẵn từ db
+                copy = currentMap.get(dto.getCopyId()); //lấy ra chính xác bản copy đó theo id
+                if (copy == null) {
+                    throw new RuntimeException("Book copy không tồn tại");
+                }
+                remainIds.add(copy.getCopyId()); //thêm vào danh sách các id có sẵn cần giữ lại
+            } else {
+                // Create
+                copy = new BookCopy(); //là bản copy mới hẳn -> cần tạo mới
                 copy.setBook(book);
-                // Mã barcode = B-{Mã Sách}-{Random 4 chữ số} để tránh trùng lặp
-                copy.setBarcode("B-" + book.getBookId() + "-" + i + "-" + java.util.UUID.randomUUID().toString().substring(0, 4).toUpperCase());
-                copy.setStatus(EBookCopyStatus.AVAILABLE);
-                copies.add(copy);
             }
-            bookCopyRepository.saveAll(copies);
+            // Kiểm tra barcode unique
+            Optional<BookCopy> existed = bookCopyRepository.findByBarcodeAndDeleteFlagFalse(dto.getBarcode());
+            if (existed.isPresent()
+                    && !Objects.equals(existed.get().getCopyId(), dto.getCopyId())) {
+                throw new IllegalArgumentException("Barcode '" + dto.getBarcode() + "' đã tồn tại");
+            }
+//            cập nhật thông tin bản copy
+            copy.setBarcode(dto.getBarcode());
+            copy.setStatus(dto.getStatus());
+            saveList.add(copy);
+        }
+        // Lưu các bản sao
+        bookCopyRepository.saveAll(saveList);
+        // Xóa các BookCopy có trong db từ trước nhưng không còn trên form update -> xoá đi
+        List<BookCopy> deleteList = currentCopies.stream().filter(c -> !remainIds.contains(c.getCopyId())).toList();
+        if (!deleteList.isEmpty()) {
+            deleteList.forEach(copy -> copy.setDeleteFlag(true));
+            bookCopyRepository.saveAll(deleteList);
         }
     }
 
-    // Thay thế hàm updateBook cũ bằng đoạn này:
     @Override
-    public void updateBook(Integer id, BookFormDto form) {
-        Book book = bookRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sách"));
-        book.setIsbn(form.getIsbn());
-        book.setTitle(form.getTitle());
-        book.setPublisher(form.getPublisher());
-        book.setPublishYear(form.getPublishYear());
-        book.setDescription(form.getDescription());
-        if (form.getCategoryIds() != null) {
-            book.setCategories(categoryRepository.findAllById(form.getCategoryIds()));
-        } else {
-            book.getCategories().clear();
-        }
-        if (form.getAuthorIds() != null) {
-            book.setAuthors(authorRepository.findAllById(form.getAuthorIds()));
-        } else {
-            book.getAuthors().clear();
-        }
-        if (form.getBookCoverUrl() != null && !form.getBookCoverUrl().isBlank()) {
-            if (book.getBookCover() == null) {
-                AppFile cover = new AppFile();
-                cover.setFileName("book-cover.jpg");
-                cover.setExtension("jpg");
-                cover.setPurpose(EFilePurpose.BOOK_COVER);
-                book.setBookCover(cover);
-            }
-            book.getBookCover().setFileUrl(form.getBookCoverUrl());
-        } else {
-            book.setBookCover(null);
-        }
-        bookRepository.save(book);
-    }
-
-    @Override
+    @Transactional
     public void deleteBook(Integer id) {
-        Book book = bookRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sách"));
-        bookRepository.delete(book);
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sách"));
+        book.setDeleteFlag(true);
+        List<BookCopy> copies = bookCopyRepository.findByBook_BookIdAndDeleteFlagFalse(id);
+        for (BookCopy copy : copies) {
+            copy.setDeleteFlag(true);
+        }
+        bookCopyRepository.saveAll(copies);
+        bookRepository.save(book);
     }
 }

@@ -18,12 +18,14 @@ import com.mss301.fe.edu.vn.hsf302_fptu_library_system.util.CommonFunction;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,6 +41,9 @@ public class BorrowRequestServiceImpl implements BorrowRequestService {
     private final EmailService emailService;
     private final BookCopyRepository bookCopyRepository;
     private final BorrowHistoryRepository borrowHistoryRepository;
+
+    @Value("${borrow.request.borrow-days}")
+    private int borrowDays;
 
     @Override
     public String createBorrowRequest(Integer bookId, String email) {
@@ -167,26 +172,24 @@ public class BorrowRequestServiceImpl implements BorrowRequestService {
             request.setStatus(EBorrowRequestStatus.APPROVED);
         }
         borrowRequestRepository.save(request);
-        //
     }
+
     @Override
-    public Page<BorrowRequestDto> getBorrowersThisWeek(String keyword, java.time.LocalDate fromDate, int page, int size) {
+    public Page<BorrowRequestDto> getBorrowers(String keyword, LocalDate fromDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "approvedDate"));
         LocalDateTime startDateTime = (fromDate != null) ? fromDate.atStartOfDay() : null;
-        LocalDateTime endDateTime = (fromDate != null) ? fromDate.atTime(23, 59, 59) : null;
-        return borrowRequestRepository.findBorrowersThisWeek(keyword, startDateTime, endDateTime, pageable)
+        return borrowRequestRepository.findBorrowersThisWeek(keyword, startDateTime, pageable)
                 .map(borrowRequestMapper::toDTO);
     }
+
     @Override
     public void issueBook(Integer requestId) {
         User librarian = commonFunction.getCurrentUser();
         BorrowRequest request = borrowRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Borrow request not found"));
-
         if (request.getStatus() != EBorrowRequestStatus.WAITING) {
             throw new RuntimeException("Request is not in WAITING status");
         }
-
         request.setStatus(EBorrowRequestStatus.ISSUED);
         borrowRequestRepository.save(request);
         BookCopy copy = request.getReservedCopy();
@@ -199,7 +202,7 @@ public class BorrowRequestServiceImpl implements BorrowRequestService {
                 .copy(copy)
                 .issuedBy(librarian)
                 .borrowDate(LocalDateTime.now())
-                .dueDate(LocalDateTime.now().plusDays(7))
+                .dueDate(LocalDateTime.now().plusDays(borrowDays))
                 .status(EBorrowHistoryStatus.BORROWING)
                 .build();
         borrowHistoryRepository.save(history);

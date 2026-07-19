@@ -15,6 +15,8 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByUserId(Integer userId);
+
     // Dành cho Admin: Lấy danh sách tài khoản
     @Query("""
         SELECT u FROM User u 
@@ -31,5 +33,16 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             @Param("status") Boolean status,
             Pageable pageable
     );
-    long countByRole(ERole role);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByCode(String code);
+
+    boolean existsByEmailAndUserIdNot(String email, Integer userId);
+
+    boolean existsByCodeAndUserIdNot(String code, Integer userId);
+
+    boolean existsByPhone(String phone);
+
+    boolean existsByPhoneAndUserIdNot(String phone, Integer userId);
 }

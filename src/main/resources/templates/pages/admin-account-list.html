@@ -11,15 +11,15 @@
 <body>
 <div layout:fragment="content">
     <div class="container py-4">
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-sm">
 
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">
                     Danh sách tài khoản hệ thống
                 </h4>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAccountModal">
-                    <i class="bi bi-plus-circle me-1"></i> Thêm tài khoản
-                </button>
+                <a th:href="@{/admin/accounts/add}" class="btn btn-primary">
+                    Thêm tài khoản
+                </a>
             </div>
 
             <div class="card-body">
@@ -48,7 +48,7 @@
                     </div>
                     <div class="col-md-2 d-flex align-items-end gap-2">
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search me-1"></i> Tìm
+                            <i class="bi bi-search me-1"></i> Tìm kiếm
                         </button>
                         <a th:href="@{/admin/accounts}" class="btn btn-outline-secondary" title="Đặt lại">
                             <i class="bi bi-arrow-counterclockwise"></i>
@@ -61,6 +61,7 @@
                         <thead class="table-light">
                         <tr>
                             <th>STT</th>
+                            <th class="text-center" style="width: 80px;">Ảnh</th> <!-- Cột hiển thị avatar -->
                             <th>Họ & Tên</th>
                             <th>Mã số</th>
                             <th>Liên hệ</th>
@@ -72,12 +73,25 @@
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(accounts)}">
-                            <td colspan="8" class="text-center text-muted">
+                            <td colspan="9" class="text-center text-muted"> <!-- Tăng colspan lên 9 -->
                                 Chưa có tài khoản nào
                             </td>
                         </tr>
                         <tr th:each="acc, stat : ${accounts}">
                             <td th:text="${accountPage.number * accountPage.size + stat.count}"></td>
+
+                            <!-- Cột hiển thị Avatar được thêm mới -->
+                            <td class="text-center">
+                                <img th:if="${acc.avatarUrl != null and !#strings.isEmpty(acc.avatarUrl)}"
+                                     th:src="${acc.avatarUrl}"
+                                     alt="Avatar"
+                                     class="rounded-circle object-fit-cover border shadow-sm"
+                                     style="width: 40px; height: 40px;">
+                                <!-- Hiển thị avatar mặc định bằng icon nếu avatarUrl rỗng -->
+                                <i th:unless="${acc.avatarUrl != null and !#strings.isEmpty(acc.avatarUrl)}"
+                                   class="bi bi-person-circle fs-3 text-secondary"></i>
+                            </td>
+
                             <td>
                                 <strong th:text="${acc.fullName}"></strong>
                             </td>
@@ -98,88 +112,37 @@
                                 </span>
                             </td>
                             <td>
+                                <!-- Sử dụng acc.status kiểu boolean nguyên thủy từ UserProfileDto -->
                                 <span class="badge" th:classappend="${acc.status} ? ' bg-success' : ' bg-secondary'">
                                     <span th:text="${acc.status ? 'Hoạt động' : 'Bị khóa'}"></span>
                                 </span>
                             </td>
-                            <!-- Thao tác Khóa/Mở khóa và Sửa -->
+                            <!-- Thao tác Khóa/Mở khóa và Sửa dựa theo code và các trường có sẵn -->
                             <td class="text-center">
                                 <div class="d-flex gap-2 justify-content-center">
-                                    <button type="button" class="btn btn-sm btn-outline-primary"
-                                            data-bs-toggle="modal"
-                                            th:data-bs-target="'#editAccountModal-' + ${acc.userId}" title="Sửa thông tin">
+                                    <a th:href="@{/admin/accounts/edit/{userId}(userId=${acc.userId})}"
+                                       class="btn btn-sm btn-outline-primary"
+                                       title="Sửa thông tin">
                                         <i class="bi bi-pencil-square"></i>
-                                    </button>
-                                    
-                                    <form method="post" th:action="@{/admin/accounts/toggle-status}">
+                                    </a>
+
+                                    <form th:id="'toggleForm-' + ${acc.userId}" method="post" th:action="@{/admin/accounts/toggle-status}">
                                         <input type="hidden" name="userId" th:value="${acc.userId}">
-                                        
-                                        <button th:if="${acc.status}" type="submit" class="btn btn-sm btn-outline-danger" 
+                                        <button th:if="${acc.status}" type="button" class="btn btn-sm btn-outline-danger btn-toggle-status"
                                                 title="Khóa tài khoản này"
-                                                onclick="return confirm('Bạn có chắc chắn muốn KHÓA tài khoản này không? Người này sẽ không thể đăng nhập nữa.');">
+                                                th:data-form-id="'toggleForm-' + ${acc.userId}"
+                                                th:data-action-type="lock"
+                                                th:data-user-name="${acc.fullName}">
                                             <i class="bi bi-lock-fill"></i> Khóa
                                         </button>
-                                        
-                                         <button th:unless="${acc.status}" type="submit" class="btn btn-sm btn-outline-success" 
+                                        <button th:unless="${acc.status}" type="button" class="btn btn-sm btn-outline-success btn-toggle-status"
                                                 title="Mở khóa tài khoản"
-                                                onclick="return confirm('Xác nhận MỞ KHÓA cho tài khoản này?');">
+                                                th:data-form-id="'toggleForm-' + ${acc.userId}"
+                                                th:data-action-type="unlock"
+                                                th:data-user-name="${acc.fullName}">
                                             <i class="bi bi-unlock-fill"></i> Mở
                                         </button>
                                     </form>
-                                </div>
-
-                                <!-- Modal Sửa Tài Khoản -->
-                                <div class="modal fade text-start" th:id="'editAccountModal-' + ${acc.userId}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content">
-                                            <form th:action="@{/admin/accounts/edit/{id}(id=${acc.userId})}" method="post">
-                                                <div class="modal-header bg-light">
-                                                    <h5 class="modal-title fw-bold text-primary"><i class="bi bi-pencil-square me-2"></i>Sửa thông tin tài khoản</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="row g-3">
-                                                        <div class="col-md-6">
-                                                            <label class="form-label fw-bold">Họ và Tên <span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control" name="fullName" th:value="${acc.fullName}" required>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label fw-bold">Mã số <span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control" name="code" th:value="${acc.code}" required>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label fw-bold">Email <span class="text-danger">*</span></label>
-                                                            <input type="email" class="form-control" name="email" th:value="${acc.email}" required>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label fw-bold">Số điện thoại</label>
-                                                            <input type="text" class="form-control" name="phone" th:value="${acc.phone}">
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label fw-bold">Vai trò <span class="text-danger">*</span></label>
-                                                            <select name="role" class="form-select" required>
-                                                                <option value="ADMIN" th:selected="${acc.role.name() == 'ADMIN'}">Quản trị viên (Admin)</option>
-                                                                <option value="LIBRARIAN" th:selected="${acc.role.name() == 'LIBRARIAN'}">Thủ thư (Librarian)</option>
-                                                                <option value="READER" th:selected="${acc.role.name() == 'READER'}">Độc giả (Reader)</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label fw-bold">Mật khẩu mới (Bỏ trống nếu không đổi)</label>
-                                                            <input type="password" class="form-control" name="password" placeholder="Nhập mật khẩu mới...">
-                                                        </div>
-                                                        <div class="col-12">
-                                                            <label class="form-label fw-bold">Địa chỉ</label>
-                                                            <input type="text" class="form-control" name="address" th:value="${acc.address}">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -194,13 +157,13 @@
                             <span th:text="${accountPage.number * accountPage.size + accounts.size()}"></span>
                             trên tổng
                             <span th:text="${accountPage.totalElements}"></span>
-                            tài khoản
+                            dòng
                         </div>
                         <nav th:if="${accountPage.totalPages > 1}">
                             <ul class="pagination mb-0">
                                 <li class="page-item" th:classappend="${accountPage.first} ? 'disabled'">
                                     <a class="page-link" th:href="@{/admin/accounts(page=${accountPage.number - 1}, keyword=${keyword}, role=${role}, status=${status})}" aria-label="Previous">
-                                        &laquo;
+                                        Trước
                                     </a>
                                 </li>
                                 <li class="page-item" th:each="i : ${#numbers.sequence(0, accountPage.totalPages - 1)}" th:classappend="${i == accountPage.number} ? 'active'">
@@ -208,7 +171,7 @@
                                 </li>
                                 <li class="page-item" th:classappend="${accountPage.last} ? 'disabled'">
                                     <a class="page-link" th:href="@{/admin/accounts(page=${accountPage.number + 1}, keyword=${keyword}, role=${role}, status=${status})}" aria-label="Next">
-                                        &raquo;
+                                        Sau
                                     </a>
                                 </li>
                             </ul>
@@ -220,89 +183,42 @@
         </div>
     </div>
 
-    <!-- Modal Thêm Tài Khoản Mới -->
-    <div class="modal fade" id="addAccountModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+    <!-- Bootstrap Confirm Modal Dùng Chung Cho Việc Khóa/Mở -->
+    <div class="modal fade" id="confirmToggleStatusModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form th:action="@{/admin/accounts/add}" method="post">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2"></i>Thêm tài khoản mới</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Họ và Tên <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="fullName" required placeholder="Nhập họ và tên...">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Mã số <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="code" required placeholder="Ví dụ: HE123456, LIB001...">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Email <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" name="email" required placeholder="Nhập địa chỉ email...">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Số điện thoại</label>
-                                <input type="text" class="form-control" name="phone" placeholder="Nhập số điện thoại...">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Vai trò <span class="text-danger">*</span></label>
-                                <select name="role" class="form-select" required>
-                                    <option value="READER" selected>Độc giả (Reader)</option>
-                                    <option value="LIBRARIAN">Thủ thư (Librarian)</option>
-                                    <option value="ADMIN">Quản trị viên (Admin)</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Mật khẩu <span class="text-danger">*</span></label>
-                                <input type="password" class="form-control" name="password" required placeholder="Nhập mật khẩu đăng nhập...">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold">Địa chỉ</label>
-                                <input type="text" class="form-control" name="address" placeholder="Nhập địa chỉ...">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-primary">Thêm tài khoản</button>
-                    </div>
-                </form>
+                <div class="modal-header" id="toggleModalHeader">
+                    <h5 class="modal-title text-white" id="toggleModalTitle">Xác nhận thao tác</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="toggleModalBody">
+                    Nội dung thông báo xác nhận sẽ hiển thị ở đây...
+                </div>
+                <div class="modal-footer p-3 d-flex justify-content-end gap-2 border-top">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" id="btnToggleModalSubmit" class="btn">Xác nhận</button>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="toast-container position-fixed bottom-0 start-0 p-3">
-        <div th:if="${success}"
-             id="successToast"
-             class="toast text-bg-success border-0"
-             role="alert">
+        <div th:if="${success}" id="successToast" class="toast text-bg-success border-0" role="alert">
             <div class="d-flex">
                 <div class="toast-body">
                     <i class="bi bi-check-circle-fill me-2"></i>
                     <span th:text="${success}"></span>
                 </div>
-                <button type="button"
-                        class="btn-close btn-close-white me-2 m-auto"
-                        data-bs-dismiss="toast">
-                </button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
-        <div th:if="${error}"
-             id="errorToast"
-             class="toast text-bg-danger border-0"
-             role="alert">
+        <div th:if="${error}" id="errorToast" class="toast text-bg-danger border-0" role="alert">
             <div class="d-flex">
                 <div class="toast-body">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
                     <span th:text="${error}"></span>
                 </div>
-                <button type="button"
-                        class="btn-close btn-close-white me-2 m-auto"
-                        data-bs-dismiss="toast">
-                </button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
     </div>
@@ -311,16 +227,47 @@
         document.addEventListener('DOMContentLoaded', function () {
             const successToast = document.getElementById('successToast');
             if (successToast) {
-                new bootstrap.Toast(successToast, {
-                    delay: 5000
-                }).show();
+                new bootstrap.Toast(successToast, { delay: 5000 }).show();
             }
             const errorToast = document.getElementById('errorToast');
             if (errorToast) {
-                new bootstrap.Toast(errorToast, {
-                    delay: 5000
-                }).show();
+                new bootstrap.Toast(errorToast, { delay: 5000 }).show();
             }
+
+            let targetFormId = null;
+            const toggleModal = new bootstrap.Modal(document.getElementById('confirmToggleStatusModal'));
+            const toggleModalHeader = document.getElementById('toggleModalHeader');
+            const toggleModalTitle = document.getElementById('toggleModalTitle');
+            const toggleModalBody = document.getElementById('toggleModalBody');
+            const btnToggleModalSubmit = document.getElementById('btnToggleModalSubmit');
+
+            document.querySelectorAll('.btn-toggle-status').forEach(button => {
+                button.addEventListener('click', function () {
+                    targetFormId = this.getAttribute('data-form-id');
+                    const actionType = this.getAttribute('data-action-type');
+                    const userName = this.getAttribute('data-user-name');
+                    if (actionType === 'lock') {
+                        toggleModalHeader.className = "modal-header bg-danger text-white";
+                        toggleModalTitle.innerHTML = '<i class="bi bi-lock-fill me-2"></i>Khóa tài khoản';
+                        toggleModalBody.innerHTML = `Bạn có chắc chắn muốn <strong>KHÓA</strong> tài khoản của <strong>${userName}</strong> không?<br><small class="text-danger">* Người này sẽ không thể đăng nhập vào hệ thống nữa.</small>`;
+                        btnToggleModalSubmit.className = "btn btn-danger";
+                        btnToggleModalSubmit.textContent = "Khóa tài khoản";
+                    } else {
+                        toggleModalHeader.className = "modal-header bg-success text-white";
+                        toggleModalTitle.innerHTML = '<i class="bi bi-unlock-fill me-2"></i>Mở khóa tài khoản';
+                        toggleModalBody.innerHTML = `Xác nhận <strong>MỞ KHÓA</strong> cho tài khoản của <strong>${userName}</strong>?`;
+                        btnToggleModalSubmit.className = "btn btn-success";
+                        btnToggleModalSubmit.textContent = "Mở khóa";
+                    }
+                    toggleModal.show();
+                });
+            });
+
+            btnToggleModalSubmit.addEventListener('click', function () {
+                if (targetFormId) {
+                    document.getElementById(targetFormId).submit();
+                }
+            });
         });
     </script>
 </div>

@@ -1,12 +1,16 @@
 package com.mss301.fe.edu.vn.hsf302_fptu_library_system.controller;
 
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowHistoryStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowRequestStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BorrowHistoryDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BorrowRequestDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.BorrowHistoryRepository;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.BorrowRequestRepository;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.service.BorrowHistoryService;
+import com.mss301.fe.edu.vn.hsf302_fptu_library_system.service.BorrowRequestService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,76 +23,83 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/librarian")
 public class IssueReturnController {
-
     private final BorrowHistoryService borrowHistoryService;
-    private final BorrowRequestRepository borrowRequestRepository;
-    private final BorrowHistoryRepository borrowHistoryRepository;
 
-    // ─────────────────────────────────────────────
-    // ISSUE BOOK — Hiển thị danh sách yêu cầu đã duyệt (WAITING = chờ lấy sách)
-    // URL: GET /librarian/issue
-    // ─────────────────────────────────────────────
-    @GetMapping("/issue")
-    public String listApprovedRequests(Model model) {
-        List<BorrowRequestDto> approvedList = borrowRequestRepository
-                .findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus.WAITING)
-                .stream()
-                .map(r -> BorrowRequestDto.builder()
-                        .requestId(r.getRequestId())
-                        .username(r.getUser().getFullName())
-                        .studentCode(r.getUser().getCode())
-                        .bookTitle(r.getBook().getTitle())
-                        .createdDate(r.getCreatedAt())
-                        .build())
-                .collect(Collectors.toList());
-        model.addAttribute("approvedList", approvedList);
-        return "pages/issue-book";
-    }
+//    @GetMapping("/issue")
+//    public String listApprovedRequests(
+//            Model model
+//    ) {
+//        List<BorrowRequestDto> approvedList = borrowRequestRepository
+//                .findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus.WAITING)
+//                .stream()
+//                .map(r -> BorrowRequestDto.builder()
+//                        .requestId(r.getRequestId())
+//                        .username(r.getUser().getFullName())
+//                        .studentCode(r.getUser().getCode())
+//                        .bookTitle(r.getBook().getTitle())
+//                        .createdDate(r.getCreatedAt())
+//                        .build())
+//                .collect(Collectors.toList());
+//        model.addAttribute("approvedList", approvedList);
+//        return "pages/issue-book";
+//    }
 
-    // ─────────────────────────────────────────────
-    // ISSUE BOOK — Thực hiện giao sách vật lý
-    // URL: POST /librarian/issue/{requestId}
-    // ─────────────────────────────────────────────
-    @PostMapping("/issue/{requestId}")
-    public String issueBook(@PathVariable Integer requestId,
-                            RedirectAttributes redirectAttributes) {
-        try {
-            borrowHistoryService.issueBook(requestId);
-            redirectAttributes.addFlashAttribute("success", "Giao sách thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-        }
-        return "redirect:/librarian/issue";
-    }
+//    @PostMapping("/issue/{requestId}")
+//    public String issueBook(@PathVariable Integer requestId,
+//                            RedirectAttributes redirectAttributes) {
+//        try {
+//            borrowHistoryService.issueBook(requestId);
+//            redirectAttributes.addFlashAttribute("success", "Giao sách thành công!");
+//        } catch (Exception e) {
+//            redirectAttributes.addFlashAttribute("error", e.getMessage());
+//        }
+//        return "redirect:/librarian/issue";
+//    }
 
-    // ─────────────────────────────────────────────
-    // CONFIRM RETURN — Hiển thị danh sách đang mượn (chưa trả)
-    // URL: GET /librarian/confirm-return
-    // ─────────────────────────────────────────────
+//    @GetMapping("/confirm-return")
+//    public String listActiveBorrows(Model model) {
+//        List<BorrowHistoryDto> activeList = borrowHistoryRepository
+//                .findByReturnDateIsNull()
+//                .stream()
+//                .map(b -> BorrowHistoryDto.builder()
+//                        .borrowId(b.getBorrowId())
+//                        .studentName(b.getUser().getFullName())
+//                        .studentCode(b.getUser().getCode())
+//                        .bookTitle(b.getCopy().getBook().getTitle())
+//                        .borrowDate(b.getBorrowDate())
+//                        .dueDate(b.getDueDate())
+//                        .status(b.getStatus())
+//                        .build())
+//                .collect(Collectors.toList());
+//        model.addAttribute("activeList", activeList);
+//        return "pages/confirm-return";
+//    }
+
     @GetMapping("/confirm-return")
-    public String listActiveBorrows(Model model) {
-        //TODO: chuyển cái convert từ object sang dto vào service nhé, controller chỉ điều hướng thôi, để code đây cô nói đấy
-        List<BorrowHistoryDto> activeList = borrowHistoryRepository
-                .findByReturnDateIsNull()
-                .stream()
-                .map(b -> BorrowHistoryDto.builder()
-                        .borrowId(b.getBorrowId())
-                        .studentName(b.getUser().getFullName())
-                        .studentCode(b.getUser().getCode())
-                        .bookTitle(b.getCopy().getBook().getTitle())
-                        .borrowDate(b.getBorrowDate())
-                        .dueDate(b.getDueDate())
-                        .status(b.getStatus())
-                        .build())
-                .collect(Collectors.toList());
-        model.addAttribute("activeList", activeList);
+    public String listActiveBorrows(
+            @RequestParam(defaultValue = "") String fullName,
+            @RequestParam(defaultValue = "") String bookTitle,
+            @RequestParam(required = false) EBorrowHistoryStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model
+    ) {
+        Page<BorrowHistoryDto> activePage =
+                borrowHistoryService.getActiveBorrows(
+                        fullName,
+                        bookTitle,
+                        status,
+                        page,
+                        size
+                );
+        model.addAttribute("activePage", activePage);
+        model.addAttribute("activeList", activePage.getContent());
+        model.addAttribute("fullName", fullName);
+        model.addAttribute("bookTitle", bookTitle);
+        model.addAttribute("status", status);
         return "pages/confirm-return";
     }
 
-    // ─────────────────────────────────────────────
-    // CONFIRM RETURN — Xác nhận sinh viên đã trả sách
-    // URL: POST /librarian/confirm-return/{borrowId}
-    // ─────────────────────────────────────────────
     @PostMapping("/confirm-return/{borrowId}")
     public String confirmReturn(@PathVariable Integer borrowId, RedirectAttributes redirectAttributes) {
         try {

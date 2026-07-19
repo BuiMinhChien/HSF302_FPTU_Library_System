@@ -5,13 +5,13 @@
       layout:decorate="~{layout/main-layout}">
 <head>
     <meta charset="UTF-8">
-    <title>Người mượn sách tuần này (Thủ thư)</title>
+    <title>Người mượn sách</title>
 </head>
 
 <body>
 <div layout:fragment="content">
     <div class="container py-4">
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-sm">
             <div class="card-header">
                 <h4 class="mb-0">
                     Danh sách chờ nhận sách
@@ -26,12 +26,12 @@
                                th:value="${keyword}" placeholder="Tên sinh viên, mã số sinh viên hoặc tên sách...">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-semibold small mb-1">Ngày duyệt</label>
+                        <label class="form-label fw-semibold small mb-1">Duyệt từ ngày</label>
                         <input type="date" name="fromDate" class="form-control" th:value="${fromDate}">
                     </div>
                     <div class="col-md-2 d-flex align-items-end gap-2">
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search me-1"></i> Tìm
+                            <i class="bi bi-search me-1"></i> Tìm kiếm
                         </button>
                         <a th:href="@{/librarian/borrowers-this-week}" class="btn btn-outline-secondary" title="Đặt lại">
                             <i class="bi bi-arrow-counterclockwise"></i>
@@ -48,6 +48,7 @@
                             <th>Sinh viên mượn</th>
                             <th>Thông tin sách</th>
                             <th>Ngày duyệt</th>
+                            <th>Người duyệt</th>
                             <th>Trạng thái</th>
                             <th>Hành động</th>
                         </tr>
@@ -61,19 +62,16 @@
                         </tr>
                         <tr th:each="req, stat : ${requests}">
                             <td class="fw-bold text-muted" th:text="${requestPage.number * requestPage.size + stat.count}"></td>
-
                             <!-- Thông tin người mượn -->
                             <td>
                                 <div class="fw-bold text-primary" th:text="${req.username}"></div>
                                 <div class="small text-muted"><i class="bi bi-person-badge me-1"></i><span th:text="${req.studentCode}"></span></div>
                             </td>
-
                             <!-- Thông tin sách -->
                             <td>
                                 <div class="fw-bold" th:text="${req.bookTitle}"></div>
                                 <div class="small text-muted">Mã bản sao: <span class="badge bg-secondary" th:text="${req.reservedBookCopyBarcode ?: 'N/A'}"></span></div>
                             </td>
-
                             <!-- Ngày duyệt -->
                             <td>
                                 <div th:if="${req.approvedDate != null}">
@@ -81,18 +79,20 @@
                                     <div class="small text-muted" th:text="${#temporals.format(req.approvedDate, 'HH:mm')}"></div>
                                 </div>
                             </td>
-
+                            <td>
+                                <div th:text="${req.approvedByName}"></div>
+                            </td>
                             <!-- Trạng thái -->
                             <td>
                                 <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">
                                     <i class="bi bi-clock-history me-1"></i> Đang chờ lấy sách
                                 </span>
                             </td>
-                            
+
                             <!-- Nút Xác nhận giao sách -->
                             <td>
-                                <form th:action="@{/librarian/borrowers-this-week/{id}/issue(id=${req.requestId})}" method="post">
-                                    <button type="submit" class="btn btn-sm btn-success fw-bold" onclick="return confirm('Bạn có chắc chắn muốn xác nhận đã giao sách cho sinh viên này không?');">
+                                <form th:id="'issueForm-' + ${req.requestId}" th:action="@{/librarian/borrowers-this-week/{id}/issue(id=${req.requestId})}" method="post">
+                                    <button type="button" class="btn btn-sm btn-success fw-bold btn-issue-confirm" th:data-form-id="'issueForm-' + ${req.requestId}">
                                         <i class="bi bi-check-circle me-1"></i> Xác nhận giao sách
                                     </button>
                                 </form>
@@ -107,18 +107,18 @@
                     <div class="text-muted small">
                         Hiển thị <span th:text="${requestPage.number * requestPage.size + 1}"></span> -
                         <span th:text="${requestPage.number * requestPage.size + requests.size()}"></span>
-                        / <span th:text="${requestPage.totalElements}"></span> dòng
+                        trên tổng <span th:text="${requestPage.totalElements}"></span> dòng
                     </div>
                     <nav th:if="${requestPage.totalPages > 1}">
                         <ul class="pagination mb-0">
                             <li class="page-item" th:classappend="${requestPage.first} ? 'disabled'">
-                                <a class="page-link" th:href="@{/librarian/borrowers-this-week(page=${requestPage.number - 1}, keyword=${keyword}, fromDate=${fromDate})}" aria-label="Previous">&laquo;</a>
+                                <a class="page-link" th:href="@{/librarian/borrowers-this-week(page=${requestPage.number - 1}, keyword=${keyword}, fromDate=${fromDate})}" aria-label="Previous">Trước</a>
                             </li>
                             <li class="page-item" th:each="i : ${#numbers.sequence(0, requestPage.totalPages - 1)}" th:classappend="${i == requestPage.number} ? 'active'">
                                 <a class="page-link" th:text="${i + 1}" th:href="@{/librarian/borrowers-this-week(page=${i}, keyword=${keyword}, fromDate=${fromDate})}"></a>
                             </li>
                             <li class="page-item" th:classappend="${requestPage.last} ? 'disabled'">
-                                <a class="page-link" th:href="@{/librarian/borrowers-this-week(page=${requestPage.number + 1}, keyword=${keyword}, fromDate=${fromDate})}" aria-label="Next">&raquo;</a>
+                                <a class="page-link" th:href="@{/librarian/borrowers-this-week(page=${requestPage.number + 1}, keyword=${keyword}, fromDate=${fromDate})}" aria-label="Next">Sau</a>
                             </li>
                         </ul>
                     </nav>
@@ -126,6 +126,26 @@
             </div>
         </div>
     </div>
+
+    <!-- Bootstrap Confirm Modal (Chỉ thêm phần này) -->
+    <div class="modal fade" id="confirmIssueModal" tabindex="-1" aria-labelledby="confirmIssueModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmIssueModalLabel">Xác nhận thao tác</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc chắn muốn xác nhận đã giao sách cho sinh viên này không?
+                </div>
+                <div class="modal-content-footer p-3 d-flex justify-content-end gap-2 border-top">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" id="btnModalSubmit" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div class="toast-container position-fixed bottom-0 start-0 p-3">
         <!-- Success Toast -->
@@ -152,6 +172,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Xử lý Toast hiện tại của bạn
             const successToast = document.getElementById('successToast');
             if (successToast) {
                 new bootstrap.Toast(successToast, {delay: 5000}).show();
@@ -160,6 +181,26 @@
             if (errorToast) {
                 new bootstrap.Toast(errorToast, {delay: 5000}).show();
             }
+
+            // Xử lý logic Modal Xác nhận giao sách (Chỉ thêm phần này)
+            let currentFormId = null;
+            const confirmModal = new bootstrap.Modal(document.getElementById('confirmIssueModal'));
+            const btnModalSubmit = document.getElementById('btnModalSubmit');
+
+            // Lắng nghe sự kiện click trên các nút "Xác nhận giao sách" trong bảng
+            document.querySelectorAll('.btn-issue-confirm').forEach(button => {
+                button.addEventListener('click', function () {
+                    currentFormId = this.getAttribute('data-form-id');
+                    confirmModal.show();
+                });
+            });
+
+            // Khi click nút Xác nhận trên Modal sẽ tiến hành submit form tương ứng
+            btnModalSubmit.addEventListener('click', function () {
+                if (currentFormId) {
+                    document.getElementById(currentFormId).submit();
+                }
+            });
         });
     </script>
 </div>

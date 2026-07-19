@@ -176,7 +176,7 @@
            th:if="${totalItems > 0}">
         <small class="text-muted">
           Hiển thị <span th:text="${start}"></span> - <span th:text="${end}"></span>
-          trên tổng <span th:text="${totalItems}"></span> danh mục
+          trên tổng <span th:text="${totalItems}"></span> dòng
         </small>
 
         <!-- ── Phân trang ── -->
@@ -186,7 +186,7 @@
             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
               <a class="page-link"
                  th:href="@{/admin/categories(keyword=${keyword}, page=${currentPage - 1}, size=${size})}">
-                &laquo;
+                Trước
               </a>
             </li>
             <!-- Các trang số -->
@@ -201,7 +201,7 @@
             <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
               <a class="page-link"
                  th:href="@{/admin/categories(keyword=${keyword}, page=${currentPage + 1}, size=${size})}">
-                &raquo;
+                Sau
               </a>
             </li>
           </ul>

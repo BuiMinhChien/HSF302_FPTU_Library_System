@@ -5,63 +5,110 @@
       layout:decorate="~{layout/main-layout}">
 <head>
     <meta charset="UTF-8">
-    <title>Xác nhận trả sách</title>
+    <title>Lịch sử mượn sách</title>
 </head>
+
 <body>
 <div layout:fragment="content">
     <div class="container py-4">
         <div class="card shadow-sm">
             <div class="card-header d-flex align-items-center gap-2">
-                <i class="bi bi-box-arrow-in-down-left fs-5 text-primary"></i>
-                <h4 class="mb-0">Xác nhận trả sách — Danh sách đang mượn</h4>
+                <h4 class="mb-0">Lịch sử mượn sách</h4>
             </div>
-            <div class="card-body">
 
-                <!-- Thông báo thành công / lỗi -->
-                <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            <div class="card-body">
+                <!-- Form tìm kiếm bổ sung ô chọn Trạng thái -->
+                <form method="get" th:action="@{/librarian/confirm-return}" class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small mb-1">Sinh viên</label>
+                        <input type="text" name="fullName" class="form-control"
+                               th:value="${fullName}" placeholder="Nhập tên sinh viên...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small mb-1">Tên sách</label>
+                        <input type="text" name="bookTitle" class="form-control"
+                               th:value="${bookTitle}" placeholder="Nhập tên tiêu đề sách...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small mb-1">Trạng thái</label>
+                        <select name="status" class="form-select">
+                            <option value="" th:selected="${status == null}">-- Tất cả trạng thái --</option>
+                            <option value="BORROWING" th:selected="${status?.name() == 'BORROWING'}">Đang mượn</option>
+                            <option value="OVERDUE" th:selected="${status?.name() == 'OVERDUE'}">Quá hạn</option>
+                            <option value="RETURNED" th:selected="${status?.name() == 'RETURNED'}">Đã trả</option>
+                            <option value="LOST" th:selected="${status?.name() == 'LOST'}">Báo mất sách</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i> Tìm kiếm
+                        </button>
+                        <a th:href="@{/librarian/confirm-return}" class="btn btn-outline-secondary" title="Đặt lại">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </a>
+                    </div>
+                </form>
 
                 <!-- Bảng danh sách -->
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle">
+                    <table class="table table-hover align-middle border">
                         <thead class="table-light">
                         <tr>
-                            <th>#</th>
-                            <th>Sinh viên</th>
-                            <th>Mã SV</th>
-                            <th>Tên sách</th>
+                            <th>STT</th>
+                            <th>Sinh viên mượn</th>
+                            <th>Thông tin sách</th>
                             <th>Ngày mượn</th>
                             <th>Hạn trả</th>
+                            <th>Trạng thái</th>
                             <th>Hành động</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <!-- Nếu danh sách trống -->
                         <tr th:if="${#lists.isEmpty(activeList)}">
-                            <td colspan="7" class="text-center text-muted py-4">
-                                Hiện không có ai đang mượn sách
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                Hiện không có ai mượn sách phù hợp với bộ lọc.
                             </td>
                         </tr>
-                        <!-- Duyệt từng bản ghi đang mượn -->
-                        <tr th:each="borrow, idx : ${activeList}">
-                            <td th:text="${idx.count}"></td>
-                            <td th:text="${borrow.studentName}"></td>
-                            <td th:text="${borrow.studentCode}"></td>
-                            <td th:text="${borrow.bookTitle}"></td>
-                            <td th:text="${#temporals.format(borrow.borrowDate, 'dd/MM/yyyy')}"></td>
-                            <!-- Đánh dấu đỏ nếu quá hạn -->
+                        <tr th:each="borrow, stat : ${activeList}">
+                            <td class="fw-bold text-muted" th:text="${activePage.number * activePage.size + stat.count}"></td>
                             <td>
-                                <span th:text="${#temporals.format(borrow.dueDate, 'dd/MM/yyyy')}"
-                                      th:class="${borrow.dueDate.isBefore(#temporals.createNow())} ? 'text-danger fw-bold' : ''">
-                                </span>
+                                <div class="fw-bold text-primary" th:text="${borrow.studentName}"></div>
+                                <div class="small text-muted">
+                                    <i class="bi bi-person-badge me-1"></i><span th:text="${borrow.studentCode}"></span>
+                                </div>
                             </td>
                             <td>
-                                <!-- Nút xác nhận trả sách -->
-                                <form th:action="@{/librarian/confirm-return/{id}(id=${borrow.borrowId})}"
-                                      method="post"
-                                      onsubmit="return confirm('Xác nhận ' + '[[${borrow.studentName}]]' + ' đã trả sách?')">
-                                    <button type="submit" class="btn btn-primary btn-sm">
-                                        <i class="bi bi-check-circle me-1"></i>Xác nhận trả
+                                <div class="fw-bold" th:text="${borrow.bookTitle}"></div>
+                            </td>
+                            <td>
+                                <div th:if="${borrow.borrowDate != null}">
+                                    <div th:text="${#temporals.format(borrow.borrowDate, 'dd/MM/yyyy')}"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div th:if="${borrow.dueDate != null}">
+                                    <span th:text="${#temporals.format(borrow.dueDate, 'dd/MM/yyyy')}"
+                                          th:class="${borrow.dueDate.isBefore(#temporals.createNow()) and borrow.status?.name() != 'RETURNED'} ? 'text-danger fw-bold' : ''">
+                                    </span>
+                                </div>
+                            </td>
+                            <!-- Hiển thị Badge Trạng thái trực quan -->
+                            <td>
+                                <span th:if="${borrow.status?.name() == 'BORROWING'}" class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Đang mượn</span>
+                                <span th:if="${borrow.status?.name() == 'OVERDUE'}" class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">Quá hạn</span>
+                                <span th:if="${borrow.status?.name() == 'RETURNED'}" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Đã trả</span>
+                                <span th:if="${borrow.status?.name() == 'LOST'}" class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">Báo mất</span>
+                            </td>
+                            <!-- Nút Xác nhận trả sách (Chỉ ẩn hoặc vô hiệu hóa khi sách ĐÃ TRẢ) -->
+                            <td>
+                                <form th:id="'returnForm-' + ${borrow.borrowId}" th:action="@{/librarian/confirm-return/{id}(id=${borrow.borrowId})}" method="post"
+                                      th:if="${borrow.status?.name() != 'RETURNED'}">
+                                    <button type="button" class="btn btn-sm btn-primary fw-bold btn-return-confirm"
+                                            th:data-form-id="'returnForm-' + ${borrow.borrowId}"
+                                            th:data-student-name="${borrow.studentName}">
+                                        <i class="bi bi-check-circle me-1"></i> Xác nhận trả
                                     </button>
                                 </form>
                             </td>
@@ -69,9 +116,101 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Phân trang (Bổ sung thêm status vào các link chuyển trang) -->
+                <div class="d-flex justify-content-between align-items-center mt-3" th:if="${activePage.totalElements > 0}">
+                    <div class="text-muted small">
+                        Hiển thị <span th:text="${activePage.number * activePage.size + 1}"></span> -
+                        <span th:text="${activePage.number * activePage.size + activeList.size()}"></span>
+                        trên tổng <span th:text="${activePage.totalElements}"></span> dòng
+                    </div>
+                    <nav th:if="${activePage.totalPages > 1}">
+                        <ul class="pagination mb-0">
+                            <li class="page-item" th:classappend="${activePage.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{/librarian/confirm-return(page=${activePage.number - 1}, fullName=${fullName}, bookTitle=${bookTitle}, status=${status})}" aria-label="Previous">Trước</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, activePage.totalPages - 1)}" th:classappend="${i == activePage.number} ? 'active'">
+                                <a class="page-link" th:text="${i + 1}" th:href="@{/librarian/confirm-return(page=${i}, fullName=${fullName}, bookTitle=${bookTitle}, status=${status})}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${activePage.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{/librarian/confirm-return(page=${activePage.number + 1}, fullName=${fullName}, bookTitle=${bookTitle}, status=${status})}" aria-label="Next">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Bootstrap Confirm Modal -->
+    <div class="modal fade" id="confirmReturnModal" tabindex="-1" aria-labelledby="confirmReturnModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmReturnModalLabel">Xác nhận thao tác</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Xác nhận <span id="modalStudentName" class="fw-bold text-primary"></span> đã trả sách?
+                </div>
+                <div class="modal-content-footer p-3 d-flex justify-content-end gap-2 border-top">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" id="btnModalSubmit" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div th:if="${success}" id="successToast" class="toast text-bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        <div th:if="${error}" id="errorToast" class="toast text-bg-danger border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const successToast = document.getElementById('successToast');
+            if (successToast) { new bootstrap.Toast(successToast, {delay: 5000}).show(); }
+            const errorToast = document.getElementById('errorToast');
+            if (errorToast) { new bootstrap.Toast(errorToast, {delay: 5000}).show(); }
+
+            let currentFormId = null;
+            const confirmModal = new bootstrap.Modal(document.getElementById('confirmReturnModal'));
+            const btnModalSubmit = document.getElementById('btnModalSubmit');
+            const modalStudentName = document.getElementById('modalStudentName');
+
+            document.querySelectorAll('.btn-return-confirm').forEach(button => {
+                button.addEventListener('click', function () {
+                    currentFormId = this.getAttribute('data-form-id');
+                    const studentName = this.getAttribute('data-student-name');
+                    modalStudentName.textContent = studentName;
+                    confirmModal.show();
+                });
+            });
+
+            btnModalSubmit.addEventListener('click', function () {
+                if (currentFormId) {
+                    document.getElementById(currentFormId).submit();
+                }
+            });
+        });
+    </script>
 </div>
 </body>
 </html>

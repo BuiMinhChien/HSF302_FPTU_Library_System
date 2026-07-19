@@ -23,15 +23,14 @@ public class LibrarianBorrowerController {
 
     @GetMapping
     @PreAuthorize("hasRole('LIBRARIAN')")
-    public String viewBorrowersThisWeek(
+    public String viewBorrowers(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate fromDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model
     ) {
-        Page<BorrowRequestDto> requestPage = borrowRequestService.getBorrowersThisWeek(keyword, fromDate, page, size);
-
+        Page<BorrowRequestDto> requestPage = borrowRequestService.getBorrowers(keyword, fromDate, page, size);
         model.addAttribute("requests", requestPage.getContent());
         model.addAttribute("requestPage", requestPage);
         model.addAttribute("keyword", keyword);

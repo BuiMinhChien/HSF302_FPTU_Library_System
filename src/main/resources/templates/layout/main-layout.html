@@ -47,7 +47,7 @@
                     <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle me-1"></i>
-                        <span sec:authentication="name">User</span>
+                        <span th:text="${#authentication.principal.user.fullName}">User</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" th:href="@{/profile}">

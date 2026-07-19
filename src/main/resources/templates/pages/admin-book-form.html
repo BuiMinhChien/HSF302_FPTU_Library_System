@@ -5,105 +5,296 @@
       layout:decorate="~{layout/main-layout}">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${bookForm.bookId == null ? 'Thêm sách mới' : 'Sửa thông tin sách'}">Thêm/Sửa Sách</title>
+    <title th:text="${bookForm.bookId != null} ? 'Cập nhật thông tin sách' : 'Thêm sách mới'"></title>
 </head>
 <body>
 <div layout:fragment="content">
     <div class="container py-4">
-        <div class="mb-4">
-            <a th:href="@{/admin/books}" class="text-decoration-none text-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
-            </a>
-        </div>
-
-        <h2 class="fw-bold mb-4" style="color: #f37021;">
-            <i class="bi bi-journal-text me-2"></i><span th:text="${bookForm.bookId == null ? 'Thêm sách mới' : 'Sửa thông tin sách'}"></span>
-        </h2>
-
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <form th:action="${bookForm.bookId == null ? '/admin/books/add' : '/admin/books/edit/' + bookForm.bookId}"
-                      method="post" th:object="${bookForm}">
-                    <input type="hidden" th:field="*{bookId}">
-
-                    <div class="row">
-                        <!-- Cột trái: Thông tin cơ bản -->
-                        <div class="col-md-8">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Tên sách <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" th:field="*{title}" required>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Mã ISBN <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" th:field="*{isbn}" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Năm xuất bản</label>
-                                    <input type="number" class="form-control" th:field="*{publishYear}">
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Nhà xuất bản</label>
-                                <input type="text" class="form-control" th:field="*{publisher}">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Mô tả</label>
-                                <textarea class="form-control" th:field="*{description}" rows="4"></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">URL Ảnh bìa</label>
-                                <input type="url" class="form-control" th:field="*{bookCoverUrl}" placeholder="https://example.com/cover.jpg">
-                            </div>
-                            <!-- Thêm trường Số lượng bản in (Chỉ hiển thị khi thêm mới) -->
-                            <div class="mb-3" th:if="${bookForm.bookId == null}">
-                                <label class="form-label fw-bold">Số lượng bản in nhập về <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" th:field="*{totalCopies}" min="1" value="1" required placeholder="Nhập số lượng bản in (BookCopy)...">
-                            </div>
-                        </div>
-
-                        <!-- Cột phải: Thể loại & Tác giả -->
-                        <div class="col-md-4">
-                            <!-- Chọn danh mục -->
-                            <div class="card mb-3">
-                                <div class="card-header bg-light fw-bold">Chọn Danh mục</div>
-                                <div class="card-body" style="max-height: 200px; overflow-y: auto;">
-                                    <div class="form-check" th:each="cat : ${categories}">
-                                        <input class="form-check-input" type="checkbox" th:value="${cat.categoryId}" th:field="*{categoryIds}" th:id="'cat-' + ${cat.categoryId}">
-                                        <label class="form-check-label" th:for="'cat-' + ${cat.categoryId}" th:text="${cat.categoryName}"></label>
-                                    </div>
-                                    <div th:if="${#lists.isEmpty(categories)}" class="text-danger small">
-                                        Chưa có danh mục nào. Vui lòng thêm danh mục trước.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Chọn tác giả -->
-                            <div class="card mb-3">
-                                <div class="card-header bg-light fw-bold">Chọn Tác giả</div>
-                                <div class="card-body" style="max-height: 200px; overflow-y: auto;">
-                                    <div class="form-check" th:each="auth : ${authors}">
-                                        <input class="form-check-input" type="checkbox" th:value="${auth.authorId}" th:field="*{authorIds}" th:id="'auth-' + ${auth.authorId}">
-                                        <label class="form-check-label" th:for="'auth-' + ${auth.authorId}" th:text="${auth.authorName}"></label>
-                                    </div>
-                                    <div th:if="${#lists.isEmpty(authors)}" class="text-danger small">
-                                        Chưa có tác giả nào. Vui lòng thêm tác giả trước.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-sm">
+                    <!-- Tiêu đề thẻ động chuẩn mẫu -->
+                    <div class="card-header d-flex align-items-center gap-2 bg-light">
+                        <i th:class="${bookForm.bookId != null} ? 'bi bi-pencil-square fs-5 text-primary' : 'bi bi-journal-plus fs-5 text-primary'"></i>
+                        <h4 class="mb-0 text-primary fw-bold"
+                            th:text="${bookForm.bookId != null} ? 'Cập nhật thông tin sách' : 'Thêm đầu sách mới'">
+                        </h4>
                     </div>
 
-                    <div class="d-flex justify-content-end mt-4 pt-3 border-top">
-                        <a th:href="@{/admin/books}" class="btn btn-secondary me-2">Hủy</a>
-                        <button type="submit" class="btn btn-primary px-4">
-                            <i class="bi bi-save me-1"></i>Lưu sách
-                        </button>
+                    <div class="card-body">
+                        <!-- Form hỗ trợ tải lên file với enctype -->
+                        <form th:action="${bookForm.bookId != null} ? @{/admin/books/edit} : @{/admin/books/add}"
+                              th:object="${bookForm}"
+                              method="post"
+                              enctype="multipart/form-data">
+                            <input type="hidden" th:field="*{bookId}" th:if="*{bookId != null}" />
+
+                            <!-- Khu vực hiển thị và xem trước ảnh bìa sách -->
+                            <div class="row mb-4 align-items-center justify-content-center text-center text-md-start bg-light p-3 rounded mx-1 border">
+                                <div th:if="*{bookCoverUrl != null}" class="col-md-2 d-flex justify-content-center mb-3 mb-md-0">
+                                    <div class="position-relative">
+                                        <img id="coverPreview"
+                                             th:src="*{bookCoverUrl != null and !#strings.isEmpty(bookCoverUrl)} ? *{bookCoverUrl} : '/images/default-book.png'"
+                                             alt="Cover Preview"
+                                             class="object-fit-cover border shadow-sm p-1 bg-white rounded-1"
+                                             style="width: 80px; height: 115px;">
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <h6 class="fw-bold mb-1 text-secondary">Ảnh bìa sách (Book Cover)</h6>
+                                    <p class="text-muted small mb-0">Hệ thống chấp nhận định dạng ảnh JPG, PNG hoặc WEBP. Bạn có thể chọn tải file ảnh mới từ máy tính ở mục bên dưới để thay đổi hình hiển thị.</p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <!-- Thông tin cơ bản sách -->
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Tên sách <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" th:field="*{title}" placeholder="Nhập tên hoặc tiêu đề sách...">
+                                    <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="text-danger small mt-1"></div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Mã ISBN <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" th:field="*{isbn}" placeholder="Ví dụ: 9786043773121">
+                                    <div th:if="${#fields.hasErrors('isbn')}" th:errors="*{isbn}" class="text-danger small mt-1"></div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Nhà xuất bản <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" th:field="*{publisher}" placeholder="Nhập tên nhà xuất bản...">
+                                    <div th:if="${#fields.hasErrors('publisher')}" th:errors="*{publisher}" class="text-danger small mt-1"></div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Năm xuất bản <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" th:field="*{publishYear}" placeholder="Ví dụ: 2026">
+                                    <div th:if="${#fields.hasErrors('publishYear')}" th:errors="*{publishYear}" class="text-danger small mt-1"></div>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Mô tả tóm tắt</label>
+                                    <textarea class="form-control" th:field="*{description}" rows="3" placeholder="Nhập tóm tắt nội dung sách..."></textarea>
+                                    <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger small mt-1"></div>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Tải lên file ảnh bìa mới</label>
+                                    <input type="file" id="coverFileInput" class="form-control" th:field="*{bookCoverFile}" accept="image/*">
+                                    <div th:if="${#fields.hasErrors('bookCoverFile')}" th:errors="*{bookCoverFile}" class="text-danger small mt-1"></div>
+                                </div>
+
+                                <!-- Phân mục Checkbox danh mục & Danh sách Tác giả -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Chọn Danh mục thể loại <span class="text-danger">*</span></label>
+                                    <div class="border rounded p-3 bg-white" style="max-height: 160px; overflow-y: auto;">
+                                        <div class="form-check" th:each="cat : ${categories}">
+                                            <input class="form-check-input" type="checkbox" th:value="${cat.categoryId}" th:field="*{categoryIds}" th:id="'cat-' + ${cat.categoryId}">
+                                            <label class="form-check-label text-dark small" th:for="'cat-' + ${cat.categoryId}" th:text="${cat.categoryName}"></label>
+                                        </div>
+                                        <div th:if="${#lists.isEmpty(categories)}" class="text-danger small">Chưa có dữ liệu danh mục.</div>
+                                    </div>
+                                    <div th:if="${#fields.hasErrors('categoryIds')}" th:errors="*{categoryIds}" class="text-danger small mt-1"></div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Chọn Tác giả <span class="text-danger">*</span></label>
+                                    <div class="border rounded p-3 bg-white" style="max-height: 160px; overflow-y: auto;">
+                                        <div class="form-check" th:each="auth : ${authors}">
+                                            <input class="form-check-input" type="checkbox" th:value="${auth.authorId}" th:field="*{authorIds}" th:id="'auth-' + ${auth.authorId}">
+                                            <label class="form-check-label text-dark small" th:for="'auth-' + ${auth.authorId}" th:text="${auth.authorName}"></label>
+                                        </div>
+                                        <div th:if="${#lists.isEmpty(authors)}" class="text-danger small">Chưa có dữ liệu tác giả.</div>
+                                    </div>
+                                    <div th:if="${#fields.hasErrors('authorIds')}" th:errors="*{authorIds}" class="text-danger small mt-1"></div>
+                                </div>
+
+                                <!-- Cấu trúc quản lý danh sách bản sao (BookCopy) động -->
+                                <div class="col-md-12 mt-4">
+                                    <div class="p-3 border rounded bg-light">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-layers me-1"></i> Danh sách các bản sao của sách (Book Copies)</h6>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" id="addCopyBtn">
+                                                <i class="bi bi-plus-lg me-1"></i>Thêm bản sao
+                                            </button>
+                                        </div>
+
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered bg-white align-middle mb-0" id="copiesTable">
+                                                <thead class="table-secondary small">
+                                                <tr>
+                                                    <th>Mã Barcode <span class="text-danger">*</span></th>
+                                                    <th style="width: 220px;">Trạng thái bản sao</th>
+                                                    <th style="width: 60px;" class="text-center">Xóa</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody id="copiesContainer">
+                                                <!-- Thymeleaf render dữ liệu cũ nếu có lỗi validate quay về hoặc khi nhấn sửa -->
+                                                <tr th:each="copy, stat : *{bookCopies}" class="copy-row">
+                                                    <td>
+                                                        <input type="hidden" class="copy-id-input" th:field="*{bookCopies[__${stat.index}__].copyId}">
+                                                        <input type="text" class="form-control form-control-sm barcode-input" th:field="*{bookCopies[__${stat.index}__].barcode}" placeholder="Nhập mã vạch barcode...">
+                                                        <div th:if="${#fields.hasErrors('bookCopies[__${stat.index}__].barcode')}" th:errors="*{bookCopies[__${stat.index}__].barcode}" class="text-danger small mt-1"></div>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-select form-select-sm status-select" th:field="*{bookCopies[__${stat.index}__].status}">
+                                                            <option value="AVAILABLE">AVAILABLE</option>
+                                                            <option value="BORROWED">BORROWED</option>
+                                                            <option value="RESERVED">RESERVED</option>
+                                                            <option value="WITHDRAWN">WITHDRAWN</option>
+                                                            <option value="RESERVED">LOST</option>
+                                                            <option value="WITHDRAWN">DAMAGED</option>
+                                                        </select>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-sm btn-outline-danger remove-copy-btn"><i class="bi bi-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                                <!-- Hiển thị dòng mặc định nếu danh sách trống ban đầu -->
+                                                <tr th:if="${#lists.isEmpty(bookForm.bookCopies)}" id="emptyCopiesRow">
+                                                    <td colspan="3" class="text-center text-muted small py-3">Chưa có bản sao nào được tạo. Nhấn "Thêm bản sao" để thêm mới.</td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div th:if="${#fields.hasErrors('bookCopies')}" th:errors="*{bookCopies}" class="text-danger small mt-1"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nhóm nút hành động chuẩn mẫu -->
+                            <div class="mt-4 pt-3 border-top d-flex gap-2 justify-content-end">
+                                <a th:href="@{/admin/books}" class="btn btn-secondary">Hủy bỏ</a>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i th:class="${bookForm.bookId != null} ? 'bi bi-save me-1' : 'bi bi-journal-plus me-1'"></i>
+                                    <span th:text="${bookForm.bookId != null} ? 'Cập nhật sách' : 'Tạo sách mới'"></span>
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Toast Container thông báo lỗi/thành công -->
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div th:if="${success}" id="successToast" class="toast text-bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i><span th:text="${success}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        <div th:if="${error}" id="errorToast" class="toast text-bg-danger border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${error}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // Khởi chạy hệ thống Toast thông báo
+            const successToast = document.getElementById('successToast');
+            if (successToast) { new bootstrap.Toast(successToast, { delay: 5000 }).show(); }
+            const errorToast = document.getElementById('errorToast');
+            if (errorToast) { new bootstrap.Toast(errorToast, { delay: 5000 }).show(); }
+
+            // Xử lý xem trước ảnh bìa thời gian thực
+            const coverFileInput = document.getElementById('coverFileInput');
+            const coverPreview = document.getElementById('coverPreview');
+            if (coverPreview) {
+                const originalSrc = coverPreview.src;
+                if (coverFileInput) {
+                    coverFileInput.addEventListener('change', function (event) {
+                        const file = event.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function (e) { coverPreview.src = e.target.result; };
+                            reader.readAsDataURL(file);
+                        } else {
+                            coverPreview.src = originalSrc;
+                        }
+                    });
+                }
+            }
+
+            // Xử lý Thêm / Xóa động bản sao sách (BookCopy)
+            const addCopyBtn = document.getElementById('addCopyBtn');
+            const copiesContainer = document.getElementById('copiesContainer');
+            const emptyCopiesRow = document.getElementById('emptyCopiesRow');
+
+            function updateRowIndices() {
+                const rows = copiesContainer.querySelectorAll('.copy-row');
+                if(rows.length === 0) {
+                    if(emptyCopiesRow) emptyCopiesRow.style.display = '';
+                    return;
+                }
+                if(emptyCopiesRow) emptyCopiesRow.style.display = 'none';
+                rows.forEach((row, index) => {
+                    // Định vị an toàn bằng class được chỉ định rõ ràng
+                    const hiddenInput = row.querySelector('.copy-id-input');
+                    if(hiddenInput) {
+                        hiddenInput.name = `bookCopies[${index}].copyId`;
+                        hiddenInput.id = `bookCopies${index}.copyId`;
+                    }
+                    const textInput = row.querySelector('.barcode-input');
+                    if(textInput) {
+                        textInput.name = `bookCopies[${index}].barcode`;
+                        textInput.id = `bookCopies${index}.barcode`;
+                    }
+                    const selectElement = row.querySelector('.status-select');
+                    if(selectElement) {
+                        selectElement.name = `bookCopies[${index}].status`;
+                        selectElement.id = `bookCopies${index}.status`;
+                    }
+                });
+            }
+            if (addCopyBtn) {
+                addCopyBtn.addEventListener('click', function() {
+                    if(emptyCopiesRow) emptyCopiesRow.style.display = 'none';
+                    const newRow = document.createElement('tr');
+                    newRow.className = 'copy-row';
+                    // Đã bổ sung các class nhận diện cụ thể (.copy-id-input, .barcode-input, .status-select)
+                    newRow.innerHTML = `
+                        <td>
+                            <input type="hidden" class="copy-id-input" value="">
+                            <input type="text" class="form-control form-control-sm barcode-input" placeholder="Nhập mã vạch barcode...">
+                        </td>
+                        <td>
+                            <select class="form-select form-select-sm status-select">
+                                <option value="AVAILABLE">AVAILABLE</option>
+                                <option value="BORROWED">BORROWED</option>
+                                <option value="RESERVED">RESERVED</option>
+                                <option value="WITHDRAWN">WITHDRAWN</option>
+                                <option value="RESERVED">LOST</option>
+                                <option value="WITHDRAWN">DAMAGED</option>
+                            </select>
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-copy-btn"><i class="bi bi-trash"></i></button>
+                        </td>
+                    `;
+                    copiesContainer.appendChild(newRow);
+                    updateRowIndices();
+                });
+            }
+            if (copiesContainer) {
+                copiesContainer.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('remove-copy-btn') || e.target.closest('.remove-copy-btn')) {
+                        const button = e.target.classList.contains('remove-copy-btn') ? e.target : e.target.closest('.remove-copy-btn');
+                        button.closest('.copy-row').remove();
+                        updateRowIndices();
+                    }
+                });
+            }
+        });
+    </script>
 </div>
 </body>
 </html>

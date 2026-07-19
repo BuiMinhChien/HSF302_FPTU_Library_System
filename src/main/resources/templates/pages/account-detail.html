@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <!-- Tiêu đề trang động tùy thuộc vào việc thêm hay sửa -->
+    <title th:text="${accountForm.userId != null} ? 'Cập nhật tài khoản' : 'Thêm tài khoản mới'"></title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <!-- Tiêu đề thẻ động -->
+                    <div class="card-header d-flex align-items-center gap-2 bg-light">
+                        <i th:class="${accountForm.userId != null} ? 'bi bi-pencil-square fs-5 text-primary' : 'bi bi-person-plus-fill fs-5 text-primary'"></i>
+                        <h4 class="mb-0 text-primary fw-bold"
+                            th:text="${accountForm.userId != null} ? 'Cập nhật thông tin tài khoản' : 'Thêm tài khoản mới'">
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Đường dẫn form động: Nếu có userId thì gửi về edit/{userId}, ngược lại gửi về add -->
+                        <form th:action="${accountForm.userId != null} ? @{/admin/accounts/edit} : @{/admin/accounts/add}"
+                              th:object="${accountForm}"
+                              method="post"
+                              enctype="multipart/form-data">
+
+                            <!-- Giữ lại userId ẩn nếu đang ở chế độ cập nhật -->
+                            <input type="hidden" th:field="*{userId}" th:if="*{userId != null}" />
+
+                            <!-- Khu vực hiển thị và xem trước Avatar -->
+                            <div class="row mb-4 align-items-center justify-content-center text-center text-md-start">
+                                <div th:if="*{avatarUrl != null}" class="col-md-3 d-flex justify-content-center mb-3 mb-md-0">
+                                    <div class="position-relative">
+                                        <!-- Hiển thị ảnh cũ từ url hoặc ảnh mặc định -->
+                                        <img id="avatarPreview"
+                                             th:src="*{avatarUrl != null and !#strings.isEmpty(avatarUrl)} ? *{avatarUrl} : '/images/default-avatar.png'"
+                                             alt="Avatar Preview"
+                                             class="rounded-circle object-fit-cover border shadow-sm p-1 bg-white"
+                                             style="width: 120px; height: 120px;">
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <h6 class="fw-bold mb-1 text-secondary">Ảnh đại diện tài khoản</h6>
+                                    <p class="text-muted small mb-0">Hệ thống chấp nhận định dạng ảnh JPG, PNG hoặc WEBP. Chọn tệp mới phía dưới để thay đổi hình ảnh hiển thị.</p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Họ và Tên <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" th:field="*{fullName}" placeholder="Nhập họ và tên...">
+                                    <div th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="text-danger small mt-1"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Mã số <span class="text-danger">*</span></label>
+                                    <!-- Khóa trường mã số (Readonly) nếu ở chế độ chỉnh sửa để tránh lỗi dữ liệu hệ thống -->
+                                    <input type="text" class="form-control" th:field="*{code}" placeholder="Ví dụ: HE123456, LIB001..." th:readonly="*{userId != null}">
+                                    <div th:if="${#fields.hasErrors('code')}" th:errors="*{code}" class="text-danger small mt-1"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" th:field="*{email}" placeholder="Nhập địa chỉ email...">
+                                    <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger small mt-1"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" th:field="*{phone}" placeholder="Nhập số điện thoại...">
+                                    <div th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="text-danger small mt-1"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Vai trò <span class="text-danger">*</span></label>
+                                    <select th:field="*{role}" class="form-select">
+                                        <option value="READER">Độc giả (Reader)</option>
+                                        <option value="LIBRARIAN">Thủ thư (Librarian)</option>
+                                        <option value="ADMIN">Quản trị viên (Admin)</option>
+                                    </select>
+                                    <div th:if="${#fields.hasErrors('role')}" th:errors="*{role}" class="text-danger small mt-1"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Trạng thái <span class="text-danger">*</span></label>
+                                    <select th:field="*{status}" class="form-select">
+                                        <option th:value="true" th:text="'Kích hoạt / Hoạt động'"></option>
+                                        <option th:value="false" th:text="'Khóa / Tạm dừng'"></option>
+                                    </select>
+                                    <div th:if="${#fields.hasErrors('status')}" th:errors="*{status}" class="text-danger small mt-1"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Địa chỉ <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" th:field="*{address}" placeholder="Nhập địa chỉ cư trú...">
+                                    <div th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="text-danger small mt-1"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Tải lên ảnh mới</label>
+                                    <!-- ID avatarFileInput dùng để bắt sự kiện xem trước ảnh bằng JS -->
+                                    <input type="file" id="avatarFileInput" class="form-control" th:field="*{avatarFile}" accept="image/*">
+                                    <div th:if="${#fields.hasErrors('avatarFile')}" th:errors="*{avatarFile}" class="text-danger small mt-1"></div>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-3 border-top d-flex gap-2 justify-content-end">
+                                <a th:href="@{/admin/accounts}" class="btn btn-secondary">
+                                    Hủy bỏ
+                                </a>
+                                <!-- Nội dung nút bấm thay đổi theo hành động tương ứng -->
+                                <button type="submit" class="btn btn-primary">
+                                    <i th:class="${accountForm.userId != null} ? 'bi bi-save me-1' : 'bi bi-person-plus-fill me-1'"></i>
+                                    <span th:text="${accountForm.userId != null} ? 'Cập nhật tài khoản' : 'Tạo tài khoản'"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div th:if="${success}" id="successToast" class="toast text-bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        <div th:if="${error}" id="errorToast" class="toast text-bg-danger border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Hiển thị thông báo Toast nếu có
+            const successToast = document.getElementById('successToast');
+            if (successToast) { new bootstrap.Toast(successToast, { delay: 5000 }).show(); }
+            const errorToast = document.getElementById('errorToast');
+            if (errorToast) { new bootstrap.Toast(errorToast, { delay: 5000 }).show(); }
+
+            // Xử lý xem trước ảnh thời gian thực khi chọn file mới
+            const avatarFileInput = document.getElementById('avatarFileInput');
+            const avatarPreview = document.getElementById('avatarPreview');
+            // Lưu lại đường dẫn gốc để khôi phục nếu người dùng xóa file đã chọn
+            const originalSrc = avatarPreview.src;
+
+            if (avatarFileInput && avatarPreview) {
+                avatarFileInput.addEventListener('change', function (event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            avatarPreview.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        avatarPreview.src = originalSrc;
+                    }
+                });
+            }
+        });
+    </script>
+</div>
+</body>
+</html>
