@@ -63,13 +63,13 @@ public class LibraryStatisticServiceImpl implements LibraryStatisticService {
         stats.put("totalFines", fineRepository.count());
         stats.put("totalBorrowRequests", borrowRequestRepository.count());
 
-        // 4 biểu đồ biến động 7 ngày gần đây
-        LocalDateTime sevenDaysAgo = LocalDate.now().minusDays(6).atStartOfDay();
+        // 4 biểu đồ biến động 30 ngày gần đây
+        LocalDateTime thirtyDaysAgo = LocalDate.now().minusDays(29).atStartOfDay();
 
-        List<BorrowHistory>  recentBorrows       = borrowHistoryRepository.findByBorrowDateAfter(sevenDaysAgo);
-        List<Fine>           recentFines         = fineRepository.findByCreatedAtAfter(sevenDaysAgo);
-        List<BorrowRequest>  recentBorrowReqs    = borrowRequestRepository.findByCreatedAtAfter(sevenDaysAgo);
-        List<NewBookRequest> recentNewBookReqs   = newBookRequestRepository.findByCreatedAtAfter(sevenDaysAgo);
+        List<BorrowHistory>  recentBorrows       = borrowHistoryRepository.findByBorrowDateAfter(thirtyDaysAgo);
+        List<Fine>           recentFines         = fineRepository.findByCreatedAtAfter(thirtyDaysAgo);
+        List<BorrowRequest>  recentBorrowReqs    = borrowRequestRepository.findByCreatedAtAfter(thirtyDaysAgo);
+        List<NewBookRequest> recentNewBookReqs   = newBookRequestRepository.findByCreatedAtAfter(thirtyDaysAgo);
 
         List<String> trendLabels            = new ArrayList<>();
         List<Long>   trendValues            = new ArrayList<>();
@@ -78,7 +78,7 @@ public class LibraryStatisticServiceImpl implements LibraryStatisticService {
         List<Long>   trendNewBookReqValues  = new ArrayList<>();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM");
 
-        for (int i = 6; i >= 0; i--) {
+        for (int i = 29; i >= 0; i--) {
             LocalDate date = LocalDate.now().minusDays(i);
             trendLabels.add(date.format(fmt));
 
