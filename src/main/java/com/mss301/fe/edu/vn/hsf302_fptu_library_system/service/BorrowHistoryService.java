@@ -15,6 +15,7 @@ public interface BorrowHistoryService {
 
     // Hàm MỚI — Xác nhận sinh viên đã trả sách + FIFO
     BorrowHistory confirmReturn(Integer borrowId);
+    BorrowHistory confirmLost(Integer borrowId);
 
     Page<BorrowHistoryDto> getActiveBorrows(
             String fullName,

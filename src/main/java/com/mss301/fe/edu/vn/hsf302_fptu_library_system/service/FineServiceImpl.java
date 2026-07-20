@@ -31,7 +31,6 @@ public class FineServiceImpl implements FineService {
     private final CommonFunction commonFunction;
 
     @Override
-    @Transactional
     public Page<FineViewDTO> getFinesForCurrentReader(FineSearchRequest request) {
         User reader = commonFunction.getCurrentUser();
         Pageable pageable = PageRequest.of(
@@ -49,7 +48,6 @@ public class FineServiceImpl implements FineService {
     }
 
     @Override
-    @Transactional
     public Page<FineViewDTO> getAllFines(FineSearchRequest request) {
         Pageable pageable = PageRequest.of(
                 request.getPage(),
@@ -86,7 +84,6 @@ public class FineServiceImpl implements FineService {
     }
 
     @Override
-    @Transactional
     public List<BorrowHistoryOptionDTO> getBorrowOptionsForCreateFine() {
         return borrowHistoryRepository.findReturnedWithoutFine().stream()
                 .map(this::toBorrowOption)
@@ -94,7 +91,6 @@ public class FineServiceImpl implements FineService {
     }
 
     @Override
-    @Transactional
     public Fine getFineForPayment(Integer fineId) {
         return fineRepository.findByFineIdWithUser(fineId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khoản phạt"));

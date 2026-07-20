@@ -116,18 +116,10 @@
                                 <span th:if="${history.returnDate == null}" class="text-muted">-</span>
                             </td>
                             <td>
-                                <span th:if="${history.returnDate != null and history.returnDate.isBefore(history.dueDate)}"
-                                      class="badge bg-success">
-                                    Đã trả đúng hạn
-                                </span>
-                                <span th:if="${history.returnDate != null and !history.returnDate.isBefore(history.dueDate)}"
-                                      class="badge bg-warning text-dark">
-                                    Trả trễ hạn
-                                </span>
-                                <span th:if="${history.returnDate == null}"
-                                      class="badge bg-secondary">
-                                    Chưa trả
-                                </span>
+                                <span th:if="${history.status?.name() == 'BORROWING'}" class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Đang mượn</span>
+                                <span th:if="${history.status?.name() == 'OVERDUE'}" class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">Quá hạn</span>
+                                <span th:if="${history.status?.name() == 'RETURNED'}" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Đã trả</span>
+                                <span th:if="${history.status?.name() == 'LOST'}" class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">Báo mất</span>
                             </td>
                         </tr>
                         </tbody>

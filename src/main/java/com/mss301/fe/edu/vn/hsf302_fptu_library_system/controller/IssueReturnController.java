@@ -25,56 +25,6 @@ import java.util.stream.Collectors;
 public class IssueReturnController {
     private final BorrowHistoryService borrowHistoryService;
 
-//    @GetMapping("/issue")
-//    public String listApprovedRequests(
-//            Model model
-//    ) {
-//        List<BorrowRequestDto> approvedList = borrowRequestRepository
-//                .findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus.WAITING)
-//                .stream()
-//                .map(r -> BorrowRequestDto.builder()
-//                        .requestId(r.getRequestId())
-//                        .username(r.getUser().getFullName())
-//                        .studentCode(r.getUser().getCode())
-//                        .bookTitle(r.getBook().getTitle())
-//                        .createdDate(r.getCreatedAt())
-//                        .build())
-//                .collect(Collectors.toList());
-//        model.addAttribute("approvedList", approvedList);
-//        return "pages/issue-book";
-//    }
-
-//    @PostMapping("/issue/{requestId}")
-//    public String issueBook(@PathVariable Integer requestId,
-//                            RedirectAttributes redirectAttributes) {
-//        try {
-//            borrowHistoryService.issueBook(requestId);
-//            redirectAttributes.addFlashAttribute("success", "Giao sách thành công!");
-//        } catch (Exception e) {
-//            redirectAttributes.addFlashAttribute("error", e.getMessage());
-//        }
-//        return "redirect:/librarian/issue";
-//    }
-
-//    @GetMapping("/confirm-return")
-//    public String listActiveBorrows(Model model) {
-//        List<BorrowHistoryDto> activeList = borrowHistoryRepository
-//                .findByReturnDateIsNull()
-//                .stream()
-//                .map(b -> BorrowHistoryDto.builder()
-//                        .borrowId(b.getBorrowId())
-//                        .studentName(b.getUser().getFullName())
-//                        .studentCode(b.getUser().getCode())
-//                        .bookTitle(b.getCopy().getBook().getTitle())
-//                        .borrowDate(b.getBorrowDate())
-//                        .dueDate(b.getDueDate())
-//                        .status(b.getStatus())
-//                        .build())
-//                .collect(Collectors.toList());
-//        model.addAttribute("activeList", activeList);
-//        return "pages/confirm-return";
-//    }
-
     @GetMapping("/confirm-return")
     public String listActiveBorrows(
             @RequestParam(defaultValue = "") String fullName,
@@ -105,6 +55,17 @@ public class IssueReturnController {
         try {
             borrowHistoryService.confirmReturn(borrowId);
             redirectAttributes.addFlashAttribute("success", "Xác nhận trả sách thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/librarian/confirm-return";
+    }
+
+    @PostMapping("/confirm-lost/{borrowId}")
+    public String confirmLost(@PathVariable Integer borrowId, RedirectAttributes redirectAttributes) {
+        try {
+            borrowHistoryService.confirmLost(borrowId);
+            redirectAttributes.addFlashAttribute("success", "Xác nhận báo mất sách thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }

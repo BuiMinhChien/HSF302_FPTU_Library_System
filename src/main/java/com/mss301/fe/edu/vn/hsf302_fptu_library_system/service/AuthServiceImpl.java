@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -22,9 +20,7 @@ public class AuthServiceImpl implements AuthService {
     public void resetPassword(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
-        // Tạo mật khẩu mới
         String newPassword = commonFunction.generateRandomPassword();
-        // Gửi email trước
         try {
             emailService.sendNewPasswordEmail(
                     user.getEmail(),
@@ -34,9 +30,7 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             throw new RuntimeException("Send mail failed");
         }
-        // Hash password
         user.setPassword(passwordEncoder.encode(newPassword));
-        // Lưu DB
         userRepository.save(user);
     }
 
@@ -44,13 +38,10 @@ public class AuthServiceImpl implements AuthService {
     public boolean changePassword(String email, String oldPassword, String newPassword) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
-        // Kiểm tra mật khẩu cũ
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             return false;
         }
-        // Hash password
         user.setPassword(passwordEncoder.encode(newPassword));
-        // Lưu DB
         userRepository.save(user);
         return true;
     }

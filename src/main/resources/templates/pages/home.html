@@ -36,7 +36,7 @@
                     </button>
                 </div>
 
-                <div class="text-center small">
+                <div sec:authorize="hasRole('READER')" class="text-center small">
                     <a th:href="@{/borrow-requests}" class="text-white text-decoration-none">Yêu cầu mượn sách</a>
                     <span class="text-white-50 mx-2">|</span>
                     <a th:href="@{/borrow-history}" class="text-white text-decoration-none">Lịch sử mượn sách</a>

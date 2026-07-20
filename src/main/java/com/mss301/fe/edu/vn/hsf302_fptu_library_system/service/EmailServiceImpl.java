@@ -20,16 +20,21 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class EmailServiceImpl implements EmailService {
-    JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
+    private final SpringTemplateEngine templateEngine;
+
     @Value("${spring.mail.username}")
     @NonFinal
-    String fromEmailAddress;
-    SpringTemplateEngine templateEngine;
+    private String fromEmailAddress;
+
+    @Value("${borrow.request.expire-days}")
+    private int expireDays;
+
+    @Value("${borrow.history.reminder}")
+    private int reminder;
 
     @Async
     public void sendNewPasswordEmail(String to, String fullName, String newPassword) {
@@ -61,6 +66,7 @@ public class EmailServiceImpl implements EmailService {
             Context context = new Context();
             context.setVariable("fullName", fullName);
             context.setVariable("bookTitle", bookTitle);
+            context.setVariable("expireDays", expireDays);
             context.setVariable("deadline", deadline.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             String html = templateEngine.process("email/book-ready-notification", context);
             MimeMessage message = mailSender.createMimeMessage();
@@ -78,7 +84,7 @@ public class EmailServiceImpl implements EmailService {
     private LocalDate calculatePickupDeadline(LocalDate startDate) {
         int workingDays = 0;
         LocalDate deadline = startDate;
-        while (workingDays < 3) {
+        while (workingDays < expireDays) {
             deadline = deadline.plusDays(1);
             if (deadline.getDayOfWeek() != DayOfWeek.SATURDAY
                     && deadline.getDayOfWeek() != DayOfWeek.SUNDAY) {
@@ -102,6 +108,31 @@ public class EmailServiceImpl implements EmailService {
             helper.setFrom(fromEmailAddress);
             helper.setTo(to);
             helper.setSubject("FPTU Library - Thông báo hết hạn giữ sách");
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Không gửi được email", e);
+        }
+    }
+
+    @Async
+    public void sendReturnReminderEmail(
+            String to,
+            String fullName,
+            String bookTitle,
+            LocalDate dueDate
+    ) {
+        try {
+            Context context = new Context();
+            context.setVariable("fullName", fullName);
+            context.setVariable("bookTitle", bookTitle);
+            context.setVariable("dueDate", dueDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            String html = templateEngine.process("email/return-reminder-notification", context);
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmailAddress);
+            helper.setTo(to);
+            helper.setSubject("FPTU Library - Nhắc nhở hạn trả sách");
             helper.setText(html, true);
             mailSender.send(message);
         } catch (Exception e) {

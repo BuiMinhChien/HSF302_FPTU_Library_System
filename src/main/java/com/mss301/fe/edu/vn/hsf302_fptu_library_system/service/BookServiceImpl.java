@@ -25,7 +25,6 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Transactional
-@Slf4j
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final CategoryRepository categoryRepository;
@@ -123,7 +122,6 @@ public class BookServiceImpl implements BookService {
         });
     }
 
-    // MANAGE BOOK
     @Override
     public Page<BookFormDto> getAllBooksForAdmin(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("bookId").descending());
@@ -174,7 +172,6 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    @Transactional
     public void saveBook(BookFormDto form) {
         Book book;
         if (form.getBookId() == null) {
@@ -268,7 +265,6 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    @Transactional
     public void deleteBook(Integer id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sách"));

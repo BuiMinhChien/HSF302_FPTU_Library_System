@@ -27,14 +27,14 @@ public class BorrowExpirationJob {
     private final EmailService emailService;
 
     @Value("${borrow.request.expire-days}")
-    private long expireDays;
+    private int expireDays;
 
     @Scheduled(cron = "0 */3 * * * *")
     public void expireWaitingRequests() {
         log.info("Start checking expired waiting requests");
         LocalDateTime expiredThreshold = LocalDateTime.now().minusDays(expireDays);
         List<BorrowRequest> waitingRequests =
-                borrowRequestRepository.findByStatusAndUpdatedAtBefore(
+                borrowRequestRepository.findByStatusAndApprovedDateBefore(
                         EBorrowRequestStatus.WAITING,
                         expiredThreshold
                 );

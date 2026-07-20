@@ -3,6 +3,7 @@ package com.mss301.fe.edu.vn.hsf302_fptu_library_system.service;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.CategoryDto;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.entity.Category;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.repository.CategoryRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,11 +16,10 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CategoryServiceImpl implements CategoryService {
-
     private final CategoryRepository categoryRepository;
 
-    // ── Helper: Convert Category Entity sang DTO ──
     private CategoryDto toDto(Category category) {
         int bookCount = category.getBooks() != null ? category.getBooks().size() : 0;
         return CategoryDto.builder()
@@ -29,7 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .bookCount(bookCount)
                 .build();
     }
-    // ── Lấy danh sách có phân trang + tìm kiếm ──
+
     @Override
     public Page<CategoryDto> getAllCategories(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("categoryId").ascending());
@@ -37,7 +37,6 @@ public class CategoryServiceImpl implements CategoryService {
                 .map(this::toDto);
     }
 
-    // ── Lấy tất cả (không phân trang) ──
     @Override
     public List<CategoryDto> getAllCategories() {
         return categoryRepository.findAll().stream()
@@ -52,8 +51,6 @@ public class CategoryServiceImpl implements CategoryService {
         return toDto(category);
     }
 
-//Logic chặn trùng tên existsByCategoryName chạy câu SQL SELECT COUNT(*)
-// WHERE category_name = ? nếu trả về true, ném Exeotion
     @Override
     public void save(Category category) {
         if (categoryRepository.existsByCategoryName(category.getCategoryName())) {
@@ -70,7 +67,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setDescription(form.getDescription());
         categoryRepository.save(category);
     }
-// kt xem danh sách có phần tử ko, để tránh lỗi Foreign Key Constraint hoặc mất data
+
     @Override
     public void delete(Integer id) {
         Category category = categoryRepository.findById(id)
@@ -78,6 +75,6 @@ public class CategoryServiceImpl implements CategoryService {
         if (category.getBooks() != null && !category.getBooks().isEmpty()) {
             throw new IllegalStateException("Không thể xóa danh mục đang chứa sách. Vui lòng xóa sách trước.");
         }
-        categoryRepository.delete(category);
+        else categoryRepository.delete(category);
     }
 }

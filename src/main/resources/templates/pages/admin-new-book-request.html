@@ -12,7 +12,6 @@
 <div layout:fragment="content">
     <div class="container py-4">
         <div class="card shadow-sm">
-
             <div class="card-header">
                 <h4 class="mb-0">
                     Danh sách yêu cầu sách mới
@@ -20,42 +19,44 @@
             </div>
 
             <div class="card-body">
-                <!-- Thông báo thành công/lỗi -->
-                <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${param.success}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${param.error}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-
-                <!-- Form Lọc Trạng Thái & Từ Khóa -->
-                <form method="get" th:action="@{/admin/new-book-requests}" class="row g-3 mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold small mb-1">Từ khóa</label>
-                        <input type="text" name="keyword" class="form-control"
-                               placeholder="Tên sách, tác giả hoặc người gửi..." th:value="${keyword}">
+                <!-- Form Lọc Trạng Thái & Từ Khóa (Cấu trúc chuẩn theo mẫu) -->
+                <form method="get"
+                      th:action="@{/admin/new-book-requests}"
+                      class="row g-3 mb-3">
+                    <div class="col-md-5">
+                        <input type="text"
+                               name="keyword"
+                               class="form-control"
+                               placeholder="Tên sách, tác giả hoặc người gửi..."
+                               th:value="${keyword}">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-semibold small mb-1">Trạng thái</label>
                         <select name="status" class="form-select">
                             <option value="">Tất cả trạng thái</option>
-                            <option value="PENDING" th:selected="${status != null and status.name() == 'PENDING'}">Đang chờ duyệt</option>
-                            <option value="APPROVED" th:selected="${status != null and status.name() == 'APPROVED'}">Đã duyệt</option>
-                            <option value="REJECTED" th:selected="${status != null and status.name() == 'REJECTED'}">Đã từ chối</option>
+                            <option value="PENDING"
+                                    th:selected="${status != null and status.name() == 'PENDING'}">
+                                Chờ duyệt
+                            </option>
+                            <option value="APPROVED"
+                                    th:selected="${status != null and status.name() == 'APPROVED'}">
+                                Đã duyệt
+                            </option>
+                            <option value="REJECTED"
+                                    th:selected="${status != null and status.name() == 'REJECTED'}">
+                                Từ chối
+                            </option>
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label fw-semibold small mb-1">Ngày gửi</label>
-                        <input type="date" name="fromDate" class="form-control" th:value="${fromDate}">
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end gap-2">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search me-1"></i> Tìm
+                    <div class="col-md-2">
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            Tìm kiếm
                         </button>
-                        <a th:href="@{/admin/new-book-requests}" class="btn btn-outline-secondary" title="Đặt lại">
-                            <i class="bi bi-arrow-counterclockwise"></i>
+                    </div>
+                    <div class="col-md-2">
+                        <a th:href="@{/admin/new-book-requests}"
+                           class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Đặt lại
                         </a>
                     </div>
                 </form>
@@ -68,23 +69,26 @@
                             <th>STT</th>
                             <th>Người gửi</th>
                             <th>Tên sách</th>
+                            <th>Tác giả / NXB</th>
                             <th>Lý do mua</th>
                             <th>Ngày gửi</th>
                             <th>Trạng thái</th>
-                            <th>Người xử lý</th>
-                            <th class="text-center">Hành động</th>
+                            <th>Người duyệt</th>
+                            <th>Ngày duyệt</th>
+                            <th>Lý do từ chối</th>
+                            <th>Tùy chọn</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(requests)}">
-                            <td colspan="8" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
-                                Hệ thống chưa có yêu cầu mua sách nào.
+                            <td colspan="10"
+                                class="text-center text-muted">
+                                Chưa có yêu cầu nào
                             </td>
                         </tr>
                         <tr th:each="request, stat : ${requests}">
                             <td th:text="${requestPage.number * requestPage.size + stat.count}"></td>
-                            
+
                             <!-- Người gửi -->
                             <td>
                                 <strong th:text="${request.user.fullName}"></strong><br>
@@ -94,66 +98,100 @@
                             <!-- Thông tin sách -->
                             <td>
                                 <strong th:text="${request.bookTitle}"></strong><br>
-                                <span class="small text-muted" th:text="${request.authorName}"></span>
-                                <a th:if="${request.purchaseLink != null and request.purchaseLink != ''}" 
+                                <a th:if="${request.purchaseLink != null and request.purchaseLink != ''}"
                                    th:href="${request.purchaseLink}" target="_blank" class="small d-block mt-1">
-                                    <i class="bi bi-link-45deg"></i> Link mua
+                                    Link tham khảo
                                 </a>
                             </td>
-                            
-                            <!-- Lý do -->
+                            <td>
+                                <span th:text="${request.authorName}"></span>
+                                <div class="small text-muted" th:text="${request.publisher ?: '-'}"></div>
+                            </td>
+
+                            <!-- Lý do mượn/mua -->
                             <td th:text="${request.reason}"></td>
 
                             <!-- Ngày gửi -->
                             <td>
                                 <div th:if="${request.requestDate != null}">
-                                    <div class="fw-semibold" th:text="${#temporals.format(request.requestDate, 'dd/MM/yyyy')}"></div>
-                                    <small class="text-muted" th:text="${#temporals.format(request.requestDate, 'HH:mm')}"></small>
+                                    <div class="fw-semibold"
+                                         th:text="${#temporals.format(request.requestDate, 'dd/MM/yyyy')}">
+                                    </div>
+                                    <small class="text-muted"
+                                           th:text="${#temporals.format(request.requestDate, 'HH:mm:ss')}">
+                                    </small>
                                 </div>
                             </td>
-                            
+
                             <!-- Trạng thái -->
                             <td>
                                 <span class="badge"
                                       th:classappend="
-                                          ${request.status.name() == 'PENDING'} ? ' bg-warning text-dark' :
-                                          (${request.status.name() == 'APPROVED'} ? ' bg-success' : ' bg-danger')">
-                                    <i class="bi" th:classappend="
-                                          ${request.status.name() == 'PENDING'} ? ' bi-hourglass-split' :
-                                          (${request.status.name() == 'APPROVED'} ? ' bi-check-circle' : ' bi-x-circle')"></i>
+                                            ${request.status.name() == 'PENDING'} ? ' bg-warning text-dark' :
+                                            (${request.status.name() == 'APPROVED'} ? ' bg-success' : ' bg-danger')">
                                     <span th:text="${request.status}"></span>
                                 </span>
                             </td>
-                            
-                            <!-- Người xử lý -->
+
+                            <!-- Người duyệt -->
+                            <td th:text="${request.approvedBy?.fullName ?: '-'}"></td>
+
+                            <!-- Ngày duyệt -->
                             <td>
-                                <div th:if="${request.status.name() != 'PENDING'}">
-                                    <strong th:text="${request.approvedBy?.fullName ?: 'System Administrator'}"></strong>
-                                    <div th:if="${request.approvedDate != null}" class="small text-muted" th:text="${#temporals.format(request.approvedDate, 'dd/MM/yyyy HH:mm')}"></div>
-                                    <div th:if="${request.rejectionReason != null and request.rejectionReason != ''}" class="text-danger small mt-1">
-                                        Lý do: <span th:text="${request.rejectionReason}"></span>
+                                <div th:if="${request.approvedDate != null}">
+                                    <div class="fw-semibold"
+                                         th:text="${#temporals.format(request.approvedDate, 'dd/MM/yyyy')}">
                                     </div>
+                                    <small class="text-muted"
+                                           th:text="${#temporals.format(request.approvedDate, 'HH:mm:ss')}">
+                                    </small>
                                 </div>
-                                <span th:if="${request.status.name() == 'PENDING'}" class="text-muted">-</span>
+                                <span th:if="${request.approvedDate == null}">-</span>
                             </td>
 
-                            <!-- Nút Hành động -->
-                            <td class="text-center">
-                                <div th:if="${request.status.name() == 'PENDING'}" class="d-flex justify-content-center gap-2">
-                                    <!-- Nút Duyệt -->
-                                    <form method="post" th:action="@{/admin/new-book-requests/approve}">
-                                        <input type="hidden" name="requestId" th:value="${request.newBookRequestId}">
-                                        <button type="submit" class="btn btn-sm btn-success" title="Duyệt yêu cầu"
-                                                onclick="return confirm('Xác nhận DUYỆT yêu cầu mua sách này?');">
-                                            <i class="bi bi-check-lg"></i> Duyệt
-                                        </button>
-                                    </form>
-                                    
-                                    <!-- Nút Từ chối (Bật Modal) -->
-                                    <button type="button" class="btn btn-sm btn-danger" title="Từ chối yêu cầu"
-                                            data-bs-toggle="modal" th:data-bs-target="'#rejectModal-' + ${request.newBookRequestId}">
-                                        <i class="bi bi-x-lg"></i> Từ chối
+                            <!-- Lý do từ chối -->
+                            <td th:text="${request.rejectionReason ?: '-'}"></td>
+
+                            <!-- Tùy chọn -->
+                            <td>
+                                <div th:if="${request.status.name() == 'PENDING'}" class="d-flex gap-2">
+                                    <!-- Nút Duyệt (Mở Modal) -->
+                                    <button type="button"
+                                            class="btn btn-sm btn-success"
+                                            data-bs-toggle="modal"
+                                            th:data-bs-target="'#approveModal-' + ${request.newBookRequestId}">
+                                        Duyệt
                                     </button>
+
+                                    <!-- Nút Từ chối (Mở Modal) -->
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal"
+                                            th:data-bs-target="'#rejectModal-' + ${request.newBookRequestId}">
+                                        Từ chối
+                                    </button>
+
+                                    <!-- Modal Xác Nhận Duyệt -->
+                                    <div class="modal fade text-start" th:id="'approveModal-' + ${request.newBookRequestId}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form method="post" th:action="@{/admin/new-book-requests/approve}">
+                                                    <input type="hidden" name="requestId" th:value="${request.newBookRequestId}">
+                                                    <div class="modal-header bg-success text-white">
+                                                        <h5 class="modal-title fw-bold"><i class="bi bi-check-circle me-2"></i>Xác nhận phê duyệt</h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p class="mb-0">Bạn có chắc chắn muốn duyệt yêu cầu mua cuốn sách: <strong th:text="${request.bookTitle}"></strong>?</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                        <button type="submit" class="btn btn-success">Đồng ý duyệt</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <!-- Modal Nhập Lý Do Từ Chối -->
                                     <div class="modal fade text-start" th:id="'rejectModal-' + ${request.newBookRequestId}" tabindex="-1" aria-hidden="true">
@@ -186,35 +224,97 @@
                         </tr>
                         </tbody>
                     </table>
-                </div>
 
-                <!-- Phân trang -->
-                <div class="d-flex justify-content-between align-items-center mt-3" th:if="${requestPage.totalElements > 0}">
-                    <div class="text-muted small">
-                        Hiển thị
-                        <span th:text="${requestPage.number * requestPage.size + 1}"></span>
-                        -
-                        <span th:text="${requestPage.number * requestPage.size + requests.size()}"></span>
-                        trên tổng <span th:text="${requestPage.totalElements}"></span> dòng
+                    <!-- PHÂN TRANG -->
+                    <div class="d-flex justify-content-between align-items-center mt-3" th:if="${requestPage.totalElements > 0}">
+                        <div class="text-muted">
+                            Hiển thị
+                            <span th:text="${requestPage.number * requestPage.size + 1}"></span>
+                            -
+                            <span th:text="${requestPage.number * requestPage.size + requests.size()}"></span>
+                            trên tổng
+                            <span th:text="${requestPage.totalElements}"></span>
+                            dòng
+                        </div>
+                        <nav th:if="${requestPage.totalPages > 1}">
+                            <ul class="pagination mb-0">
+                                <!-- Previous -->
+                                <li class="page-item"
+                                    th:classappend="${requestPage.first} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/new-book-requests(
+                                            page=${requestPage.number - 1},
+                                            keyword=${keyword},
+                                            status=${status}
+                                        )}">
+                                        Trước
+                                    </a>
+                                </li>
+                                <!-- Page numbers -->
+                                <li class="page-item"
+                                    th:each="i : ${#numbers.sequence(0, requestPage.totalPages - 1)}"
+                                    th:classappend="${i == requestPage.number} ? 'active'">
+                                    <a class="page-link"
+                                       th:text="${i + 1}"
+                                       th:href="@{/admin/new-book-requests(
+                                            page=${i},
+                                            keyword=${keyword},
+                                            status=${status}
+                                        )}">
+                                    </a>
+                                </li>
+                                <!-- Next -->
+                                <li class="page-item"
+                                    th:classappend="${requestPage.last} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/new-book-requests(
+                                            page=${requestPage.number + 1},
+                                            keyword=${keyword},
+                                            status=${status}
+                                        )}">
+                                        Sau
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
-                    <nav th:if="${requestPage.totalPages > 1}">
-                        <ul class="pagination mb-0">
-                            <li class="page-item" th:classappend="${requestPage.first} ? 'disabled'">
-                                <a class="page-link" th:href="@{/admin/new-book-requests(page=${requestPage.number - 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}" aria-label="Previous">Trước</a>
-                            </li>
-                            <li class="page-item" th:each="i : ${#numbers.sequence(0, requestPage.totalPages - 1)}" th:classappend="${i == requestPage.number} ? 'active'">
-                                <a class="page-link" th:text="${i + 1}" th:href="@{/admin/new-book-requests(page=${i}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}"></a>
-                            </li>
-                            <li class="page-item" th:classappend="${requestPage.last} ? 'disabled'">
-                                <a class="page-link" th:href="@{/admin/new-book-requests(page=${requestPage.number + 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate})}" aria-label="Next">Sau</a>
-                            </li>
-                        </ul>
-                    </nav>
                 </div>
-
             </div>
         </div>
     </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div th:if="${success}" id="successToast" class="toast text-bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        <div th:if="${error}" id="errorToast" class="toast text-bg-danger border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Hiển thị thông báo Toast nếu có
+            const successToast = document.getElementById('successToast');
+            if (successToast) { new bootstrap.Toast(successToast, { delay: 5000 }).show(); }
+            const errorToast = document.getElementById('errorToast');
+            if (errorToast) { new bootstrap.Toast(errorToast, { delay: 5000 }).show(); }
+        });
+    </script>
 </div>
+
 </body>
 </html>

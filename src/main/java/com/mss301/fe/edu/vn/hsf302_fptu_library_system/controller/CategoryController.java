@@ -14,71 +14,50 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/admin/categories")
 @RequiredArgsConstructor
 public class CategoryController {
-
     private final CategoryService categoryService;
 
-    // ── Hiển thị danh sách có tìm kiếm + phân trang ──
     @GetMapping
     public String listCategories(
             @RequestParam(value = "keyword", required = false, defaultValue = "") String keyword,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
-
         Page<CategoryDto> categoryPage = categoryService.getAllCategories(keyword, page, size);
-
-        // Tính vị trí hiển thị (VD: "Hiển thị 1 - 5 trên tổng 10")
-        long start = categoryPage.getTotalElements() == 0 ? 0 : (long) page * size + 1;
-        long end = Math.min((long) (page + 1) * size, categoryPage.getTotalElements());
-
+        model.addAttribute("categoryPage", categoryPage);
         model.addAttribute("categories", categoryPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", categoryPage.getTotalPages());
-        model.addAttribute("totalItems", categoryPage.getTotalElements());
-        model.addAttribute("start", start);
-        model.addAttribute("end", end);
         model.addAttribute("keyword", keyword);
-        model.addAttribute("size", size);
-
         return "pages/admin-category-list";
     }
 
-    // ── Thêm mới ──
     @PostMapping("/add")
-    public String addCategory(@ModelAttribute Category category,
-                              RedirectAttributes redirectAttributes) {
+    public String addCategory(@ModelAttribute Category category, RedirectAttributes redirectAttributes) {
         try {
             categoryService.save(category);
-            redirectAttributes.addFlashAttribute("successMessage", "Thêm danh mục thành công!");
+            redirectAttributes.addFlashAttribute("success", "Thêm danh mục thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/categories";
     }
 
-    // ── Cập nhật ──
     @PostMapping("/edit/{id}")
-    public String editCategory(@PathVariable Integer id,
-                               @ModelAttribute Category category,
-                               RedirectAttributes redirectAttributes) {
+    public String editCategory(@PathVariable Integer id, @ModelAttribute Category category, RedirectAttributes redirectAttributes) {
         try {
             categoryService.update(id, category);
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật danh mục thành công!");
+            redirectAttributes.addFlashAttribute("success", "Cập nhật danh mục thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/categories";
     }
 
-    // ── Xóa ──
     @PostMapping("/delete/{id}")
-    public String deleteCategory(@PathVariable Integer id,
-                                 RedirectAttributes redirectAttributes) {
+    public String deleteCategory(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
             categoryService.delete(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Xóa danh mục thành công!");
+            redirectAttributes.addFlashAttribute("success", "Xóa danh mục thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/categories";
     }

@@ -2,7 +2,6 @@ package com.mss301.fe.edu.vn.hsf302_fptu_library_system.controller;
 
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.constant.EBorrowRequestStatus;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.dto.BorrowRequestDto;
-import com.mss301.fe.edu.vn.hsf302_fptu_library_system.service.BookService;
 import com.mss301.fe.edu.vn.hsf302_fptu_library_system.service.BorrowRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
