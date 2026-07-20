@@ -17,9 +17,11 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class NewBookRequestServiceImpl implements NewBookRequestService {
     private final NewBookRequestRepository newBookRequestRepository;
     private final CommonFunction commonFunction;
+
     @Override
     public Page<NewBookRequest> searchMyRequests(String keyword, ENewBookRequestStatus status, java.time.LocalDate fromDate, java.time.LocalDate toDate, int page, int size) {
         User currentUser = commonFunction.getCurrentUser();
@@ -32,7 +34,6 @@ public class NewBookRequestServiceImpl implements NewBookRequestService {
     }
 
     @Override
-    @Transactional
     public void createRequest(NewBookRequest request) {
         //tìm xem ông nào đang đăng nhập để gán vào làm chủ nhân yêu cầu
         User currentUser = commonFunction.getCurrentUser();
@@ -42,6 +43,7 @@ public class NewBookRequestServiceImpl implements NewBookRequestService {
         request.setRequestDate(LocalDateTime.now());
         newBookRequestRepository.save(request);
     }
+
     @Override
     public Page<NewBookRequest> searchAllRequests(String keyword, ENewBookRequestStatus status, java.time.LocalDate fromDate, int page, int size) {
         // Sắp xếp ngày tạo từ mới nhất xuống cũ nhất
@@ -50,8 +52,8 @@ public class NewBookRequestServiceImpl implements NewBookRequestService {
         LocalDateTime endDateTime = (fromDate != null) ? fromDate.atTime(23, 59, 59) : null;
         return newBookRequestRepository.searchAllRequests(keyword, status, startDateTime, endDateTime, pageable);
     }
+
     @Override
-    @Transactional
     public void approveRequest(Integer requestId) {
         //tìm cái yêu cầu đó, nếu không có thì quăng ra lỗi
         NewBookRequest request = newBookRequestRepository.findById(requestId)
@@ -64,8 +66,8 @@ public class NewBookRequestServiceImpl implements NewBookRequestService {
         // lưu
         newBookRequestRepository.save(request);
     }
+
     @Override
-    @Transactional
     public void rejectRequest(Integer requestId, String rejectionReason) {
         //tìm ra yêu cầu đó
         NewBookRequest request = newBookRequestRepository.findById(requestId)

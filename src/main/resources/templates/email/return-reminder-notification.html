@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Nhắc nhở trả sách</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+<h2>Thông báo từ FPTU Library</h2>
+<p>
+    Xin chào <strong th:text="${fullName}"></strong>,
+</p>
+<p>
+    Đây là email nhắc nhở về cuốn sách bạn đang mượn:
+    <strong th:text="${bookTitle}"></strong>.
+</p>
+<p>
+    Sách sắp đến hạn phải trả vào ngày
+    <strong th:text="${dueDate}"></strong>
+</p>
+<p>
+    Vui lòng sắp xếp thời gian đến thư viện trả sách đúng hạn để tránh các khoản phí phạt quá hạn và giúp các độc giả khác có thể sử dụng sách.
+</p>
+<p>
+    Nếu bạn đã trả sách rồi, xin vui lòng bỏ qua email này.
+</p>
+<br>
+<p>
+    Trân trọng,<br>
+    <strong>FPTU Library</strong>
+</p>
+</body>
+</html>

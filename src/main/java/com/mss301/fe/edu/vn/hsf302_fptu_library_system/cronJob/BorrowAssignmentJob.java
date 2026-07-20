@@ -25,7 +25,7 @@ public class BorrowAssignmentJob {
     private final BookCopyRepository bookCopyRepository;
     private final EmailService emailService;
 
-    @Scheduled(cron = "0 */3 * * * *")
+    @Scheduled(cron = "0 */1 * * * *")
     public void assignBooksToApprovedRequests() {
         log.info("Start borrow assignment job");
         List<BorrowRequest> requests = borrowRequestRepository.findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus.APPROVED);

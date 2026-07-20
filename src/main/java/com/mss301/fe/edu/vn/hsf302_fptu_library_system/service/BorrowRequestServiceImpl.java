@@ -38,7 +38,6 @@ public class BorrowRequestServiceImpl implements BorrowRequestService {
     private final BorrowRequestRepository borrowRequestRepository;
     private final BorrowRequestMapper borrowRequestMapper;
     private final CommonFunction commonFunction;
-    private final EmailService emailService;
     private final BookCopyRepository bookCopyRepository;
     private final BorrowHistoryRepository borrowHistoryRepository;
 
@@ -56,7 +55,8 @@ public class BorrowRequestServiceImpl implements BorrowRequestService {
                         List.of(
                                 EBorrowRequestStatus.REJECTED,
                                 EBorrowRequestStatus.CANCELLED,
-                                EBorrowRequestStatus.EXPIRED
+                                EBorrowRequestStatus.EXPIRED,
+                                EBorrowRequestStatus.ISSUED
                         )
                 );
         if (existedRequest) {
@@ -146,31 +146,31 @@ public class BorrowRequestServiceImpl implements BorrowRequestService {
         if (request.getStatus() != EBorrowRequestStatus.PENDING) {
             throw new RuntimeException("Request is not pending");
         }
+        request.setApprovedBy(librarian);
+        request.setApprovedDate(LocalDateTime.now());
         BookCopy availableCopy = request.getBook()
                 .getBookCopies()
                 .stream()
                 .filter(copy -> copy.getStatus() == EBookCopyStatus.AVAILABLE)
                 .findFirst()
                 .orElse(null);
-        request.setApprovedBy(librarian);
-        request.setApprovedDate(LocalDateTime.now());
-        if (availableCopy != null) {
-            request.setStatus(EBorrowRequestStatus.WAITING);
-            request.setReservedCopy(availableCopy);
-            availableCopy.setStatus(EBookCopyStatus.RESERVED);
-            bookCopyRepository.save(availableCopy);
-            try {
-                emailService.sendWaitingBookNotification(
-                        request.getUser().getEmail(),
-                        request.getUser().getFullName(),
-                        request.getBook().getTitle()
-                );
-            } catch (Exception e) {
-                throw new RuntimeException("Send mail failed");
-            }
-        } else {
+//        if (availableCopy != null) {
+//            request.setStatus(EBorrowRequestStatus.WAITING);
+//            request.setReservedCopy(availableCopy);
+//            availableCopy.setStatus(EBookCopyStatus.RESERVED);
+//            bookCopyRepository.save(availableCopy);
+//            try {
+//                emailService.sendWaitingBookNotification(
+//                        request.getUser().getEmail(),
+//                        request.getUser().getFullName(),
+//                        request.getBook().getTitle()
+//                );
+//            } catch (Exception e) {
+//                throw new RuntimeException("Send mail failed");
+//            }
+//        } else {
             request.setStatus(EBorrowRequestStatus.APPROVED);
-        }
+//        }
         borrowRequestRepository.save(request);
     }
 

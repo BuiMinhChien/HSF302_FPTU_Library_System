@@ -24,7 +24,7 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, In
 
     List<BorrowRequest> findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus status);
 
-    List<BorrowRequest> findByStatusAndUpdatedAtBefore(
+    List<BorrowRequest> findByStatusAndApprovedDateBefore(
             EBorrowRequestStatus status,
             LocalDateTime expiredTime
     );

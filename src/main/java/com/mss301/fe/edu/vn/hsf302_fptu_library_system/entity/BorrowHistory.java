@@ -39,6 +39,9 @@ public class BorrowHistory extends BaseEntity {
 
     private LocalDateTime returnDate;
 
+    @Column(nullable = false)
+    private boolean reminderSent = false;
+
     @ManyToOne
     @JoinColumn(name = "return_confirmed_by")
     private User returnConfirmedBy;

@@ -12,13 +12,7 @@
 <body>
 <div layout:fragment="content">
     <div class="container-fluid py-4">
-        <!-- Back button -->
-<!--        <div class="mb-3">-->
-<!--            <a th:href="@{/books}" class="text-decoration-none text-muted">-->
-<!--                <i class="bi bi-arrow-left me-1"></i> Trở về trang chủ-->
-<!--            </a>-->
-<!--        </div>-->
-        
+
         <!-- Header -->
         <div class="mb-4">
             <h2 class="fw-bold" th:text="${book.title}"></h2>
@@ -27,34 +21,44 @@
                 <span th:text="${book.isbn}"></span>
             </div>
         </div>
+
         <div class="row g-4 mb-4">
-            <!-- BOOK INFO -->
-            <div class="col-lg-8">
+            <!-- BOOK INFO (Full width col-12) -->
+            <div class="col-12">
                 <div class="card shadow-sm h-100">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">
                             <i class="bi bi-book"></i>
                             Thông tin sách
                         </h5>
+                        <!-- Nút mượn sách cho READER trên header card (Tùy chọn hiển thị) -->
+                        <div sec:authorize="hasRole('READER')">
+                            <button class="btn btn-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#borrowModal">
+                                <i class="bi bi-journal-check me-1"></i>
+                                Đăng ký mượn sách
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
 
-                        <!-- Row 1 -->
-                        <div class="row">
+                        <!-- Row 1: Ảnh bìa & Thông tin chi tiết -->
+                        <div class="row g-4">
                             <!-- Book Cover -->
-                            <div class="col-md-4 text-center">
+                            <div class="col-md-3 text-center">
                                 <img th:src="${book.bookCoverUrl}"
                                      alt="Book Cover"
-                                     class="img-fluid rounded shadow-sm"
-                                     style="max-height:320px; object-fit:cover;">
+                                     class="img-fluid rounded shadow-sm w-100"
+                                     style="max-height:360px; object-fit:cover;">
                             </div>
 
-                            <!-- Book Summary -->
-                            <div class="col-md-8">
-                                <table class="table table-borderless mb-0">
+                            <!-- Book Summary Table -->
+                            <div class="col-md-9">
+                                <table class="table table-borderless mb-0 align-middle">
                                     <tbody>
                                     <tr>
-                                        <th width="30%">Tiêu đề</th>
+                                        <th width="20%">Tiêu đề</th>
                                         <td th:text="${book.title}"></td>
                                     </tr>
 
@@ -66,10 +70,10 @@
                                     <tr>
                                         <th>Thể loại</th>
                                         <td>
-                        <span th:each="category : ${book.categories}"
-                              class="badge bg-primary me-1"
-                              th:text="${category}">
-                        </span>
+                                            <span th:each="category : ${book.categories}"
+                                                  class="badge bg-primary me-1"
+                                                  th:text="${category}">
+                                            </span>
                                         </td>
                                     </tr>
 
@@ -82,18 +86,34 @@
                                         <th>Năm XB</th>
                                         <td th:text="${book.publishYear}"></td>
                                     </tr>
+
+                                    <!-- Thêm dòng: Tổng số bản -->
+                                    <tr>
+                                        <th>Tổng số bản</th>
+                                        <td th:text="${book.totalCopies}">15</td>
+                                    </tr>
+
+                                    <!-- Thêm dòng: Sẵn sàng mượn (Màu xanh lá) -->
+                                    <tr>
+                                        <th>Sẵn sàng mượn</th>
+                                        <td>
+                                            <span class="text-success fw-bold fs-6"
+                                                  th:text="${book.availableCopies}">10</span>
+                                            <small class="text-muted ms-1">(bản)</small>
+                                        </td>
+                                    </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
 
-                        <!-- Row 2 -->
-                        <hr>
+                        <!-- Row 2: Mô tả sách -->
+                        <hr class="my-4">
 
                         <div class="row">
                             <div class="col-12">
                                 <h6 class="fw-bold">
-                                    <i class="bi bi-card-text"></i>
+                                    <i class="bi bi-card-text me-1"></i>
                                     Mô tả sách
                                 </h6>
 
@@ -107,96 +127,38 @@
                     </div>
                 </div>
             </div>
-
-            <!-- AVAILABILITY -->
-            <div class="col-lg-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-collection"></i>
-                            Tình trạng sách
-                        </h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <div class="display-4 fw-bold text-primary"
-                             th:text="${book.totalCopies}">
-                            15
-                        </div>
-                        <div class="text-muted mb-4">
-                            Tổng số bản trong thư viện
-                        </div>
-                        <div class="row text-center">
-                            <div class="col-6">
-                                <div class="card border-success">
-                                    <div class="card-body">
-                                        <h3 class="text-success"
-                                            th:text="${book.availableCopies}">
-                                            10
-                                        </h3>
-                                        <small>Sẵn sàng</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="card border-danger">
-                                    <div class="card-body">
-                                        <h3 class="text-danger"
-                                            th:text="${book.borrowedCopies}">
-                                            5
-                                        </h3>
-                                        <small>Đang mượn</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-4"
-                             sec:authorize="hasRole('READER')">
-                            <button class="btn btn-primary btn-lg w-100"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#borrowModal">
-                                <i class="bi bi-journal-check"></i>
-                                Đăng ký mượn sách
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
+
         <!-- AUTHORS -->
         <div class="row mt-4">
             <div class="col-12">
                 <div class="card shadow-sm">
                     <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="bi bi-people"></i>
+                            <i class="bi bi-people me-1"></i>
                             Tác giả
                         </h5>
                     </div>
 
                     <div class="card-body">
-
-                        <div th:each="author : ${book.authors}"
-                             class="row align-items-start mb-4">
-
+                        <div th:each="author, stat : ${book.authors}" class="row align-items-start">
                             <!-- Avatar -->
-                            <div class="col-md-2 text-center">
+                            <div class="col-md-2 col-sm-3 text-center mb-3 mb-md-0">
                                 <img th:src="${author.avatarUrl}"
                                      alt="Author Avatar"
                                      class="rounded-circle shadow-sm"
-                                     style="width:120px;height:120px;object-fit:cover;">
+                                     style="width:110px;height:110px;object-fit:cover;">
                             </div>
                             <!-- Info -->
-                            <div class="col-md-10">
-                                <h4 class="fw-bold mb-2"
-                                    th:text="${author.authorName}">
-                                </h4>
+                            <div class="col-md-10 col-sm-9">
+                                <h4 class="fw-bold mb-2" th:text="${author.authorName}"></h4>
                                 <p class="text-muted mb-0"
                                    style="text-align: justify;"
                                    th:text="${author.biography}">
                                 </p>
                             </div>
-                            <div class="col-12">
-                                <hr>
+                            <div class="col-12" th:if="${!stat.last}">
+                                <hr class="my-4">
                             </div>
                         </div>
                     </div>

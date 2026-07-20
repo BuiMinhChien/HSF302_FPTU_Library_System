@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 @Transactional
 @RequiredArgsConstructor
 public class BorrowHistoryServiceImpl implements BorrowHistoryService {
-
     private final BorrowHistoryRepository borrowHistoryRepository;
     private final BorrowRequestRepository borrowRequestRepository;
     private final BookCopyRepository bookCopyRepository;
@@ -95,21 +94,31 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
         BookCopy copy = history.getCopy();
         copy.setStatus(EBookCopyStatus.AVAILABLE);
         bookCopyRepository.save(copy);
+        return history;
+    }
 
-//        List<BorrowRequest> waitingList = borrowRequestRepository
-//                .findByStatusOrderByCreatedAtAsc(EBorrowRequestStatus.WAITING);
-//
-//        BorrowRequest nextPerson = waitingList.stream()
-//                .filter(req -> req.getBook().getBookId().equals(copy.getBook().getBookId()))
-//                .findFirst()
-//                .orElse(null);
-//
-//        if (nextPerson != null) {
-//            nextPerson.setStatus(EBorrowRequestStatus.APPROVED);
-//            nextPerson.setApprovedBy(librarian);
-//            nextPerson.setApprovedDate(LocalDateTime.now());
-//            borrowRequestRepository.save(nextPerson);
-//        }
+    @Override
+    public BorrowHistory confirmLost(Integer borrowId) {
+        User librarian = commonFunction.getCurrentUser();
+
+        BorrowHistory history = borrowHistoryRepository.findById(borrowId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch sử mượn mã: " + borrowId));
+
+        if (history.getStatus().equals(EBorrowHistoryStatus.RETURNED)) {
+            throw new RuntimeException("Sách này đã được xác nhận trả rồi!");
+        }
+        if (history.getStatus().equals(EBorrowHistoryStatus.LOST)) {
+            throw new RuntimeException("Sách này đã được báo mất rồi!");
+        }
+
+        history.setReturnDate(null);
+        history.setReturnConfirmedBy(librarian);
+        history.setStatus(EBorrowHistoryStatus.LOST);
+        borrowHistoryRepository.save(history);
+
+        BookCopy copy = history.getCopy();
+        copy.setStatus(EBookCopyStatus.LOST);
+        bookCopyRepository.save(copy);
         return history;
     }
 
@@ -144,6 +153,7 @@ public class BorrowHistoryServiceImpl implements BorrowHistoryService {
                 .bookTitle(entity.getCopy().getBook().getTitle())
                 .borrowDate(entity.getBorrowDate())
                 .dueDate(entity.getDueDate())
+                .returnDate(entity.getReturnDate())
                 .status(entity.getStatus())
                 .build();
     }

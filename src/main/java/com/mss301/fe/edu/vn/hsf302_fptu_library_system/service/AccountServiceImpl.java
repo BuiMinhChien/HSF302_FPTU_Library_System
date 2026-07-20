@@ -23,6 +23,7 @@ import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AccountServiceImpl implements AccountService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -43,7 +44,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    @Transactional
     public void toggleAccountStatus(Integer userId) {
         //lấy taài khoản tu data lên
         User user = userRepository.findById(userId)
@@ -57,7 +57,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    @Transactional
     public void saveAccount(AccountFormDto dto) {
         User user;
         if (dto.getUserId() == null) {

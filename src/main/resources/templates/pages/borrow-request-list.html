@@ -47,6 +47,9 @@
                                     th:selected="${status == 'CANCELLED'}">
                                 Đã huỷ
                             </option>
+                            <option value="WAITING" th:selected="${status == 'WAITING'}">
+                                Chờ lấy sách
+                            </option>
                             <option value="EXPIRED"
                                     th:selected="${status == 'EXPIRED'}">
                                 Hết hạn

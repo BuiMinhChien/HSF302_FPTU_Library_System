@@ -13,4 +13,5 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
     // Tìm kiếm tác giả theo tên (phân trang)
     @Query("SELECT a FROM Author a WHERE (:keyword IS NULL OR LOWER(a.authorName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Author> findByNameContaining(@Param("keyword") String keyword, Pageable pageable);
+    boolean existsByAuthorNameAndAuthorIdNot(String authorName, Integer authorId);
 }

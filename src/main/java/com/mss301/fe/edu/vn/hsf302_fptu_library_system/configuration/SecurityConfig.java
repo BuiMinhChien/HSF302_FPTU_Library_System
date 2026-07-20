@@ -16,35 +16,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // disable csrf nếu test Postman
-                // nếu chỉ dùng thymeleaf thì nên enable
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // public pages
                         .requestMatchers(
+                                "/",
+                                "/books/**",
                                 "/login",
                                 "/forgot-password",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**"
                         ).permitAll()
-                        // ADMIN only
+                        // ADMIN
                         .requestMatchers("/admin/**")
                         .hasRole("ADMIN")
                         // LIBRARIAN
                         .requestMatchers("/librarian/**")
                         .hasRole("LIBRARIAN")
                         // READER
-                        .requestMatchers("/reader/**")
+                        .requestMatchers("/reader/**","/borrow-requests/**","/borrow-requests/**","/borrow-history/**","/new-book-requests/**")
                         .hasRole("READER")
                         // PayOS callback
                         .requestMatchers("/payment/payos/**")
                         .permitAll()
-                        // LIBRARIAN pages (thống kê, giao sách, xác nhận trả)
-                        .requestMatchers("/librarian/**")
-                        .hasAnyRole("LIBRARIAN", "ADMIN")
                         // Profile - tất cả đã đăng nhập đều xem được
-                        .requestMatchers("/profile/**")
+                        .requestMatchers("/profile", "/change-password")
                         .authenticated()
                         // tất cả request khác cần login
                         .anyRequest()

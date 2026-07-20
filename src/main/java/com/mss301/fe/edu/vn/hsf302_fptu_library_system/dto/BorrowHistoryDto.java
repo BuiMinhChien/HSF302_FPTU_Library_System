@@ -17,4 +17,5 @@ public class BorrowHistoryDto {
     private EBorrowHistoryStatus status;
     private LocalDateTime borrowDate;
     private LocalDateTime dueDate;
+    private LocalDateTime returnDate;
 }

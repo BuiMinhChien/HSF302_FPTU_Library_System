@@ -10,6 +10,5 @@ public interface AuthorService {
     List<AuthorFormDto> getAllAuthorsForCreate();
     AuthorFormDto getById(Integer id);
     void save(AuthorFormDto form);
-    void update(Integer id, AuthorFormDto form);
     void delete(Integer id);
 }

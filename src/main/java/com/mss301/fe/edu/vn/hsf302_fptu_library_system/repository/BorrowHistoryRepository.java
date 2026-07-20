@@ -80,5 +80,7 @@ public interface BorrowHistoryRepository extends JpaRepository<BorrowHistory, In
 
     // Lấy danh sách lượt mượn từ sau thời điểm chỉ định (dùng để thống kê biến động)
     List<BorrowHistory> findByBorrowDateAfter(java.time.LocalDateTime startDate);
+
+    List<BorrowHistory> findByStatus(EBorrowHistoryStatus status);
 }
 

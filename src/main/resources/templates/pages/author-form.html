@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${authorForm.authorId != null} ? 'Cập nhật tác giả' : 'Thêm tác giả mới'"></title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <!-- Header Card -->
+                    <div class="card-header d-flex align-items-center justify-content-between bg-light">
+                        <div class="d-flex align-items-center gap-2">
+                            <i th:class="${authorForm.authorId != null} ? 'bi bi-pencil-square fs-5 text-primary' : 'bi bi-person-plus-fill fs-5 text-primary'"></i>
+                            <h4 class="mb-0 text-primary fw-bold"
+                                th:text="${authorForm.authorId != null} ? 'Cập nhật thông tin tác giả' : 'Thêm tác giả mới'">
+                            </h4>
+                        </div>
+                        <span th:if="${authorForm.authorId != null}"
+                              class="badge bg-info text-dark fs-6"
+                              th:text="'Đã có ' + ${authorForm.bookCount} + ' cuốn sách'">
+                        </span>
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Action Form: Phân biệt Add và Edit -->
+                        <form th:action="${authorForm.authorId != null} ? @{/admin/authors/edit} : @{/admin/authors/add}"
+                              th:object="${authorForm}"
+                              method="post"
+                              enctype="multipart/form-data">
+
+                            <!-- ID tác giả ẩn khi chỉnh sửa -->
+                            <input type="hidden" th:field="*{authorId}" th:if="*{authorId != null}" />
+
+                            <div class="row mb-4 align-items-center justify-content-center text-center text-md-start">
+                                <div th:if="*{avatarUrl != null}" class="col-md-3 d-flex justify-content-center mb-3 mb-md-0">
+                                    <div class="position-relative">
+                                        <!-- Hiển thị ảnh cũ nếu có, nếu không thì hiện Icon mặc định -->
+                                        <img id="avatarPreview"
+                                             th:src="*{avatarUrl != null and !#strings.isEmpty(avatarUrl)} ? *{avatarUrl} : '/images/default-avatar.png'"
+                                             alt="Avatar Preview"
+                                             class="rounded-circle object-fit-cover border shadow-sm p-1 bg-white"
+                                             style="width: 120px; height: 120px; display: block;">
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <h6 class="fw-bold mb-1 text-secondary">Ảnh chân dung tác giả</h6>
+                                    <p class="text-muted small mb-0">Chấp nhận định dạng JPG, PNG hoặc WEBP. Chọn tệp ảnh mới bên dưới để thay đổi chân dung hiển thị.</p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Tên tác giả <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" th:field="*{authorName}" placeholder="Nhập tên tác giả...">
+                                    <div th:if="${#fields.hasErrors('authorName')}" th:errors="*{authorName}" class="text-danger small mt-1"></div>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Tải lên ảnh mới</label>
+                                    <input type="file" id="avatarFileInput" class="form-control" th:field="*{multipartFile}" accept="image/*">
+                                    <div th:if="${#fields.hasErrors('multipartFile')}" th:errors="*{multipartFile}" class="text-danger small mt-1"></div>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Tiểu sử</label>
+                                    <textarea class="form-control" th:field="*{biography}" rows="5" placeholder="Nhập tóm tắt tiểu sử tác giả..."></textarea>
+                                    <div th:if="${#fields.hasErrors('biography')}" th:errors="*{biography}" class="text-danger small mt-1"></div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-top d-flex gap-2 justify-content-end">
+                                <a th:href="@{/admin/authors}" class="btn btn-secondary">
+                                    Hủy bỏ
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i th:class="${authorForm.authorId != null} ? 'bi bi-save me-1' : 'bi bi-person-plus-fill me-1'"></i>
+                                    <span th:text="${authorForm.authorId != null} ? 'Cập nhật tác giả' : 'Thêm tác giả'"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div th:if="${success}" id="successToast" class="toast text-bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        <div th:if="${error}" id="errorToast" class="toast text-bg-danger border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Toast
+            const successToast = document.getElementById('successToast');
+            if (successToast) { new bootstrap.Toast(successToast, { delay: 5000 }).show(); }
+            const errorToast = document.getElementById('errorToast');
+            if (errorToast) { new bootstrap.Toast(errorToast, { delay: 5000 }).show(); }
+
+            // Xem trước ảnh khi chọn file
+            const avatarFileInput = document.getElementById('avatarFileInput');
+            const avatarPreview = document.getElementById('avatarPreview');
+            const originalSrc = avatarPreview ? avatarPreview.src : '';
+
+            if (avatarFileInput && avatarPreview) {
+                avatarFileInput.addEventListener('change', function (event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            avatarPreview.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        avatarPreview.src = originalSrc;
+                    }
+                });
+            }
+        });
+    </script>
+</div>
+</body>
+</html>
